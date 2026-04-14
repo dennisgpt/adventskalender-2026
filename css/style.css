@@ -114,8 +114,8 @@ small span:hover {
 
 /* ---- Hero Bereich ---- */
 .hero-bereich {
-  background: linear-gradient(135deg, #16213e 0%, #0f3460 100%);
-  border-bottom: 1px solid #0f3460;
+  background: transparent;
+  border-bottom: none;
 }
 
 .hero-bereich h1 {
