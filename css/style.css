@@ -16,7 +16,7 @@ body {
   background: white;
   border-bottom: 3px solid orange;
   color: #16213e;
-  padding: 10px 0;
+  padding: 12px 0;
 }
 
 .thws-header-inner {
@@ -26,13 +26,23 @@ body {
 }
 
 .header-breadcrumb {
-  color: gray;
+  color: #555 !important;
   font-size: 0.8rem;
 }
 
 .header-breadcrumb span:hover {
   color: orange;
   cursor: pointer;
+}
+
+small span:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+.thws-header strong {
+  display: block;
+  margin-top: 2px;
 }
 
 .thws-logo-placeholder {
