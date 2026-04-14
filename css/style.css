@@ -213,8 +213,8 @@ small span:hover {
 
 /* ---- Footer ---- */
 footer {
-  background-color: #16213e;
-  border-top-color: #0f3460 !important;
+  background: transparent !important;
+  border-top: none !important;
 }
 
 /* ---- Responsive: kleinere Karten auf Handy ---- */
