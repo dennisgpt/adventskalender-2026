@@ -5,10 +5,25 @@
 
 /* ---- Allgemein ---- */
 body {
-  background-color: #1a1a2e;
-  color: #f0f0f0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  min-height: 100vh;
+    background: url('../img/winter-thws.png') no-repeat center center fixed;
+    background-size: cover;
+
+    color: #f0f0f0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    min-height: 100vh;
+
+    position: relative;
+    z-index: 0;
+}
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    z-index: -1;
 }
 
 /* ---- Header ---- */
