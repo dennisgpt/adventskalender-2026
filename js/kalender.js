@@ -32,7 +32,7 @@ function heutigesTuerchen() {
   const tag   = heute.getDate();    // 1–31
 
   if (monat === ADVENTSSTART_MONAT && tag >= 1 && tag <= 24) {
-    return tag; // Tag = Türchen-Nummer
+     return tag; // Tag = Türchen-Nummer
   }
   return null; // Nicht im Advent
 }
@@ -64,6 +64,7 @@ function alsGeoeffnetSpeichern(nummer) {
  * Bestimmt den Zustand eines Türchens.
  * @param {number} nummer - Türchen-Nummer (1–24)
  * @returns {'geoeffnet'|'verfuegbar'|'heute'|'gesperrt'}
+ * 
  */
 function tuerchenzustand(nummer) {
   const aktuellesTuerchen = heutigesTuerchen();
