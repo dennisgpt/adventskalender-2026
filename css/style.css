@@ -93,6 +93,40 @@ small span:hover {
   text-underline-offset: 3px;
 }
 
+.content-btn {
+  background: transparent;
+  border: none;
+  color: #000;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding-top: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.content-btn i {
+  font-size: 18px;
+  color: #c8102e;
+}
+
+.content-btn:hover i,
+.content-btn:focus i,
+.content-btn:active i {
+  color: #e78500;
+}
+
+.content-btn:hover {
+  color: #e78500;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
 .thws-logo {
   transition: opacity 0.2s ease;
 }
