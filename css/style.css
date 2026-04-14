@@ -45,6 +45,26 @@ small span:hover {
   margin-top: 2px;
 }
 
+.login-btn {
+  background: transparent;
+  border: none;
+  color: #000;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.login-btn i {
+  font-size: 18px;
+}
+
+.login-btn:hover {
+  color: #f39200;
+}
+
 .thws-logo-placeholder {
   background-color: #c8102e;
   color: white;
