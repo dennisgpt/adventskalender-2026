@@ -15,6 +15,7 @@ body {
 .thws-header {
   background: white;
   border-bottom: 3px solid orange;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   color: #16213e;
   padding: 12px 0;
 }
@@ -26,43 +27,64 @@ body {
 }
 
 .header-breadcrumb {
-  color: #555 !important;
-  font-size: 0.8rem;
+  color: #666 !important;
+  font-size: 0.86rem;
+  letter-spacing: 0.15px;
+  font-weight: 400;
 }
 
 .header-breadcrumb span:hover {
-  color: orange;
+  color: #e78500;
   cursor: pointer;
 }
 
 small span:hover {
-  color: orange;
+  color: #e78500;
   cursor: pointer;
 }
 
 .thws-header strong {
-  display: block;
-  margin-top: 2px;
+  display: inline;
+  margin-top: 0;
+  margin-left: 2px;
+  font-size: 1rem;
+  color: #16213e;
+  font-weight: 700;
 }
 
 .login-btn {
   background: transparent;
   border: none;
   color: #000;
-  font-weight: 500;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 6px;
+  padding-top: 6px;
+  text-decoration: none;
   cursor: pointer;
   transition: 0.2s;
 }
 
 .login-btn i {
-  font-size: 18px;
+  font-size: 19px;
 }
 
 .login-btn:hover {
-  color: #f39200;
+  color: #e78500;
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-decoration-thickness: 1.5px;
+  text-underline-offset: 3px;
+}
+
+.thws-logo {
+  transition: opacity 0.2s ease;
+}
+
+.thws-logo:hover {
+  opacity: 0.8;
+  cursor: pointer;
 }
 
 .thws-logo-placeholder {
