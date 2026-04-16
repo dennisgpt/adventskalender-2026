@@ -158,6 +158,11 @@ small span:hover {
   text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 22px rgba(0, 0, 0, 0.35);
 }
 
+.hero-bereich .text-muted {
+  color: #ffffff !important;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;           /* immer quadratisch */
@@ -472,6 +477,14 @@ footer {
 
 footer.border-top {
   border-top: none !important;
+}
+
+footer.text-muted {
+  color: #ffffff !important;
+}
+
+footer .text-muted {
+  color: #ffffff !important;
 }
 
 /* ---- Responsive: kleinere Karten auf Handy ---- */
