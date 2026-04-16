@@ -212,7 +212,7 @@ tuerchen-karte.heute:hover {
 /* Heutiges Türchen hervorheben */
 .tuerchen-karte.heute {
   border-color: #ff4d6d;
-  box-shadow: 0 0 20px rgba(255, 77, 109, 0.5);
+  box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
   animation: pulsieren 1.5s infinite;
 }
 
@@ -249,7 +249,7 @@ tuerchen-karte.heute:hover {
 }
 
 /* ---- Modal (Türchen-Inhalt) ---- */
-.weihnachts-modal .modal-content {
+.weihnachts-modal {
   background-color: #16213e;
   border: 2px solid #e8c84a;
   color: #f0f0f0;

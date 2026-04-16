@@ -16,6 +16,8 @@
 // Advent beginnt immer am 1. Dezember
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG   = 1;
+const RESET_GEOEFFNETE_TUERCHEN_BEIM_START = true; // Fuer Animationstests auf false setzen, wenn nicht mehr noetig
+const TESTMODUS_TUERCHEN_NUMMER = 1; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
 
 // ============================================================
 // HILFSFUNKTIONEN
@@ -27,6 +29,10 @@ const ADVENTSSTART_TAG   = 1;
  * @returns {number|null} Türchen-Nummer (1–24) oder null
  */
 function heutigesTuerchen() {
+  if (TESTMODUS_TUERCHEN_NUMMER >= 1 && TESTMODUS_TUERCHEN_NUMMER <= 24) {
+    return TESTMODUS_TUERCHEN_NUMMER;
+  }
+
   const heute = new Date();
   const monat = heute.getMonth();   // 11 = Dezember
   const tag   = heute.getDate();    // 1–31
@@ -186,5 +192,9 @@ function mischeArray(array) {
 // START: Grid aufbauen wenn die Seite geladen ist
 // ============================================================
 document.addEventListener('DOMContentLoaded', function() {
+  if (RESET_GEOEFFNETE_TUERCHEN_BEIM_START) {
+    localStorage.removeItem('geoeffneteTuerchen');
+  }
   kalenderGridAufbauen();
 });
+
