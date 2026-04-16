@@ -5,6 +5,7 @@
 
 /* ---- Allgemein ---- */
 body {
+    margin: 0;
     background: url('../img/winter-thws.png') no-repeat center center fixed;
     background-size: cover;
 
@@ -466,6 +467,10 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
 /* ---- Footer ---- */
 footer {
   background: transparent !important;
+  border-top: none !important;
+}
+
+footer.border-top {
   border-top: none !important;
 }
 
