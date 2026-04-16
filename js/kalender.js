@@ -128,9 +128,17 @@ function kalenderGridAufbauen() {
 
     // Klick-Handler: nur wenn verfügbar oder heute
     if (zustand === 'verfuegbar' || zustand === 'heute') {
-      karte.addEventListener('click', function() {
-        tuercheoeffnen(nummer, karte);
-      });
+     karte.addEventListener('click', function() {
+  // kleines Klick-Feedback
+  karte.style.transform = "scale(0.95)";
+
+  setTimeout(function() {
+    tuercheoeffnen(nummer, karte);
+
+    // optional: zurücksetzen (sauberer Look)
+    karte.style.transform = "";
+  }, 100);
+});
     }
 
     spalte.appendChild(karte);
