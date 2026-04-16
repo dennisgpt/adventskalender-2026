@@ -10,7 +10,7 @@
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG = 1;
 const RESET_GEOEFFNETE_TUERCHEN_BEIM_START = true; // Fuer Animationstests auf false setzen
-const TESTMODUS_TUERCHEN_NUMMER = 1; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
+const TESTMODUS_TUERCHEN_NUMMER = 2; // null fuer echten Kalenderbetrieb, 2 simuliert den 2. Dezember
 
 let geschenkAnimationLaeuft = false;
 
