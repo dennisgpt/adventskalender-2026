@@ -1,6 +1,6 @@
-/* ============================================
-   THWS Adventskalender – Eigene Styles
-   Zuständig: Dennis & Artjom (gemeinsam)
+﻿/* ============================================
+   THWS Adventskalender â€“ Eigene Styles
+   ZustÃ¤ndig: Dennis & Artjom (gemeinsam)
    ============================================ */
 
 /* ---- Allgemein ---- */
@@ -157,7 +157,7 @@ small span:hover {
   text-shadow: 0 3px 10px rgba(0, 0, 0, 0.55), 0 0 22px rgba(0, 0, 0, 0.35);
 }
 
-/* ---- Türchen-Karten ---- */
+/* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;           /* immer quadratisch */
   border-radius: 12px;
@@ -175,7 +175,7 @@ small span:hover {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
 }
 
-/* Verfügbares Türchen (heute oder vergangen, noch nicht geöffnet) */
+/* VerfÃ¼gbares TÃ¼rchen (heute oder vergangen, noch nicht geÃ¶ffnet) */
 .tuerchen-karte.verfuegbar {
   background: linear-gradient(135deg, #1e3a5f, #0f3460);
   border-color: #e8c84a;
@@ -189,7 +189,7 @@ tuerchen-karte.heute:hover {
   box-shadow: 0 8px 25px rgba(232, 200, 74, 0.4);
 }
 
-/* Bereits geöffnetes Türchen */
+/* Bereits geÃ¶ffnetes TÃ¼rchen */
 .tuerchen-karte.geoeffnet {
   background: linear-gradient(135deg, #c8102e, #8b0000);
   border-color: #ff4d6d;
@@ -198,7 +198,7 @@ tuerchen-karte.heute:hover {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 77, 109, 0.3);
 }
 
-/* Noch gesperrtes Türchen (Datum in der Zukunft) */
+/* Noch gesperrtes TÃ¼rchen (Datum in der Zukunft) */
 .tuerchen-karte.gesperrt {
   opacity: 0.75;
   filter: grayscale(20%);
@@ -209,7 +209,7 @@ tuerchen-karte.heute:hover {
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
 }
 
-/* Heutiges Türchen hervorheben */
+/* Heutiges TÃ¼rchen hervorheben */
 .tuerchen-karte.heute {
   border-color: #ff4d6d;
   box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
@@ -222,7 +222,7 @@ tuerchen-karte.heute:hover {
   100% { box-shadow: 0 0 10px rgba(255, 77, 109, 0.4); }
 }
 
-/* Türchen-Nummer */
+/* TÃ¼rchen-Nummer */
 .tuerchen-nummer {
   font-size: 2.5rem;
   line-height: 1;
@@ -236,7 +236,7 @@ tuerchen-karte.heute:hover {
   text-shadow: 0 2px 7px rgba(0, 0, 0, 0.8);
 }
 
-/* Türchen-Label (klein darunter) */
+/* TÃ¼rchen-Label (klein darunter) */
 .tuerchen-label {
   font-size: 1.05rem;
   font-weight: 700;
@@ -248,11 +248,13 @@ tuerchen-karte.heute:hover {
   opacity: 1;
 }
 
-/* ---- Modal (Türchen-Inhalt) ---- */
+/* ---- Modal (TÃ¼rchen-Inhalt) ---- */
 .weihnachts-modal {
-  background-color: #16213e;
-  border: 2px solid #e8c84a;
-  color: #f0f0f0;
+  background: linear-gradient(135deg, #16213e, #0f3460);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+  color: #ffffff;
 }
 
 .weihnachts-modal .modal-header {
@@ -261,6 +263,204 @@ tuerchen-karte.heute:hover {
 
 .weihnachts-modal .btn-close {
   filter: invert(1);
+}
+
+#tuerchen-modal.show .weihnachts-modal {
+  animation: modal-pop-in 0.42s ease;
+}
+
+.weihnachts-modal .modal-body > * {
+  animation: modal-inhalt-reveal 0.5s ease;
+}
+
+/* ---- Geschenk Reveal Overlay ---- */
+body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
+  filter: blur(2px) brightness(0.75);
+  transition: filter 0.35s ease;
+}
+
+.geschenk-reveal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at center, rgba(28, 42, 82, 0.42), rgba(5, 8, 20, 0.86));
+  opacity: 0;
+  transition: opacity 0.35s ease;
+}
+
+.geschenk-reveal-overlay.sichtbar {
+  opacity: 1;
+}
+
+.geschenk-reveal-overlay.ausblenden {
+  opacity: 0;
+}
+
+.geschenk-reveal-buehne {
+  width: min(92vw, 600px);
+  text-align: center;
+  color: #fff;
+}
+
+.geschenk-reveal-box {
+  width: min(38vw, 240px);
+  height: min(34vw, 210px);
+  margin: 0 auto 1.2rem;
+  position: relative;
+  transform-origin: center bottom;
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.55));
+}
+
+.geschenk-koerper,
+.geschenk-deckel {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  border-radius: 14px;
+  background: linear-gradient(145deg, #ff4d6d, #c8102e);
+}
+
+.geschenk-koerper {
+  bottom: 0;
+  width: 88%;
+  height: 70%;
+}
+
+.geschenk-deckel {
+  top: 0;
+  width: 94%;
+  height: 34%;
+  transform-origin: 22% 88%;
+}
+
+.geschenk-schleife-vertikal,
+.geschenk-schleife-horizontal {
+  position: absolute;
+  background: linear-gradient(180deg, #ffd166, #e8b923);
+  border-radius: 20px;
+  z-index: 3;
+}
+
+.geschenk-schleife-vertikal {
+  width: 14%;
+  height: 95%;
+  left: 50%;
+  top: 2%;
+  transform: translateX(-50%);
+}
+
+.geschenk-schleife-horizontal {
+  width: 96%;
+  height: 14%;
+  left: 50%;
+  top: 23%;
+  transform: translateX(-50%);
+}
+
+.geschenk-schleife-knoten {
+  position: absolute;
+  width: 28%;
+  aspect-ratio: 1 / 1;
+  left: 50%;
+  top: -3%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ffe8a2, #e8b923 65%, #d69f12);
+  box-shadow: 0 0 18px rgba(255, 209, 102, 0.6);
+  z-index: 4;
+}
+
+.geschenk-reveal-box.wackeln {
+  animation: geschenk-wackeln 0.12s linear 9;
+}
+
+.geschenk-reveal-box.oeffnen .geschenk-deckel {
+  animation: geschenk-deckel-auf 0.75s ease forwards;
+}
+
+.geschenk-reveal-box.oeffnen .geschenk-koerper {
+  animation: geschenk-koerper-glow 0.75s ease forwards;
+}
+
+.geschenk-konfetti {
+  position: absolute;
+  left: 50%;
+  top: 43%;
+  width: min(55vw, 360px);
+  height: min(40vw, 240px);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.geschenk-konfetti .partikel {
+  position: absolute;
+  left: 50%;
+  bottom: 28%;
+  opacity: 0;
+  font-size: clamp(1rem, 3vw, 1.5rem);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.45);
+}
+
+.geschenk-reveal-overlay.inhalt-erscheint .geschenk-konfetti .partikel {
+  animation: weihnachts-partikel 1s ease-out forwards;
+}
+
+.geschenk-konfetti .partikel:nth-child(1)  { --x: -140px; --y: -120px; --r: -40deg; animation-delay: 0ms; color: #fff; }
+.geschenk-konfetti .partikel:nth-child(2)  { --x: -110px; --y: -170px; --r: 20deg;  animation-delay: 40ms; color: #ffd166; }
+.geschenk-konfetti .partikel:nth-child(3)  { --x: -80px;  --y: -140px; --r: -24deg; animation-delay: 80ms; color: #ffe9a8; }
+.geschenk-konfetti .partikel:nth-child(4)  { --x: -48px;  --y: -195px; --r: 36deg;  animation-delay: 120ms; color: #ffffff; }
+.geschenk-konfetti .partikel:nth-child(5)  { --x: -15px;  --y: -150px; --r: -10deg; animation-delay: 160ms; color: #ffefc1; }
+.geschenk-konfetti .partikel:nth-child(6)  { --x: 18px;   --y: -205px; --r: 16deg;  animation-delay: 200ms; color: #ffd166; }
+.geschenk-konfetti .partikel:nth-child(7)  { --x: 45px;   --y: -160px; --r: -34deg; animation-delay: 240ms; color: #ffffff; }
+.geschenk-konfetti .partikel:nth-child(8)  { --x: 75px;   --y: -190px; --r: 30deg;  animation-delay: 280ms; color: #ffe9a8; }
+.geschenk-konfetti .partikel:nth-child(9)  { --x: 102px;  --y: -132px; --r: -22deg; animation-delay: 320ms; color: #ffd166; }
+.geschenk-konfetti .partikel:nth-child(10) { --x: 128px;  --y: -176px; --r: 40deg;  animation-delay: 360ms; color: #ffffff; }
+.geschenk-konfetti .partikel:nth-child(11) { --x: 156px;  --y: -126px; --r: -16deg; animation-delay: 400ms; color: #ffefc1; }
+.geschenk-konfetti .partikel:nth-child(12) { --x: 0px;    --y: -220px; --r: 0deg;   animation-delay: 440ms; color: #ffffff; }
+
+@keyframes geschenk-wackeln {
+  0%   { transform: rotate(0deg); }
+  25%  { transform: rotate(-4deg); }
+  50%  { transform: rotate(4deg); }
+  75%  { transform: rotate(-3deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes geschenk-deckel-auf {
+  0%   { transform: translateX(-50%) translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateX(-22%) translateY(-72%) rotate(-34deg); opacity: 0.95; }
+}
+
+@keyframes geschenk-koerper-glow {
+  0%   { box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+  100% { box-shadow: 0 0 36px rgba(255, 255, 255, 0.45), 0 0 65px rgba(255, 209, 102, 0.4); }
+}
+
+@keyframes weihnachts-partikel {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 0) rotate(0deg) scale(0.7);
+  }
+  12% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--x)), var(--y)) rotate(var(--r)) scale(1.15);
+  }
+}
+
+@keyframes modal-pop-in {
+  0%   { transform: translateY(16px) scale(0.96); opacity: 0; }
+  100% { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes modal-inhalt-reveal {
+  0%   { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 /* ---- Footer ---- */
@@ -279,3 +479,4 @@ footer {
     font-size: 0.9rem;
   }
 }
+
