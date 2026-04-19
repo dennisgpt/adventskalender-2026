@@ -238,7 +238,7 @@ small span:hover {
 }
 
 .tuerchen-karte.verfuegbar:hover,
-tuerchen-karte.heute:hover {
+.tuerchen-karte.heute:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 25px rgba(232, 200, 74, 0.4);
 }
@@ -268,6 +268,25 @@ tuerchen-karte.heute:hover {
   border-color: #ff4d6d;
   box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
   animation: pulsieren 1.5s infinite;
+}
+
+.tuerchen-karte.heute::before {
+  content: "Heute offen";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.22rem 0.56rem;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1f1233;
+  background: linear-gradient(90deg, #ffe7a8, #ffd56f);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.32);
+  z-index: 2;
+  pointer-events: none;
 }
 
 @keyframes pulsieren {
@@ -537,6 +556,12 @@ footer .text-muted {
 
 /* ---- Responsive: kleinere Karten auf Handy ---- */
 @media (max-width: 576px) {
+  .tuerchen-karte.heute::before {
+    top: 8px;
+    font-size: 0.58rem;
+    padding: 0.2rem 0.48rem;
+  }
+
   .tuerchen-nummer {
     font-size: 1.4rem;
   }
