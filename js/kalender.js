@@ -9,7 +9,6 @@
 
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG = 1;
-const RESET_GEOEFFNETE_TUERCHEN_BEIM_START = true; // Fuer Animationstests auf false setzen
 const TESTMODUS_TUERCHEN_NUMMER = 1; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
 
 let geschenkAnimationLaeuft = false;
@@ -238,8 +237,10 @@ function mischeArray(array) {
 // ============================================================
 
 document.addEventListener('DOMContentLoaded', function() {
-  if (RESET_GEOEFFNETE_TUERCHEN_BEIM_START) {
-    localStorage.removeItem('geoeffneteTuerchen');
+  if (new URLSearchParams(window.location.search).get('reset') === 'true') {
+    localStorage.clear();
+    window.location.replace(window.location.pathname);
+    return;
   }
 
   kalenderGridAufbauen();
