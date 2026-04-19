@@ -33,7 +33,14 @@
 </small>
   </div>
 
-  <button class="content-btn ms-auto">
+  <button
+    class="content-btn ms-auto"
+    type="button"
+    aria-label="Mein Inhalt (Login erforderlich)"
+    data-bs-toggle="offcanvas"
+    data-bs-target="#meinInhaltHinweis"
+    aria-controls="meinInhaltHinweis"
+  >
     <i class="bi bi-gift"></i>
     Mein Inhalt
   </button>
@@ -43,6 +50,22 @@
   Login
 </button>
   </header>
+
+  <!-- ===== OFFCANVAS: Hinweis für nicht eingeloggte Nutzer ===== -->
+  <div class="offcanvas offcanvas-end login-hinweis-offcanvas" tabindex="-1" id="meinInhaltHinweis" aria-labelledby="meinInhaltHinweisLabel">
+    <div class="offcanvas-header">
+      <h5 class="offcanvas-title" id="meinInhaltHinweisLabel">
+        <i class="bi bi-lock-fill me-2"></i>Mein Inhalt
+      </h5>
+      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Schließen"></button>
+    </div>
+    <div class="offcanvas-body">
+      <p class="mb-3">Bitte zuerst einloggen.</p>
+      <button type="button" class="btn login-submit-btn w-100" data-bs-dismiss="offcanvas" data-bs-toggle="modal" data-bs-target="#login-modal">
+        Zum Login
+      </button>
+    </div>
+  </div>
 
 
   <!-- ===== HERO-BEREICH ===== -->

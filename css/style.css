@@ -109,6 +109,33 @@ small span:hover {
   transition: 0.2s;
 }
 
+.login-hinweis-offcanvas {
+  width: min(90vw, 340px) !important;
+  background:
+    radial-gradient(circle at 12% 8%, rgba(255, 221, 145, 0.28), transparent 36%),
+    linear-gradient(145deg, #123f2e 0%, #831a2a 55%, #af2a1f 100%);
+  color: #fff4d6;
+  border-left: 1px solid rgba(255, 215, 142, 0.55);
+  box-shadow: -18px 0 36px rgba(0, 0, 0, 0.35);
+}
+
+.login-hinweis-offcanvas .offcanvas-header {
+  border-bottom: 1px solid rgba(255, 224, 161, 0.35);
+}
+
+.login-hinweis-offcanvas .offcanvas-title {
+  font-weight: 700;
+  color: #fff0ca;
+}
+
+.login-hinweis-offcanvas .offcanvas-body p {
+  color: #ffefca;
+}
+
+.login-hinweis-offcanvas .btn-close {
+  filter: invert(1) brightness(1.25);
+}
+
 .content-btn i {
   font-size: 18px;
   color: #c8102e;
