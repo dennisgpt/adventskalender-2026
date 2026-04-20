@@ -220,13 +220,37 @@ function starteGeschenkRevealAnimation() {
 }
 
 // ============================================================
-// HILFSFUNKTION: Array mischen
+// HILFSFUNKTION: Array mischen (deterministisch per Jahr-Seed)
 // ============================================================
 
+/**
+ * Einfacher seeded PRNG (mulberry32).
+ * Gibt eine Funktion zurueck, die bei jedem Aufruf eine Zufallszahl [0, 1) liefert.
+ * @param {number} seed
+ * @returns {function(): number}
+ */
+function erstellePRNG(seed) {
+  let s = seed >>> 0;
+  return function() {
+    s += 0x6D2B79F5;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Mischt ein Array deterministisch anhand des aktuellen Jahres als Seed.
+ * Die Reihenfolge bleibt das gesamte Jahr identisch und aendert sich jedes Jahr.
+ * @param {number[]} array
+ * @returns {number[]}
+ */
 function mischeArray(array) {
+  const seed = new Date().getFullYear();
+  const zufall = erstellePRNG(seed);
   const kopie = [...array];
   for (let i = kopie.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
+    const j = Math.floor(zufall() * (i + 1));
     [kopie[i], kopie[j]] = [kopie[j], kopie[i]];
   }
   return kopie;
