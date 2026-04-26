@@ -1,87 +1,199 @@
-/**
+﻿/**
  * inhalte.js - Inhalts-Anzeige und Modal
  * Zustaendig: Artjom
  */
+
+// ============================================================
+// BEISPIEL-INHALTE (Platzhalter)
+// ============================================================
+
+const BEISPIEL_INHALTE = {
+  1: {
+    typ: 'funfact',
+    titel: 'Tuerchen 1 - Fun Fact!',
+    inhalt: 'Wusstest du? Die THWS hat ueber 9.000 Studierende verteilt auf zwei Standorte.'
+  },
+  2: {
+    typ: 'mood',
+    titel: 'Tuerchen 2 - Entspannungsminute',
+    bild: 'img/tadeus-kamin.jpg',
+    text: 'Irgendwie kaputt heute? Entspann dich ne Runde mit Thaddäus ...',
+    musikEmbedUrl: 'https://www.youtube.com/embed/Dx5qFachd3A'
+  },
+  3: {
+    typ: 'quiz',
+    titel: 'Tuerchen 3 - Quiz!',
+    frage: 'Wofuer steht das "W" in THWS?',
+    antworten: ['Wuerzburg', 'Westfalen', 'Weihnachten', 'Wolfsburg'],
+    richtig: 0
+  },
+  4: {
+    typ: 'karte',
+    titel: 'Tuerchen 4 - Frohe Weihnachten!',
+    nachricht: 'Wir wuenschen euch besinnliche Feiertage und einen guten Rutsch ins neue Jahr!'
+  },
+  5: {
+    typ: 'video',
+    titel: 'Tuerchen 5 - Weihnachts-Vibe!',
+    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
+  }
+  // Weitere Tuerchen hier ergaenzen ...
+};
 
 let moodFadeInterval = null;
 let aktivesMoodFrame = null;
 
 // ============================================================
-// API-ANTWORT MAPPEN
+// MODAL-STATES
 // ============================================================
 
-function mappeApiAntwort(apiDaten) {
-  const ersterInhalt = apiDaten.contents && apiDaten.contents[0];
+function templateHtml(templateId) {
+  const template = document.getElementById(templateId);
+  return template ? template.innerHTML : '';
+}
 
-  if (!ersterInhalt) {
-    return { typ: 'funfact', titel: 'Türchen ' + apiDaten.day_number, inhalt: 'Kein Inhalt verfügbar.' };
+function modalStateAnzeigen(nummer, templateId, meldung) {
+  const modalElement = document.getElementById('tuerchen-modal');
+  const modalTitel = document.getElementById('tuerchen-modal-titel');
+  const modalInhalt = document.getElementById('tuerchen-modal-inhalt');
+
+  modalTitel.textContent = 'Tuerchen ' + nummer;
+  modalInhalt.innerHTML = templateHtml(templateId);
+
+  if (meldung) {
+    const text = modalInhalt.querySelector('.modal-state-text');
+    if (text) {
+      text.textContent = meldung;
+    }
   }
 
-  let typ;
-  if (ersterInhalt.type === 'image') {
-    typ = 'bild';
-  } else if (ersterInhalt.type === 'text' || ersterInhalt.type === 'funfact') {
-    typ = 'funfact';
-  } else {
-    typ = ersterInhalt.type;
-  }
-
-  const gemappt = {
-    typ: typ,
-    titel: 'Türchen ' + apiDaten.day_number,
-    inhalt: ersterInhalt.body
-  };
-
-  if (ersterInhalt.type === 'video') gemappt.videoUrl = ersterInhalt.media_url;
-  if (ersterInhalt.type === 'image') gemappt.bild = ersterInhalt.media_url;
-
-  return gemappt;
+  bootstrap.Modal.getOrCreateInstance(modalElement).show();
 }
 
 // ============================================================
 // HAUPT-FUNKTION: Inhalt anzeigen
 // ============================================================
 
-async function inhaltAnzeigen(nummer) {
+/**
+ * Oeffnet das Modal und zeigt den passenden Inhalt fuer ein Tuerchen.
+ * Wird aus kalender.js aufgerufen.
+ * @param {number} nummer
+ */
+function inhaltAnzeigen(nummer) {
   const modalElement = document.getElementById('tuerchen-modal');
   const modalTitel = document.getElementById('tuerchen-modal-titel');
   const modalInhalt = document.getElementById('tuerchen-modal-inhalt');
-
-  modalTitel.textContent = 'Türchen ' + nummer;
-  modalInhalt.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Lädt...</span></div></div>';
-
-  const modal = new bootstrap.Modal(modalElement);
-  modal.show();
 
   modalElement.addEventListener('hidden.bs.modal', function() {
     stoppeMoodMusik(modalElement);
   }, { once: true });
 
-  try {
-    const apiDaten = await window.AdventskalenderApi.ladeTuerchenInhalt(nummer);
-    const data = mappeApiAntwort(apiDaten);
+  modalStateAnzeigen(nummer, 'modal-state-loading-template');
 
-    modalTitel.textContent = data.titel;
-    modalInhalt.innerHTML = inhaltRendern(data);
+  window.AdventskalenderApi.ladeTuerchenInhalt(nummer)
+    .then(function(apiAntwort) {
+      const data = backendAntwortNormalisieren(nummer, apiAntwort);
 
-    if (data.typ === 'mood') {
-      starteMoodMusik(modalElement);
-    }
-  } catch (fehler) {
-    if (fehler.status === 403) {
-      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-warning">⏳ Dieses Türchen ist noch nicht verfügbar.</p></div>';
-    } else if (fehler.status === 404) {
-      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-muted">Inhalt nicht gefunden.</p></div>';
-    } else {
-      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-warning">⚠️ Inhalt konnte nicht geladen werden. Bitte erneut versuchen.</p></div>';
-    }
-  }
+      if (!data) {
+        modalTitel.textContent = 'Tuerchen ' + nummer;
+        modalInhalt.innerHTML = templateHtml('modal-state-empty-template');
+        return;
+      }
+
+      modalTitel.textContent = data.titel;
+      modalInhalt.innerHTML = inhaltRendern(data);
+
+      if (data.typ === 'mood') {
+        setTimeout(function() {
+          starteMoodMusik(modalElement);
+        }, 350);
+      }
+    })
+    .catch(function(error) {
+      const meldung = error && error.message ? error.message : null;
+      modalStateAnzeigen(nummer, 'modal-state-error-template', meldung);
+    });
 }
 
 // ============================================================
 // INHALTS-TYPEN RENDERN
 // ============================================================
 
+function backendAntwortNormalisieren(nummer, apiAntwort) {
+  if (!apiAntwort || !Array.isArray(apiAntwort.contents) || apiAntwort.contents.length === 0) {
+    return null;
+  }
+
+  const items = apiAntwort.contents
+    .map(function(item) {
+      return backendItemNormalisieren(nummer, item);
+    })
+    .filter(Boolean);
+
+  if (items.length === 0) {
+    return null;
+  }
+
+  if (items.length === 1) {
+    return items[0];
+  }
+
+  return {
+    typ: 'liste',
+    titel: 'Tuerchen ' + nummer,
+    items: items
+  };
+}
+
+function backendItemNormalisieren(nummer, item) {
+  if (!item) return null;
+
+  const titel = item.title || item.titel || 'Tuerchen ' + nummer;
+
+  switch (item.type) {
+    case 'text':
+      return {
+        typ: 'funfact',
+        titel: titel,
+        inhalt: item.body || ''
+      };
+
+    case 'image':
+      return {
+        typ: 'bild',
+        titel: titel,
+        bild: item.media_url,
+        text: item.body || ''
+      };
+
+    case 'video':
+      return {
+        typ: 'video',
+        titel: titel,
+        videoUrl: item.media_url || item.body || ''
+      };
+
+    case 'game':
+      return {
+        typ: 'karte',
+        titel: titel,
+        nachricht: item.body || 'Dieses Spiel ist vorbereitet.'
+      };
+
+    default:
+      return {
+        typ: 'karte',
+        titel: titel,
+        nachricht: item.body || 'Dieser Inhaltstyp wird noch vorbereitet.'
+      };
+  }
+}
+
+/**
+ * Erzeugt den HTML-Code fuer den jeweiligen Inhalts-Typ.
+ * @param {Object} data
+ * @returns {string}
+ */
 function inhaltRendern(data) {
   switch (data.typ) {
     case 'funfact':
@@ -106,13 +218,13 @@ function inhaltRendern(data) {
 
     case 'bild':
       return `
-        <div class="text-center p-2">
+        <div class="text-center p-2 p-md-3">
           <img
             src="${data.bild}"
             alt="${data.titel}"
-            class="img-fluid rounded-4"
-            style="max-height: 420px; width: 100%; object-fit: cover;">
-          ${data.inhalt ? `<p class="lead mt-3">${data.inhalt}</p>` : ''}
+            class="img-fluid rounded-4 mb-3"
+            style="max-height: 420px; width: 100%; object-fit: cover; box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45); border: 1px solid rgba(255, 255, 255, 0.14);">
+          ${data.text ? `<p class="lead mb-0">${data.text}</p>` : ''}
         </div>
       `;
 
@@ -144,6 +256,15 @@ function inhaltRendern(data) {
             style="width:0; height:0; border:0; position:absolute; opacity:0; pointer-events:none;"
             allow="autoplay; encrypted-media">
           </iframe>
+        </div>
+      `;
+
+    case 'liste':
+      return `
+        <div class="d-grid gap-3">
+          ${data.items.map(function(item) {
+            return `<section class="tuerchen-content-item">${inhaltRendern(item)}</section>`;
+          }).join('')}
         </div>
       `;
 
@@ -199,6 +320,7 @@ function starteLautstaerkeFade(frame) {
   const ziel = 48;
   const schritt = 3;
 
+  // Initial sehr leise starten.
   sendeYouTubeBefehl(frame, 'unMute');
   sendeYouTubeBefehl(frame, 'setVolume', [lautstaerke]);
   sendeYouTubeBefehl(frame, 'playVideo');
@@ -231,6 +353,11 @@ function stoppeLautstaerkeFade() {
 // QUIZ-LOGIK
 // ============================================================
 
+/**
+ * Rendert ein Quiz mit Antwort-Buttons.
+ * @param {Object} data
+ * @returns {string}
+ */
 function quizRendern(data) {
   const antwortButtons = data.antworten.map(function(antwort, index) {
     return `
@@ -255,6 +382,10 @@ function quizRendern(data) {
   `;
 }
 
+/**
+ * Prueft ob die geklickte Antwort richtig ist und zeigt Feedback.
+ * @param {HTMLElement} button
+ */
 function quizAntwortPruefen(button) {
   const gewaehlt = parseInt(button.getAttribute('data-index'), 10);
   const richtig = parseInt(button.getAttribute('data-richtig'), 10);
