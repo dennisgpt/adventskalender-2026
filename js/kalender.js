@@ -1,100 +1,49 @@
-﻿/**
+/**
  * kalender.js - Tuerchen-Logik, Grid und Geschenk-Reveal-Animation
  * Zustaendig: Dennis
  */
 
-// ============================================================
-// KONFIGURATION
-// ============================================================
-
-const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
-const ADVENTSSTART_TAG = 1;
-const TESTMODUS_TUERCHEN_NUMMER = 1; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
-
 let geschenkAnimationLaeuft = false;
 
+// Tuerchen die in dieser Sitzung geoeffnet wurden (kein localStorage)
+const geoeffneteDieSitzung = new Set();
+
 // ============================================================
-// HILFSFUNKTIONEN
+// ZUSTAND BERECHNEN
 // ============================================================
 
-/**
- * Gibt zurueck welches Tuerchen heute geoeffnet werden darf.
- * @returns {number|null} Tuerchen-Nummer (1-24) oder null
- */
-function heutigesTuerchen() {
-  if (TESTMODUS_TUERCHEN_NUMMER >= 1 && TESTMODUS_TUERCHEN_NUMMER <= 24) {
-    return TESTMODUS_TUERCHEN_NUMMER;
-  }
-
-  const heute = new Date();
-  const monat = heute.getMonth();
-  const tag = heute.getDate();
-
-  if (monat === ADVENTSSTART_MONAT && tag >= ADVENTSSTART_TAG && tag <= 24) {
-    return tag;
-  }
-  return null;
-}
-
-/**
- * Prueft ob ein bestimmtes Tuerchen bereits geoeffnet wurde.
- * @param {number} nummer
- * @returns {boolean}
- */
-function istGeoeffnet(nummer) {
-  const geoeffnet = JSON.parse(localStorage.getItem('geoeffneteTuerchen') || '[]');
-  return geoeffnet.includes(nummer);
-}
-
-/**
- * Merkt sich dass ein Tuerchen geoeffnet wurde.
- * @param {number} nummer
- */
-function alsGeoeffnetSpeichern(nummer) {
-  const geoeffnet = JSON.parse(localStorage.getItem('geoeffneteTuerchen') || '[]');
-  if (!geoeffnet.includes(nummer)) {
-    geoeffnet.push(nummer);
-    localStorage.setItem('geoeffneteTuerchen', JSON.stringify(geoeffnet));
-  }
-}
-
-/**
- * Bestimmt den Zustand eines Tuerchens.
- * @param {number} nummer
- * @returns {'geoeffnet'|'verfuegbar'|'heute'|'gesperrt'}
- */
-function tuerchenzustand(nummer) {
-  const aktuellesTuerchen = heutigesTuerchen();
-
-  if (istGeoeffnet(nummer)) {
+function berechneTuerchenzustand(tag) {
+  if (geoeffneteDieSitzung.has(tag.day_number)) {
     return 'geoeffnet';
   }
 
-  if (aktuellesTuerchen === null) {
+  const unlockDatum = new Date(tag.unlock_date);
+  const jetzt = new Date();
+
+  if (unlockDatum > jetzt) {
     return 'gesperrt';
   }
 
-  if (nummer === aktuellesTuerchen) {
-    return 'heute';
-  }
+  const istHeute =
+    unlockDatum.getFullYear() === jetzt.getFullYear() &&
+    unlockDatum.getMonth() === jetzt.getMonth() &&
+    unlockDatum.getDate() === jetzt.getDate();
 
-  if (nummer < aktuellesTuerchen) {
-    return 'verfuegbar';
-  }
-
-  return 'gesperrt';
+  return istHeute ? 'heute' : 'verfuegbar';
 }
 
 // ============================================================
 // GRID AUFBAUEN
 // ============================================================
 
-function kalenderGridAufbauen() {
+function kalenderGridAufbauen(tage) {
   const grid = document.getElementById('kalender-grid');
+  const tageMap = new Map(tage.map(function(t) { return [t.day_number, t]; }));
   const reihenfolge = mischeArray([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]);
 
   reihenfolge.forEach(function(nummer) {
-    const zustand = tuerchenzustand(nummer);
+    const tag = tageMap.get(nummer);
+    const zustand = tag ? berechneTuerchenzustand(tag) : 'gesperrt';
 
     const spalte = document.createElement('div');
     spalte.className = 'col-4 col-sm-3 col-md-2';
@@ -105,9 +54,9 @@ function kalenderGridAufbauen() {
     karte.setAttribute('aria-label', 'Tuerchen ' + nummer);
 
     let symbol = '';
-    if (zustand === 'geoeffnet') symbol = '\u2713';
-    else if (zustand === 'gesperrt') symbol = '\uD83D\uDD12';
-    else symbol = '\uD83C\uDF81';
+    if (zustand === 'geoeffnet') symbol = '✓';
+    else if (zustand === 'gesperrt') symbol = '🔒';
+    else symbol = '🎁';
 
     karte.innerHTML = `
       <span class="tuerchen-nummer">${symbol}</span>
@@ -132,22 +81,21 @@ function kalenderGridAufbauen() {
   });
 }
 
-/**
- * Wird aufgerufen wenn der Nutzer auf ein Tuerchen klickt.
- * @param {number} nummer
- * @param {HTMLElement} karte
- */
+// ============================================================
+// TUERCHEN OEFFNEN
+// ============================================================
+
 function tuercheoeffnen(nummer, karte) {
   if (geschenkAnimationLaeuft) return;
   geschenkAnimationLaeuft = true;
 
   starteGeschenkRevealAnimation()
     .then(function() {
-      alsGeoeffnetSpeichern(nummer);
+      geoeffneteDieSitzung.add(nummer);
 
       karte.classList.remove('verfuegbar', 'heute', 'gesperrt');
       karte.classList.add('geoeffnet');
-      karte.querySelector('.tuerchen-nummer').textContent = '\u2713';
+      karte.querySelector('.tuerchen-nummer').textContent = '✓';
 
       inhaltAnzeigen(nummer);
     })
@@ -233,7 +181,6 @@ function erstellePRNG(seed) {
   };
 }
 
-
 function mischeArray(array) {
   const seed = new Date().getFullYear();
   const zufall = erstellePRNG(seed);
@@ -249,13 +196,21 @@ function mischeArray(array) {
 // START
 // ============================================================
 
-document.addEventListener('DOMContentLoaded', function() {
+function zeigeLadefehler() {
+  const grid = document.getElementById('kalender-grid');
+  grid.innerHTML = '<div class="col-12 text-center py-5"><p class="text-warning">⚠️ Der Kalender konnte nicht geladen werden. Bitte Seite neu laden.</p></div>';
+}
+
+document.addEventListener('DOMContentLoaded', async function() {
   if (new URLSearchParams(window.location.search).get('reset') === 'true') {
-    localStorage.clear();
     window.location.replace(window.location.pathname);
     return;
   }
 
-  kalenderGridAufbauen();
+  try {
+    const tage = await window.AdventskalenderApi.ladeTage();
+    kalenderGridAufbauen(tage);
+  } catch (fehler) {
+    zeigeLadefehler();
+  }
 });
-
