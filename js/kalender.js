@@ -10,6 +10,7 @@
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG = 1;
 const TESTMODUS_TUERCHEN_NUMMER = null; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
+const WIEDERHOLBAR_OEFFENBARE_TUERCHEN = [1, 2, 3, 4, 5];
 
 let geschenkAnimationLaeuft = false;
 let gesperrtHinweisTimeout = null;
@@ -40,6 +41,10 @@ function heutigesTuerchen() {
 
 function istGeoeffnet(nummer) {
   return geoeffneteDieSitzung.has(nummer);
+}
+
+function darfWiederholtGeoeffnetWerden(nummer) {
+  return WIEDERHOLBAR_OEFFENBARE_TUERCHEN.includes(nummer);
 }
 
 function alsGeoeffnetSpeichern(nummer) {
@@ -190,7 +195,7 @@ function kalenderGridAufbauen(apiTage) {
       <span class="tuerchen-label">${nummer}</span>
     `;
 
-    if (zustand === 'verfuegbar' || zustand === 'heute') {
+    if (zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer))) {
       karte.addEventListener('click', function() {
         if (geschenkAnimationLaeuft) return;
 
