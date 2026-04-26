@@ -9,10 +9,11 @@
 
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG = 1;
-const TESTMODUS_TUERCHEN_NUMMER = 1; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
+const TESTMODUS_TUERCHEN_NUMMER = null; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
 
 let geschenkAnimationLaeuft = false;
 let gesperrtHinweisTimeout = null;
+const geoeffneteDieSitzung = new Set();
 
 // ============================================================
 // HILFSFUNKTIONEN
@@ -37,26 +38,12 @@ function heutigesTuerchen() {
   return null;
 }
 
-/**
- * Prueft ob ein bestimmtes Tuerchen bereits geoeffnet wurde.
- * @param {number} nummer
- * @returns {boolean}
- */
 function istGeoeffnet(nummer) {
-  const geoeffnet = JSON.parse(localStorage.getItem('geoeffneteTuerchen') || '[]');
-  return geoeffnet.includes(nummer);
+  return geoeffneteDieSitzung.has(nummer);
 }
 
-/**
- * Merkt sich dass ein Tuerchen geoeffnet wurde.
- * @param {number} nummer
- */
 function alsGeoeffnetSpeichern(nummer) {
-  const geoeffnet = JSON.parse(localStorage.getItem('geoeffneteTuerchen') || '[]');
-  if (!geoeffnet.includes(nummer)) {
-    geoeffnet.push(nummer);
-    localStorage.setItem('geoeffneteTuerchen', JSON.stringify(geoeffnet));
-  }
+  geoeffneteDieSitzung.add(nummer);
 }
 
 function zeigeGesperrtHinweis(text) {
@@ -373,8 +360,7 @@ document.addEventListener('DOMContentLoaded', function() {
       kalenderGridAufbauen(tage);
     })
     .catch(function() {
-      grid.innerHTML = '<p class="kalender-fehler text-center text-danger py-3">Backend nicht erreichbar \u2013 lokaler Modus wird geladen\u2026</p>';
-      setTimeout(function() { kalenderGridAufbauen(null); }, 1500);
+      grid.innerHTML = '<p class="kalender-fehler text-center text-danger py-3">⚠ Der Kalender konnte nicht geladen werden. Bitte Seite neu laden.</p>';
     });
 });
 

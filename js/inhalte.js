@@ -3,43 +3,6 @@
  * Zustaendig: Artjom
  */
 
-// ============================================================
-// BEISPIEL-INHALTE (Platzhalter)
-// ============================================================
-
-const BEISPIEL_INHALTE = {
-  1: {
-    typ: 'funfact',
-    titel: 'Tuerchen 1 - Fun Fact!',
-    inhalt: 'Wusstest du? Die THWS hat ueber 9.000 Studierende verteilt auf zwei Standorte.'
-  },
-  2: {
-    typ: 'mood',
-    titel: 'Tuerchen 2 - Entspannungsminute',
-    bild: 'img/tadeus-kamin.jpg',
-    text: 'Irgendwie kaputt heute? Entspann dich ne Runde mit Thaddäus ...',
-    musikEmbedUrl: 'https://www.youtube.com/embed/Dx5qFachd3A'
-  },
-  3: {
-    typ: 'quiz',
-    titel: 'Tuerchen 3 - Quiz!',
-    frage: 'Wofuer steht das "W" in THWS?',
-    antworten: ['Wuerzburg', 'Westfalen', 'Weihnachten', 'Wolfsburg'],
-    richtig: 0
-  },
-  4: {
-    typ: 'karte',
-    titel: 'Tuerchen 4 - Frohe Weihnachten!',
-    nachricht: 'Wir wuenschen euch besinnliche Feiertage und einen guten Rutsch ins neue Jahr!'
-  },
-  5: {
-    typ: 'video',
-    titel: 'Tuerchen 5 - Weihnachts-Vibe!',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  }
-  // Weitere Tuerchen hier ergaenzen ...
-};
-
 let moodFadeInterval = null;
 let aktivesMoodFrame = null;
 
