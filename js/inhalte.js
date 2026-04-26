@@ -1,98 +1,87 @@
-﻿/**
+/**
  * inhalte.js - Inhalts-Anzeige und Modal
  * Zustaendig: Artjom
  */
-
-// ============================================================
-// BEISPIEL-INHALTE (Platzhalter)
-// ============================================================
-
-const BEISPIEL_INHALTE = {
-  1: {
-    typ: 'funfact',
-    titel: 'Tuerchen 1 - Fun Fact!',
-    inhalt: 'Wusstest du? Die THWS hat ueber 9.000 Studierende verteilt auf zwei Standorte.'
-  },
-  2: {
-    typ: 'mood',
-    titel: 'Tuerchen 2 - Entspannungsminute',
-    bild: 'img/tadeus-kamin.jpg',
-    text: 'Irgendwie kaputt heute? Entspann dich ne Runde mit Thaddäus ...',
-    musikEmbedUrl: 'https://www.youtube.com/embed/Dx5qFachd3A'
-  },
-  3: {
-    typ: 'quiz',
-    titel: 'Tuerchen 3 - Quiz!',
-    frage: 'Wofuer steht das "W" in THWS?',
-    antworten: ['Wuerzburg', 'Westfalen', 'Weihnachten', 'Wolfsburg'],
-    richtig: 0
-  },
-  4: {
-    typ: 'karte',
-    titel: 'Tuerchen 4 - Frohe Weihnachten!',
-    nachricht: 'Wir wuenschen euch besinnliche Feiertage und einen guten Rutsch ins neue Jahr!'
-  },
-  5: {
-    typ: 'video',
-    titel: 'Tuerchen 5 - Weihnachts-Vibe!',
-    videoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ'
-  }
-  // Weitere Tuerchen hier ergaenzen ...
-};
 
 let moodFadeInterval = null;
 let aktivesMoodFrame = null;
 
 // ============================================================
+// API-ANTWORT MAPPEN
+// ============================================================
+
+function mappeApiAntwort(apiDaten) {
+  const ersterInhalt = apiDaten.contents && apiDaten.contents[0];
+
+  if (!ersterInhalt) {
+    return { typ: 'funfact', titel: 'Türchen ' + apiDaten.day_number, inhalt: 'Kein Inhalt verfügbar.' };
+  }
+
+  let typ;
+  if (ersterInhalt.type === 'image') {
+    typ = 'bild';
+  } else if (ersterInhalt.type === 'text' || ersterInhalt.type === 'funfact') {
+    typ = 'funfact';
+  } else {
+    typ = ersterInhalt.type;
+  }
+
+  const gemappt = {
+    typ: typ,
+    titel: 'Türchen ' + apiDaten.day_number,
+    inhalt: ersterInhalt.body
+  };
+
+  if (ersterInhalt.type === 'video') gemappt.videoUrl = ersterInhalt.media_url;
+  if (ersterInhalt.type === 'image') gemappt.bild = ersterInhalt.media_url;
+
+  return gemappt;
+}
+
+// ============================================================
 // HAUPT-FUNKTION: Inhalt anzeigen
 // ============================================================
 
-/**
- * Oeffnet das Modal und zeigt den passenden Inhalt fuer ein Tuerchen.
- * Wird aus kalender.js aufgerufen.
- * @param {number} nummer
- */
-function inhaltAnzeigen(nummer) {
+async function inhaltAnzeigen(nummer) {
   const modalElement = document.getElementById('tuerchen-modal');
   const modalTitel = document.getElementById('tuerchen-modal-titel');
   const modalInhalt = document.getElementById('tuerchen-modal-inhalt');
 
-  const data = BEISPIEL_INHALTE[nummer];
-
-  if (!data) {
-    modalTitel.textContent = 'Tuerchen ' + nummer;
-    modalInhalt.innerHTML = '<p class="text-center py-4">Inhalt kommt bald!</p>';
-  } else {
-    modalTitel.textContent = data.titel;
-    modalInhalt.innerHTML = inhaltRendern(data);
-  }
+  modalTitel.textContent = 'Türchen ' + nummer;
+  modalInhalt.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-warning" role="status"><span class="visually-hidden">Lädt...</span></div></div>';
 
   const modal = new bootstrap.Modal(modalElement);
-
-  modalElement.addEventListener('shown.bs.modal', function() {
-    if (data && data.typ === 'mood') {
-      setTimeout(function() {
-        starteMoodMusik(modalElement);
-      }, 350);
-    }
-  }, { once: true });
+  modal.show();
 
   modalElement.addEventListener('hidden.bs.modal', function() {
     stoppeMoodMusik(modalElement);
   }, { once: true });
 
-  modal.show();
+  try {
+    const apiDaten = await window.AdventskalenderApi.ladeTuerchenInhalt(nummer);
+    const data = mappeApiAntwort(apiDaten);
+
+    modalTitel.textContent = data.titel;
+    modalInhalt.innerHTML = inhaltRendern(data);
+
+    if (data.typ === 'mood') {
+      starteMoodMusik(modalElement);
+    }
+  } catch (fehler) {
+    if (fehler.status === 403) {
+      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-warning">⏳ Dieses Türchen ist noch nicht verfügbar.</p></div>';
+    } else if (fehler.status === 404) {
+      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-muted">Inhalt nicht gefunden.</p></div>';
+    } else {
+      modalInhalt.innerHTML = '<div class="text-center py-4"><p class="text-warning">⚠️ Inhalt konnte nicht geladen werden. Bitte erneut versuchen.</p></div>';
+    }
+  }
 }
 
 // ============================================================
 // INHALTS-TYPEN RENDERN
 // ============================================================
 
-/**
- * Erzeugt den HTML-Code fuer den jeweiligen Inhalts-Typ.
- * @param {Object} data
- * @returns {string}
- */
 function inhaltRendern(data) {
   switch (data.typ) {
     case 'funfact':
@@ -112,6 +101,18 @@ function inhaltRendern(data) {
             allowfullscreen
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture">
           </iframe>
+        </div>
+      `;
+
+    case 'bild':
+      return `
+        <div class="text-center p-2">
+          <img
+            src="${data.bild}"
+            alt="${data.titel}"
+            class="img-fluid rounded-4"
+            style="max-height: 420px; width: 100%; object-fit: cover;">
+          ${data.inhalt ? `<p class="lead mt-3">${data.inhalt}</p>` : ''}
         </div>
       `;
 
@@ -198,7 +199,6 @@ function starteLautstaerkeFade(frame) {
   const ziel = 48;
   const schritt = 3;
 
-  // Initial sehr leise starten.
   sendeYouTubeBefehl(frame, 'unMute');
   sendeYouTubeBefehl(frame, 'setVolume', [lautstaerke]);
   sendeYouTubeBefehl(frame, 'playVideo');
@@ -231,11 +231,6 @@ function stoppeLautstaerkeFade() {
 // QUIZ-LOGIK
 // ============================================================
 
-/**
- * Rendert ein Quiz mit Antwort-Buttons.
- * @param {Object} data
- * @returns {string}
- */
 function quizRendern(data) {
   const antwortButtons = data.antworten.map(function(antwort, index) {
     return `
@@ -260,10 +255,6 @@ function quizRendern(data) {
   `;
 }
 
-/**
- * Prueft ob die geklickte Antwort richtig ist und zeigt Feedback.
- * @param {HTMLElement} button
- */
 function quizAntwortPruefen(button) {
   const gewaehlt = parseInt(button.getAttribute('data-index'), 10);
   const richtig = parseInt(button.getAttribute('data-richtig'), 10);
