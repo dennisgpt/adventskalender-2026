@@ -223,10 +223,19 @@ small span:hover {
   justify-content: center;
   font-size: 1.8rem;
   font-weight: bold;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, filter 0.2s ease;
   position: relative;
   overflow: hidden;
   box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+}
+
+.tuerchen-karte::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  pointer-events: none;
 }
 
 /* VerfÃ¼gbares TÃ¼rchen (heute oder vergangen, noch nicht geÃ¶ffnet) */
@@ -240,7 +249,13 @@ small span:hover {
 .tuerchen-karte.verfuegbar:hover,
 .tuerchen-karte.heute:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(232, 200, 74, 0.4);
+  box-shadow: 0 12px 28px rgba(232, 200, 74, 0.45), 0 0 0 2px rgba(232, 200, 74, 0.32);
+}
+
+.tuerchen-karte.verfuegbar:focus-visible,
+.tuerchen-karte.heute:focus-visible {
+  outline: 3px solid #ffd166;
+  outline-offset: 4px;
 }
 
 /* Bereits geÃ¶ffnetes TÃ¼rchen */
@@ -252,22 +267,52 @@ small span:hover {
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 77, 109, 0.3);
 }
 
+.tuerchen-karte.geoeffnet::after {
+  border-color: rgba(255, 150, 170, 0.2);
+}
+
 /* Noch gesperrtes TÃ¼rchen (Datum in der Zukunft) */
 .tuerchen-karte.gesperrt {
-  opacity: 0.75;
-  filter: grayscale(20%);
-  background-color: #0d0d1a;
-  border-color: #2a2a4a;
-  color: #3a3a5c;
+  opacity: 0.82;
+  filter: grayscale(35%) brightness(0.86);
+  background: linear-gradient(135deg, #202640, #12172a);
+  border-color: #4c5574;
+  color: #a5abc4;
   cursor: not-allowed;
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.42), 0 0 0 1px rgba(151, 164, 205, 0.14);
+}
+
+.tuerchen-karte.gesperrt::after {
+  border-color: rgba(255, 255, 255, 0.12);
 }
 
 /* Heutiges TÃ¼rchen hervorheben */
 .tuerchen-karte.heute {
+  background: linear-gradient(135deg, #23456d, #12395d);
   border-color: #ff4d6d;
-  box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
+  color: #ffffff;
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 2px rgba(255, 77, 109, 0.36);
   animation: pulsieren 1.5s infinite;
+}
+
+.tuerchen-karte.loading {
+  cursor: wait;
+  filter: saturate(0.82);
+  pointer-events: none;
+}
+
+.tuerchen-karte.loading::before {
+  content: "";
+  position: absolute;
+  inset: -35%;
+  background: linear-gradient(110deg, transparent 35%, rgba(255, 255, 255, 0.2) 50%, transparent 65%);
+  animation: tuerchen-loading 1.2s linear infinite;
+}
+
+.tuerchen-karte.fehler {
+  border-color: #ff8c8c;
+  background: linear-gradient(135deg, #471824, #761f31);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 2px rgba(255, 140, 140, 0.24);
 }
 
 .tuerchen-karte.heute::before {
@@ -290,9 +335,14 @@ small span:hover {
 }
 
 @keyframes pulsieren {
-  0%   { box-shadow: 0 0 10px rgba(255, 77, 109, 0.4); }
-  50%  { box-shadow: 0 0 25px rgba(255, 77, 109, 0.8); }
-  100% { box-shadow: 0 0 10px rgba(255, 77, 109, 0.4); }
+  0%   { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 2px rgba(255, 77, 109, 0.32); }
+  50%  { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 5px rgba(255, 77, 109, 0.5); }
+  100% { box-shadow: 0 16px 34px rgba(0, 0, 0, 0.52), 0 0 0 2px rgba(255, 77, 109, 0.32); }
+}
+
+@keyframes tuerchen-loading {
+  0%   { transform: translateX(-35%) rotate(12deg); }
+  100% { transform: translateX(35%) rotate(12deg); }
 }
 
 /* TÃ¼rchen-Nummer */
@@ -585,6 +635,25 @@ footer .text-muted {
 
 /* ---- Responsive: kleinere Karten auf Handy ---- */
 @media (max-width: 576px) {
+  .tuerchen-karte {
+    border-width: 1.5px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.42);
+  }
+
+  .tuerchen-karte::after {
+    inset: 5px;
+    border-radius: 6px;
+  }
+
+  .tuerchen-karte.verfuegbar:hover,
+  .tuerchen-karte.heute:hover {
+    transform: scale(1.03);
+  }
+
+  .tuerchen-karte.heute {
+    box-shadow: 0 12px 22px rgba(0, 0, 0, 0.5), 0 0 0 2px rgba(255, 77, 109, 0.34);
+  }
+
   .gesperrt-hinweis-toast {
     bottom: 16px;
     width: min(94vw, 320px);
@@ -599,11 +668,12 @@ footer .text-muted {
   }
 
   .tuerchen-nummer {
-    font-size: 1.4rem;
+    font-size: 1.35rem;
   }
 
   .tuerchen-label {
-    font-size: 0.9rem;
+    font-size: 0.82rem;
+    margin-top: 4px;
   }
 }
 
