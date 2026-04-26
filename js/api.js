@@ -1,11 +1,10 @@
 (function(window) {
     'use strict';
 
-    const DEFAULT_API_BASE_URL = import.meta.env.VITE_API_URL
     const API_BASE_URL =
       window.ADVENTSKALENDER_API_BASE_URL ||
       localStorage.getItem('ADVENTSKALENDER_API_BASE_URL') ||
-      DEFAULT_API_BASE_URL;
+      'http://localhost:3000';
 
     class AdventskalenderApiError extends Error {
       constructor(message, status, payload) {
