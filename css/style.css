@@ -238,7 +238,7 @@ small span:hover {
 }
 
 .tuerchen-karte.verfuegbar:hover,
-tuerchen-karte.heute:hover {
+.tuerchen-karte.heute:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 25px rgba(232, 200, 74, 0.4);
 }
@@ -268,6 +268,25 @@ tuerchen-karte.heute:hover {
   border-color: #ff4d6d;
   box-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
   animation: pulsieren 1.5s infinite;
+}
+
+.tuerchen-karte.heute::before {
+  content: "Heute offen";
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.22rem 0.56rem;
+  border-radius: 999px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #1f1233;
+  background: linear-gradient(90deg, #ffe7a8, #ffd56f);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.32);
+  z-index: 2;
+  pointer-events: none;
 }
 
 @keyframes pulsieren {
@@ -517,6 +536,35 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   100% { transform: translateY(0); opacity: 1; }
 }
 
+/* ---- Gesperrt-Hinweis (UI-Only, wird spaeter per JS aktiviert) ---- */
+.gesperrt-hinweis-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%) translateY(14px);
+  width: min(92vw, 340px);
+  padding: 0.62rem 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 211, 126, 0.55);
+  background: linear-gradient(145deg, rgba(17, 28, 58, 0.96), rgba(32, 46, 87, 0.96));
+  color: #fff3cc;
+  font-size: 0.86rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-align: center;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.42);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  z-index: 2300;
+  pointer-events: none;
+}
+
+.gesperrt-hinweis-toast.sichtbar {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
 /* ---- Footer ---- */
 footer {
   background: transparent !important;
@@ -537,6 +585,19 @@ footer .text-muted {
 
 /* ---- Responsive: kleinere Karten auf Handy ---- */
 @media (max-width: 576px) {
+  .gesperrt-hinweis-toast {
+    bottom: 16px;
+    width: min(94vw, 320px);
+    font-size: 0.8rem;
+    padding: 0.56rem 0.72rem;
+  }
+
+  .tuerchen-karte.heute::before {
+    top: 8px;
+    font-size: 0.58rem;
+    padding: 0.2rem 0.48rem;
+  }
+
   .tuerchen-nummer {
     font-size: 1.4rem;
   }
