@@ -441,6 +441,18 @@ small span:hover {
   display: block;
 }
 
+.tuerchen-karte.gesperrt .tuerchen-nummer {
+  display: block;
+  font-size: 1.3rem;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.6);
+}
+
+.tuerchen-karte.gesperrt .tuerchen-label {
+  display: block;
+  font-size: 1.5rem;
+}
+
 /* Türchen-Label (Zahl) – groß, weiß, gut lesbar auf allen Farben */
 .tuerchen-label {
   font-size: 2.1rem;
