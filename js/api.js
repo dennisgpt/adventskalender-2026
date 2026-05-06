@@ -6,6 +6,7 @@
     window.ADVENTSKALENDER_API_BASE_URL ||
     localStorage.getItem('ADVENTSKALENDER_API_BASE_URL') ||
     DEFAULT_API_BASE_URL;
+  const ADMIN_SESSION_STORAGE_KEY = 'ADVENTSKALENDER_ADMIN_SESSION';
 
   class AdventskalenderApiError extends Error {
     constructor(message, status, payload) {
@@ -18,6 +19,47 @@
 
   function baueApiUrl(pfad) {
     return API_BASE_URL.replace(/\/$/, '') + pfad;
+  }
+
+  function speichereAdminSession(session) {
+    if (!session || !session.token) {
+      throw new AdventskalenderApiError(
+        'Die Admin-Session ist ungueltig.',
+        0,
+        session || null
+      );
+    }
+
+    localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, JSON.stringify({
+      token: session.token,
+      expires_at: session.expires_at || null,
+      role: session.role || null
+    }));
+  }
+
+  function ladeAdminSession() {
+    const gespeicherteSession = localStorage.getItem(ADMIN_SESSION_STORAGE_KEY);
+
+    if (!gespeicherteSession) {
+      return null;
+    }
+
+    try {
+      const session = JSON.parse(gespeicherteSession);
+      return session && session.token ? session : null;
+    } catch (error) {
+      localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+      return null;
+    }
+  }
+
+  function ladeAdminToken() {
+    const session = ladeAdminSession();
+    return session ? session.token : null;
+  }
+
+  function loescheAdminSession() {
+    localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
   }
 
   async function leseJsonAntwort(response) {
@@ -119,6 +161,10 @@
   window.AdventskalenderApi = {
     API_BASE_URL,
     AdventskalenderApiError,
+    speichereAdminSession,
+    ladeAdminSession,
+    ladeAdminToken,
+    loescheAdminSession,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
