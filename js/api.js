@@ -117,6 +117,25 @@
     return payload;
   }
 
+  function adminFetch(pfad, optionen) {
+    const fetchOptionen = optionen || {};
+    const headers = {
+      Accept: 'application/json',
+      ...baueAdminAuthHeader(),
+      ...(fetchOptionen.headers || {})
+    };
+
+    if (Object.prototype.hasOwnProperty.call(fetchOptionen, 'body') && typeof fetchOptionen.body !== 'string') {
+      headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+      fetchOptionen.body = JSON.stringify(fetchOptionen.body);
+    }
+
+    return apiFetch(pfad, {
+      ...fetchOptionen,
+      headers: headers
+    });
+  }
+
   function adminLogin(username, password) {
     return apiFetch('/api/admin/login', {
       method: 'POST',
@@ -135,12 +154,8 @@
   }
 
   function adminLogout() {
-    return apiFetch('/api/admin/logout', {
-      method: 'POST',
-      headers: {
-        Accept: 'application/json',
-        ...baueAdminAuthHeader()
-      }
+    return adminFetch('/api/admin/logout', {
+      method: 'POST'
     }).finally(function() {
       loescheAdminSession();
     });
@@ -200,6 +215,7 @@
     ladeAdminToken,
     loescheAdminSession,
     baueAdminAuthHeader,
+    adminFetch,
     adminLogin,
     adminLogout,
     getHealth,
