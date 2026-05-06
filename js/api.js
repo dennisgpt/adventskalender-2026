@@ -112,6 +112,23 @@
     return payload;
   }
 
+  function adminLogin(username, password) {
+    return apiFetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
+    }).then(function(session) {
+      speichereAdminSession(session);
+      return session;
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -165,6 +182,7 @@
     ladeAdminSession,
     ladeAdminToken,
     loescheAdminSession,
+    adminLogin,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
