@@ -6,6 +6,7 @@
     window.ADVENTSKALENDER_API_BASE_URL ||
     localStorage.getItem('ADVENTSKALENDER_API_BASE_URL') ||
     DEFAULT_API_BASE_URL;
+  const ADMIN_SESSION_STORAGE_KEY = 'ADVENTSKALENDER_ADMIN_SESSION';
 
   class AdventskalenderApiError extends Error {
     constructor(message, status, payload) {
@@ -18,6 +19,52 @@
 
   function baueApiUrl(pfad) {
     return API_BASE_URL.replace(/\/$/, '') + pfad;
+  }
+
+  function speichereAdminSession(session) {
+    if (!session || !session.token) {
+      throw new AdventskalenderApiError(
+        'Die Admin-Session ist ungueltig.',
+        0,
+        session || null
+      );
+    }
+
+    localStorage.setItem(ADMIN_SESSION_STORAGE_KEY, JSON.stringify({
+      token: session.token,
+      expires_at: session.expires_at || null,
+      role: session.role || null
+    }));
+  }
+
+  function ladeAdminSession() {
+    const gespeicherteSession = localStorage.getItem(ADMIN_SESSION_STORAGE_KEY);
+
+    if (!gespeicherteSession) {
+      return null;
+    }
+
+    try {
+      const session = JSON.parse(gespeicherteSession);
+      return session && session.token ? session : null;
+    } catch (error) {
+      localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+      return null;
+    }
+  }
+
+  function ladeAdminToken() {
+    const session = ladeAdminSession();
+    return session ? session.token : null;
+  }
+
+  function loescheAdminSession() {
+    localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+  }
+
+  function baueAdminAuthHeader() {
+    const token = ladeAdminToken();
+    return token ? { Authorization: 'Bearer ' + token } : {};
   }
 
   async function leseJsonAntwort(response) {
@@ -70,6 +117,50 @@
     return payload;
   }
 
+  function adminFetch(pfad, optionen) {
+    const fetchOptionen = optionen || {};
+    const headers = {
+      Accept: 'application/json',
+      ...baueAdminAuthHeader(),
+      ...(fetchOptionen.headers || {})
+    };
+
+    if (Object.prototype.hasOwnProperty.call(fetchOptionen, 'body') && typeof fetchOptionen.body !== 'string') {
+      headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+      fetchOptionen.body = JSON.stringify(fetchOptionen.body);
+    }
+
+    return apiFetch(pfad, {
+      ...fetchOptionen,
+      headers: headers
+    });
+  }
+
+  function adminLogin(username, password) {
+    return apiFetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        username: username,
+        password: password
+      })
+    }).then(function(session) {
+      speichereAdminSession(session);
+      return session;
+    });
+  }
+
+  function adminLogout() {
+    return adminFetch('/api/admin/logout', {
+      method: 'POST'
+    }).finally(function() {
+      loescheAdminSession();
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -119,6 +210,14 @@
   window.AdventskalenderApi = {
     API_BASE_URL,
     AdventskalenderApiError,
+    speichereAdminSession,
+    ladeAdminSession,
+    ladeAdminToken,
+    loescheAdminSession,
+    baueAdminAuthHeader,
+    adminFetch,
+    adminLogin,
+    adminLogout,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
