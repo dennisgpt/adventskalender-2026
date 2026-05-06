@@ -62,6 +62,11 @@
     localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
   }
 
+  function baueAdminAuthHeader() {
+    const token = ladeAdminToken();
+    return token ? { Authorization: 'Bearer ' + token } : {};
+  }
+
   async function leseJsonAntwort(response) {
     const text = await response.text();
 
@@ -129,6 +134,18 @@
     });
   }
 
+  function adminLogout() {
+    return apiFetch('/api/admin/logout', {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json',
+        ...baueAdminAuthHeader()
+      }
+    }).finally(function() {
+      loescheAdminSession();
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -182,7 +199,9 @@
     ladeAdminSession,
     ladeAdminToken,
     loescheAdminSession,
+    baueAdminAuthHeader,
     adminLogin,
+    adminLogout,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
