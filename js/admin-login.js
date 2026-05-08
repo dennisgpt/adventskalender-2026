@@ -18,6 +18,21 @@
       : '<i class="bi bi-box-arrow-in-right me-1"></i>Einloggen';
   }
 
+  function setzeLogoutLaedt(loginButton, laedt) {
+    const loginButtonIcon = document.getElementById('admin-login-button-icon');
+    const loginButtonText = document.getElementById('admin-login-button-text');
+
+    if (!loginButton || !loginButtonIcon || !loginButtonText) {
+      return;
+    }
+
+    loginButton.disabled = laedt;
+    loginButtonIcon.className = laedt
+      ? 'spinner-border spinner-border-sm'
+      : 'bi bi-shield-check';
+    loginButtonText.textContent = laedt ? 'Abmelden...' : 'Admin';
+  }
+
   function setzeAdminLoginStatus(eingeloggt) {
     const loginButton = document.getElementById('admin-login-button');
     const loginButtonIcon = document.getElementById('admin-login-button-icon');
@@ -51,12 +66,32 @@
     const fehlerElement = document.getElementById('admin-login-fehler');
     const submitButton = document.getElementById('admin-login-submit');
     const modalElement = document.getElementById('login-modal');
+    const loginButton = document.getElementById('admin-login-button');
 
-    if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement) {
+    if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement || !loginButton) {
       return;
     }
 
     aktualisiereAdminLoginStatus();
+
+    loginButton.addEventListener('click', function(event) {
+      if (!window.AdventskalenderApi.ladeAdminToken()) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setzeLogoutLaedt(loginButton, true);
+
+      window.AdventskalenderApi.adminLogout()
+        .catch(function() {
+          // adminLogout entfernt die lokale Session auch bei Backend-Fehlern.
+        })
+        .finally(function() {
+          setzeLogoutLaedt(loginButton, false);
+          aktualisiereAdminLoginStatus();
+        });
+    });
 
     formular.addEventListener('submit', function(event) {
       event.preventDefault();
