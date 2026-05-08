@@ -139,10 +139,10 @@
           formular.reset();
         })
         .catch(function(error) {
-          const meldung = error && error.message
-            ? error.message
-            : 'Der Login ist fehlgeschlagen.';
-          zeigeFehler(fehlerElement, meldung);
+          zeigeFehler(
+            fehlerElement,
+            window.AdventskalenderApi.fehlertextFuerApiFehler(error, 'Der Login ist fehlgeschlagen.')
+          );
         })
         .finally(function() {
           setzeLoginLaedt(submitButton, false);
