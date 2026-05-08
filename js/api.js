@@ -231,6 +231,42 @@
     });
   }
 
+  // GET /api/admin/days
+  // Erfolgsantwort: Array der 24 Admin-Tuerchen inkl. Einstellungen und zugewiesener Inhalte
+  function ladeAdminTage() {
+    return adminFetch('/api/admin/days');
+  }
+
+  // PUT /api/admin/days/:dayId
+  // Aktualisiert Freischaltdatum und/oder Randomisierung eines Admin-Tuerchens.
+  function aktualisiereAdminTag(dayId, daten) {
+    return adminFetch(`/api/admin/days/${encodeURIComponent(dayId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
+  // POST /api/admin/days/:dayId/assign
+  // Weist einem Admin-Tuerchen einen Content-Eintrag zu.
+  function weiseContentAdminTagZu(dayId, contentId, sortOrder) {
+    return adminFetch(`/api/admin/days/${encodeURIComponent(dayId)}/assign`, {
+      method: 'POST',
+      body: {
+        content_id: contentId,
+        sort_order: sortOrder || 0
+      }
+    });
+  }
+
+  // DELETE /api/admin/days/:dayId/assign/:contentId
+  // Entfernt einen Content-Eintrag aus einem Admin-Tuerchen.
+  function entferneContentVonAdminTag(dayId, contentId) {
+    return adminFetch(
+      `/api/admin/days/${encodeURIComponent(dayId)}/assign/${encodeURIComponent(contentId)}`,
+      { method: 'DELETE' }
+    );
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -291,6 +327,10 @@
     adminFetch,
     adminLogin,
     adminLogout,
+    ladeAdminTage,
+    aktualisiereAdminTag,
+    weiseContentAdminTagZu,
+    entferneContentVonAdminTag,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
