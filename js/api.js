@@ -258,6 +258,15 @@
     });
   }
 
+  // DELETE /api/admin/days/:dayId/assign/:contentId
+  // Entfernt einen Content-Eintrag aus einem Admin-Tuerchen.
+  function entferneContentVonAdminTag(dayId, contentId) {
+    return adminFetch(
+      `/api/admin/days/${encodeURIComponent(dayId)}/assign/${encodeURIComponent(contentId)}`,
+      { method: 'DELETE' }
+    );
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -321,6 +330,7 @@
     ladeAdminTage,
     aktualisiereAdminTag,
     weiseContentAdminTagZu,
+    entferneContentVonAdminTag,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
