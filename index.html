@@ -44,7 +44,13 @@
         Mein Inhalt
       </button>
 
-      <button class="login-btn ms-3" type="button">
+      <button
+        class="login-btn ms-3"
+        type="button"
+        data-bs-toggle="modal"
+        data-bs-target="#login-modal"
+        aria-controls="login-modal"
+      >
         <i class="bi bi-mortarboard-fill"></i>
         Login
       </button>
@@ -64,6 +70,60 @@
       <button type="button" class="btn login-submit-btn w-100" data-bs-dismiss="offcanvas" data-bs-toggle="modal" data-bs-target="#login-modal">
         Zum Login
       </button>
+    </div>
+  </div>
+
+  <!-- ===== MODAL: Admin Login ===== -->
+  <div class="modal fade" id="login-modal" tabindex="-1" aria-labelledby="login-modal-titel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content admin-login-modal">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="login-modal-titel">
+            <i class="bi bi-shield-lock-fill me-2"></i>Admin Login
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+
+        <form id="admin-login-form" novalidate>
+          <div class="modal-body">
+            <div class="admin-login-alert d-none" id="admin-login-fehler" role="alert"></div>
+
+            <div class="mb-3">
+              <label for="admin-login-username" class="form-label">Benutzername</label>
+              <input
+                class="form-control"
+                id="admin-login-username"
+                name="username"
+                type="text"
+                autocomplete="username"
+                required
+              >
+            </div>
+
+            <div class="mb-0">
+              <label for="admin-login-password" class="form-label">Passwort</label>
+              <input
+                class="form-control"
+                id="admin-login-password"
+                name="password"
+                type="password"
+                autocomplete="current-password"
+                required
+              >
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn admin-login-secondary-btn" data-bs-dismiss="modal">Abbrechen</button>
+            <button type="submit" class="btn admin-login-submit-btn" id="admin-login-submit">
+              <i class="bi bi-box-arrow-in-right me-1"></i>
+              Einloggen
+            </button>
+          </div>
+        </form>
+
+      </div>
     </div>
   </div>
 
