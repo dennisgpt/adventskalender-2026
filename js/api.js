@@ -85,6 +85,14 @@
     localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
   }
 
+  function meldeAdminSessionVerloren(grund) {
+    window.dispatchEvent(new CustomEvent('adventskalender:admin-session-verloren', {
+      detail: {
+        grund: grund || 'unbekannt'
+      }
+    }));
+  }
+
   function baueAdminAuthHeader() {
     const token = ladeAdminToken();
     return token ? { Authorization: 'Bearer ' + token } : {};
@@ -159,6 +167,7 @@
     }).catch(function(error) {
       if (error && error.status === 401) {
         loescheAdminSession();
+        meldeAdminSessionVerloren('unauthorized');
       }
 
       throw error;
@@ -244,6 +253,7 @@
     ladeAdminToken,
     istAdminSessionAbgelaufen,
     loescheAdminSession,
+    meldeAdminSessionVerloren,
     baueAdminAuthHeader,
     adminFetch,
     adminLogin,

@@ -95,5 +95,9 @@
     aktualisiereStatus: aktualisiereAdminLoginStatus
   };
 
+  window.addEventListener('adventskalender:admin-session-verloren', function() {
+    aktualisiereAdminLoginStatus();
+  });
+
   document.addEventListener('DOMContentLoaded', initialisiereAdminLogin);
 })(window, document);
