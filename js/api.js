@@ -46,11 +46,34 @@
 
     try {
       const session = JSON.parse(gespeicherteSession);
-      return session && session.token ? session : null;
+      if (!session || !session.token) {
+        return null;
+      }
+
+      if (istAdminSessionAbgelaufen(session)) {
+        loescheAdminSession();
+        return null;
+      }
+
+      return session;
     } catch (error) {
-      localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+      loescheAdminSession();
       return null;
     }
+  }
+
+  function istAdminSessionAbgelaufen(session) {
+    if (!session || !session.expires_at) {
+      return false;
+    }
+
+    const ablaufZeit = new Date(session.expires_at).getTime();
+
+    if (Number.isNaN(ablaufZeit)) {
+      return false;
+    }
+
+    return ablaufZeit <= Date.now();
   }
 
   function ladeAdminToken() {
@@ -60,6 +83,14 @@
 
   function loescheAdminSession() {
     localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+  }
+
+  function meldeAdminSessionVerloren(grund) {
+    window.dispatchEvent(new CustomEvent('adventskalender:admin-session-verloren', {
+      detail: {
+        grund: grund || 'unbekannt'
+      }
+    }));
   }
 
   function baueAdminAuthHeader() {
@@ -117,6 +148,38 @@
     return payload;
   }
 
+  function fehlertextFuerApiFehler(error, fallback) {
+    if (!error) {
+      return fallback || 'Die Anfrage ist fehlgeschlagen.';
+    }
+
+    if (error.status === 0) {
+      return 'Das Backend ist aktuell nicht erreichbar.';
+    }
+
+    if (error.status === 401) {
+      return 'Die Sitzung ist abgelaufen oder die Anmeldung ist ungueltig.';
+    }
+
+    if (error.status === 403) {
+      return 'Fuer diese Aktion fehlt die Berechtigung.';
+    }
+
+    if (error.status === 404) {
+      return 'Der angeforderte Eintrag wurde nicht gefunden.';
+    }
+
+    if (error.status === 409) {
+      return error.message || 'Diese Aktion steht im Konflikt mit vorhandenen Daten.';
+    }
+
+    if (error.status >= 500) {
+      return 'Auf dem Server ist ein Fehler aufgetreten.';
+    }
+
+    return error.message || fallback || 'Die Anfrage ist fehlgeschlagen.';
+  }
+
   function adminFetch(pfad, optionen) {
     const fetchOptionen = optionen || {};
     const headers = {
@@ -133,6 +196,13 @@
     return apiFetch(pfad, {
       ...fetchOptionen,
       headers: headers
+    }).catch(function(error) {
+      if (error && error.status === 401) {
+        loescheAdminSession();
+        meldeAdminSessionVerloren('unauthorized');
+      }
+
+      throw error;
     });
   }
 
@@ -213,8 +283,11 @@
     speichereAdminSession,
     ladeAdminSession,
     ladeAdminToken,
+    istAdminSessionAbgelaufen,
     loescheAdminSession,
+    meldeAdminSessionVerloren,
     baueAdminAuthHeader,
+    fehlertextFuerApiFehler,
     adminFetch,
     adminLogin,
     adminLogout,

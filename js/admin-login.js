@@ -18,6 +18,51 @@
       : '<i class="bi bi-box-arrow-in-right me-1"></i>Einloggen';
   }
 
+  function setzeLogoutLaedt(loginButton, laedt) {
+    const loginButtonIcon = document.getElementById('admin-login-button-icon');
+    const loginButtonText = document.getElementById('admin-login-button-text');
+
+    if (!loginButton || !loginButtonIcon || !loginButtonText) {
+      return;
+    }
+
+    loginButton.disabled = laedt;
+    loginButtonIcon.className = laedt
+      ? 'spinner-border spinner-border-sm'
+      : 'bi bi-shield-check';
+    loginButtonText.textContent = laedt ? 'Abmelden...' : 'Admin';
+  }
+
+  let adminStatusToastTimeout = null;
+
+  function zeigeAdminStatusToast(nachricht, typ) {
+    const toast = document.getElementById('admin-status-toast');
+    const toastIcon = document.getElementById('admin-status-toast-icon');
+    const toastText = document.getElementById('admin-status-toast-text');
+    const toastTyp = typ === 'fehler' ? 'fehler' : 'erfolg';
+
+    if (!toast || !toastIcon || !toastText) {
+      return;
+    }
+
+    toastText.textContent = nachricht;
+    toast.classList.remove('erfolg', 'fehler');
+    toast.classList.add(toastTyp);
+    toastIcon.className = toastTyp === 'fehler'
+      ? 'bi bi-exclamation-triangle-fill'
+      : 'bi bi-check-circle-fill';
+    toast.classList.add('sichtbar');
+
+    if (adminStatusToastTimeout) {
+      clearTimeout(adminStatusToastTimeout);
+    }
+
+    adminStatusToastTimeout = setTimeout(function() {
+      toast.classList.remove('sichtbar');
+      adminStatusToastTimeout = null;
+    }, 2600);
+  }
+
   function setzeAdminLoginStatus(eingeloggt) {
     const loginButton = document.getElementById('admin-login-button');
     const loginButtonIcon = document.getElementById('admin-login-button-icon');
@@ -40,6 +85,10 @@
       : loginButton.getAttribute('data-login-text');
   }
 
+  function aktualisiereAdminLoginStatus() {
+    setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
+  }
+
   function initialisiereAdminLogin() {
     const formular = document.getElementById('admin-login-form');
     const usernameFeld = document.getElementById('admin-login-username');
@@ -47,12 +96,33 @@
     const fehlerElement = document.getElementById('admin-login-fehler');
     const submitButton = document.getElementById('admin-login-submit');
     const modalElement = document.getElementById('login-modal');
+    const loginButton = document.getElementById('admin-login-button');
 
-    if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement) {
+    if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement || !loginButton) {
       return;
     }
 
-    setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
+    aktualisiereAdminLoginStatus();
+
+    loginButton.addEventListener('click', function(event) {
+      if (!window.AdventskalenderApi.ladeAdminToken()) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      setzeLogoutLaedt(loginButton, true);
+
+      window.AdventskalenderApi.adminLogout()
+        .catch(function() {
+          // adminLogout entfernt die lokale Session auch bei Backend-Fehlern.
+        })
+        .finally(function() {
+          setzeLogoutLaedt(loginButton, false);
+          aktualisiereAdminLoginStatus();
+          zeigeAdminStatusToast('Erfolgreich abgemeldet.', 'erfolg');
+        });
+    });
 
     formular.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -70,22 +140,32 @@
 
       window.AdventskalenderApi.adminLogin(username, password)
         .then(function() {
-          setzeAdminLoginStatus(true);
+          aktualisiereAdminLoginStatus();
           const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
           modal.hide();
           formular.reset();
         })
         .catch(function(error) {
-          const meldung = error && error.message
-            ? error.message
-            : 'Der Login ist fehlgeschlagen.';
-          zeigeFehler(fehlerElement, meldung);
+          zeigeFehler(
+            fehlerElement,
+            window.AdventskalenderApi.fehlertextFuerApiFehler(error, 'Der Login ist fehlgeschlagen.')
+          );
         })
         .finally(function() {
           setzeLoginLaedt(submitButton, false);
         });
     });
   }
+
+  window.AdminLoginUi = {
+    aktualisiereStatus: aktualisiereAdminLoginStatus,
+    zeigeStatus: zeigeAdminStatusToast
+  };
+
+  window.addEventListener('adventskalender:admin-session-verloren', function() {
+    aktualisiereAdminLoginStatus();
+    zeigeAdminStatusToast('Sitzung abgelaufen. Bitte erneut einloggen.', 'fehler');
+  });
 
   document.addEventListener('DOMContentLoaded', initialisiereAdminLogin);
 })(window, document);
