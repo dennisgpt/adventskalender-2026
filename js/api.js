@@ -237,6 +237,15 @@
     return adminFetch('/api/admin/days');
   }
 
+  // PUT /api/admin/days/:dayId
+  // Aktualisiert Freischaltdatum und/oder Randomisierung eines Admin-Tuerchens.
+  function aktualisiereAdminTag(dayId, daten) {
+    return adminFetch(`/api/admin/days/${encodeURIComponent(dayId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -298,6 +307,7 @@
     adminLogin,
     adminLogout,
     ladeAdminTage,
+    aktualisiereAdminTag,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
