@@ -246,6 +246,18 @@
     });
   }
 
+  // POST /api/admin/days/:dayId/assign
+  // Weist einem Admin-Tuerchen einen Content-Eintrag zu.
+  function weiseContentAdminTagZu(dayId, contentId, sortOrder) {
+    return adminFetch(`/api/admin/days/${encodeURIComponent(dayId)}/assign`, {
+      method: 'POST',
+      body: {
+        content_id: contentId,
+        sort_order: sortOrder || 0
+      }
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -308,6 +320,7 @@
     adminLogout,
     ladeAdminTage,
     aktualisiereAdminTag,
+    weiseContentAdminTagZu,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
