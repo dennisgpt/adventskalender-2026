@@ -33,6 +33,29 @@
     loginButtonText.textContent = laedt ? 'Abmelden...' : 'Admin';
   }
 
+  let adminStatusToastTimeout = null;
+
+  function zeigeAdminStatusToast(nachricht) {
+    const toast = document.getElementById('admin-status-toast');
+    const toastText = document.getElementById('admin-status-toast-text');
+
+    if (!toast || !toastText) {
+      return;
+    }
+
+    toastText.textContent = nachricht;
+    toast.classList.add('sichtbar');
+
+    if (adminStatusToastTimeout) {
+      clearTimeout(adminStatusToastTimeout);
+    }
+
+    adminStatusToastTimeout = setTimeout(function() {
+      toast.classList.remove('sichtbar');
+      adminStatusToastTimeout = null;
+    }, 2600);
+  }
+
   function setzeAdminLoginStatus(eingeloggt) {
     const loginButton = document.getElementById('admin-login-button');
     const loginButtonIcon = document.getElementById('admin-login-button-icon');
@@ -90,6 +113,7 @@
         .finally(function() {
           setzeLogoutLaedt(loginButton, false);
           aktualisiereAdminLoginStatus();
+          zeigeAdminStatusToast('Erfolgreich abgemeldet.');
         });
     });
 

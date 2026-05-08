@@ -880,6 +880,42 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   transform: translateX(-50%) translateY(0);
 }
 
+.admin-status-toast {
+  position: fixed;
+  right: 24px;
+  top: 118px;
+  z-index: 2400;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.62rem;
+  max-width: min(92vw, 360px);
+  padding: 0.78rem 0.95rem;
+  border: 1px solid rgba(151, 231, 190, 0.42);
+  border-radius: 12px;
+  color: #eafff3;
+  background:
+    linear-gradient(145deg, rgba(9, 35, 31, 0.96), rgba(15, 72, 53, 0.96));
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+  font-size: 0.92rem;
+  font-weight: 800;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+  pointer-events: none;
+}
+
+.admin-status-toast i {
+  color: #8ef0b6;
+  font-size: 1.05rem;
+}
+
+.admin-status-toast.sichtbar {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
 /* ---- Footer ---- */
 footer {
   background: linear-gradient(180deg, rgba(3, 10, 26, 0), rgba(3, 10, 26, 0.65)) !important;
@@ -945,6 +981,14 @@ footer .text-muted {
     width: min(94vw, 336px);
     font-size: 0.8rem;
     padding: 0.56rem 0.72rem;
+  }
+
+  .admin-status-toast {
+    top: auto;
+    right: 12px;
+    bottom: 16px;
+    max-width: calc(100vw - 24px);
+    font-size: 0.82rem;
   }
 
   #kalender-grid {
