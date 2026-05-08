@@ -890,11 +890,7 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   gap: 0.62rem;
   max-width: min(92vw, 360px);
   padding: 0.78rem 0.95rem;
-  border: 1px solid rgba(151, 231, 190, 0.42);
   border-radius: 12px;
-  color: #eafff3;
-  background:
-    linear-gradient(145deg, rgba(9, 35, 31, 0.96), rgba(15, 72, 53, 0.96));
   box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
   font-size: 0.92rem;
   font-weight: 800;
@@ -905,9 +901,30 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   pointer-events: none;
 }
 
+.admin-status-toast.erfolg {
+  border: 1px solid rgba(151, 231, 190, 0.42);
+  color: #eafff3;
+  background:
+    linear-gradient(145deg, rgba(9, 35, 31, 0.96), rgba(15, 72, 53, 0.96));
+}
+
+.admin-status-toast.fehler {
+  border: 1px solid rgba(255, 144, 144, 0.44);
+  color: #ffe8e8;
+  background:
+    linear-gradient(145deg, rgba(72, 18, 32, 0.97), rgba(112, 28, 43, 0.97));
+}
+
 .admin-status-toast i {
-  color: #8ef0b6;
   font-size: 1.05rem;
+}
+
+.admin-status-toast.erfolg i {
+  color: #8ef0b6;
+}
+
+.admin-status-toast.fehler i {
+  color: #ffb0b0;
 }
 
 .admin-status-toast.sichtbar {

@@ -35,15 +35,22 @@
 
   let adminStatusToastTimeout = null;
 
-  function zeigeAdminStatusToast(nachricht) {
+  function zeigeAdminStatusToast(nachricht, typ) {
     const toast = document.getElementById('admin-status-toast');
+    const toastIcon = document.getElementById('admin-status-toast-icon');
     const toastText = document.getElementById('admin-status-toast-text');
+    const toastTyp = typ === 'fehler' ? 'fehler' : 'erfolg';
 
-    if (!toast || !toastText) {
+    if (!toast || !toastIcon || !toastText) {
       return;
     }
 
     toastText.textContent = nachricht;
+    toast.classList.remove('erfolg', 'fehler');
+    toast.classList.add(toastTyp);
+    toastIcon.className = toastTyp === 'fehler'
+      ? 'bi bi-exclamation-triangle-fill'
+      : 'bi bi-check-circle-fill';
     toast.classList.add('sichtbar');
 
     if (adminStatusToastTimeout) {
@@ -113,7 +120,7 @@
         .finally(function() {
           setzeLogoutLaedt(loginButton, false);
           aktualisiereAdminLoginStatus();
-          zeigeAdminStatusToast('Erfolgreich abgemeldet.');
+          zeigeAdminStatusToast('Erfolgreich abgemeldet.', 'erfolg');
         });
     });
 
@@ -151,7 +158,8 @@
   }
 
   window.AdminLoginUi = {
-    aktualisiereStatus: aktualisiereAdminLoginStatus
+    aktualisiereStatus: aktualisiereAdminLoginStatus,
+    zeigeStatus: zeigeAdminStatusToast
   };
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
