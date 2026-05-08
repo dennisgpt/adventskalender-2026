@@ -156,6 +156,12 @@
     return apiFetch(pfad, {
       ...fetchOptionen,
       headers: headers
+    }).catch(function(error) {
+      if (error && error.status === 401) {
+        loescheAdminSession();
+      }
+
+      throw error;
     });
   }
 
