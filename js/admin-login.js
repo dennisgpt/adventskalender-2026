@@ -40,6 +40,10 @@
       : loginButton.getAttribute('data-login-text');
   }
 
+  function aktualisiereAdminLoginStatus() {
+    setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
+  }
+
   function initialisiereAdminLogin() {
     const formular = document.getElementById('admin-login-form');
     const usernameFeld = document.getElementById('admin-login-username');
@@ -52,7 +56,7 @@
       return;
     }
 
-    setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
+    aktualisiereAdminLoginStatus();
 
     formular.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -70,7 +74,7 @@
 
       window.AdventskalenderApi.adminLogin(username, password)
         .then(function() {
-          setzeAdminLoginStatus(true);
+          aktualisiereAdminLoginStatus();
           const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
           modal.hide();
           formular.reset();
@@ -86,6 +90,10 @@
         });
     });
   }
+
+  window.AdminLoginUi = {
+    aktualisiereStatus: aktualisiereAdminLoginStatus
+  };
 
   document.addEventListener('DOMContentLoaded', initialisiereAdminLogin);
 })(window, document);
