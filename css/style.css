@@ -108,6 +108,14 @@ small span:hover {
   text-underline-offset: 3px;
 }
 
+.login-btn.ist-eingeloggt {
+  color: #0f5f3d;
+}
+
+.login-btn.ist-eingeloggt i {
+  color: #0f8a55;
+}
+
 .content-btn {
   background: transparent;
   border: none;

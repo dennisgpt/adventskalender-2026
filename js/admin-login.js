@@ -18,6 +18,28 @@
       : '<i class="bi bi-box-arrow-in-right me-1"></i>Einloggen';
   }
 
+  function setzeAdminLoginStatus(eingeloggt) {
+    const loginButton = document.getElementById('admin-login-button');
+    const loginButtonIcon = document.getElementById('admin-login-button-icon');
+    const loginButtonText = document.getElementById('admin-login-button-text');
+
+    if (!loginButton || !loginButtonIcon || !loginButtonText) {
+      return;
+    }
+
+    loginButton.classList.toggle('ist-eingeloggt', eingeloggt);
+    loginButton.setAttribute(
+      'aria-label',
+      eingeloggt ? 'Admin-Bereich öffnen' : 'Admin Login öffnen'
+    );
+    loginButtonIcon.className = eingeloggt
+      ? 'bi bi-shield-check'
+      : 'bi bi-mortarboard-fill';
+    loginButtonText.textContent = eingeloggt
+      ? loginButton.getAttribute('data-admin-text')
+      : loginButton.getAttribute('data-login-text');
+  }
+
   function initialisiereAdminLogin() {
     const formular = document.getElementById('admin-login-form');
     const usernameFeld = document.getElementById('admin-login-username');
@@ -29,6 +51,8 @@
     if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement) {
       return;
     }
+
+    setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
 
     formular.addEventListener('submit', function(event) {
       event.preventDefault();
@@ -46,6 +70,7 @@
 
       window.AdventskalenderApi.adminLogin(username, password)
         .then(function() {
+          setzeAdminLoginStatus(true);
           const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
           modal.hide();
           formular.reset();
