@@ -46,11 +46,34 @@
 
     try {
       const session = JSON.parse(gespeicherteSession);
-      return session && session.token ? session : null;
+      if (!session || !session.token) {
+        return null;
+      }
+
+      if (istAdminSessionAbgelaufen(session)) {
+        loescheAdminSession();
+        return null;
+      }
+
+      return session;
     } catch (error) {
-      localStorage.removeItem(ADMIN_SESSION_STORAGE_KEY);
+      loescheAdminSession();
       return null;
     }
+  }
+
+  function istAdminSessionAbgelaufen(session) {
+    if (!session || !session.expires_at) {
+      return false;
+    }
+
+    const ablaufZeit = new Date(session.expires_at).getTime();
+
+    if (Number.isNaN(ablaufZeit)) {
+      return false;
+    }
+
+    return ablaufZeit <= Date.now();
   }
 
   function ladeAdminToken() {
@@ -213,6 +236,7 @@
     speichereAdminSession,
     ladeAdminSession,
     ladeAdminToken,
+    istAdminSessionAbgelaufen,
     loescheAdminSession,
     baueAdminAuthHeader,
     adminFetch,
