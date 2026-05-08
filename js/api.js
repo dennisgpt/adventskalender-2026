@@ -231,6 +231,12 @@
     });
   }
 
+  // GET /api/admin/days
+  // Erfolgsantwort: Array der 24 Admin-Tuerchen inkl. Einstellungen und zugewiesener Inhalte
+  function ladeAdminTage() {
+    return adminFetch('/api/admin/days');
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -291,6 +297,7 @@
     adminFetch,
     adminLogin,
     adminLogout,
+    ladeAdminTage,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
