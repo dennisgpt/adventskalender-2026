@@ -108,6 +108,14 @@ small span:hover {
   text-underline-offset: 3px;
 }
 
+.login-btn.ist-eingeloggt {
+  color: #0f5f3d;
+}
+
+.login-btn.ist-eingeloggt i {
+  color: #0f8a55;
+}
+
 .content-btn {
   background: transparent;
   border: none;
@@ -169,6 +177,87 @@ small span:hover {
   background: linear-gradient(90deg, #ffefca, #ffd67e);
   transform: translateY(-1px);
   box-shadow: 0 14px 26px rgba(8, 13, 34, 0.42);
+}
+
+.admin-login-modal {
+  color: #eef3ff;
+  border: 1px solid rgba(255, 219, 148, 0.22);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 8% 0%, rgba(255, 209, 102, 0.16), transparent 36%),
+    linear-gradient(155deg, #101a3b 0%, #17285a 58%, #111a3a 100%);
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.55);
+}
+
+.admin-login-modal .modal-header,
+.admin-login-modal .modal-footer {
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+.admin-login-modal .modal-title {
+  color: #ffe5ad;
+  font-weight: 800;
+}
+
+.admin-login-modal .btn-close {
+  filter: invert(1) brightness(1.2);
+}
+
+.admin-login-modal .form-label {
+  color: #f7e8c2;
+  font-weight: 700;
+}
+
+.admin-login-modal .form-control {
+  color: #f8fbff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(4, 10, 28, 0.48);
+}
+
+.admin-login-modal .form-control:focus {
+  color: #ffffff;
+  border-color: rgba(255, 209, 102, 0.76);
+  background: rgba(4, 10, 28, 0.64);
+  box-shadow: 0 0 0 0.22rem rgba(255, 209, 102, 0.16);
+}
+
+.admin-login-submit-btn {
+  border: 1px solid rgba(255, 228, 163, 0.45);
+  border-radius: 10px;
+  color: #2a1a10;
+  background: linear-gradient(90deg, #ffe9b8, #ffd06f);
+  font-weight: 800;
+}
+
+.admin-login-submit-btn:hover,
+.admin-login-submit-btn:focus-visible {
+  color: #1f120b;
+  background: linear-gradient(90deg, #ffefca, #ffd67e);
+}
+
+.admin-login-secondary-btn {
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 10px;
+  color: #eef3ff;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+}
+
+.admin-login-secondary-btn:hover,
+.admin-login-secondary-btn:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.34);
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.admin-login-alert {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 140, 140, 0.38);
+  border-radius: 10px;
+  padding: 0.72rem 0.85rem;
+  color: #ffe6e6;
+  background: rgba(92, 18, 34, 0.48);
+  font-weight: 700;
 }
 
 .content-btn i {
