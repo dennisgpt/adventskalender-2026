@@ -164,6 +164,7 @@
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
     aktualisiereAdminLoginStatus();
+    zeigeAdminStatusToast('Sitzung abgelaufen. Bitte erneut einloggen.', 'fehler');
   });
 
   document.addEventListener('DOMContentLoaded', initialisiereAdminLogin);
