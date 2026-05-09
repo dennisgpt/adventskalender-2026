@@ -1,0 +1,237 @@
+(function(window, document) {
+  'use strict';
+
+  function istAdminEingeloggt() {
+    return Boolean(window.AdventskalenderApi.ladeAdminToken());
+  }
+
+  function dashboardElemente() {
+    return {
+      dashboard: document.getElementById('admin-dashboard'),
+      loading: document.getElementById('admin-dashboard-loading'),
+      fehler: document.getElementById('admin-dashboard-fehler'),
+      fehlerText: document.getElementById('admin-dashboard-fehler-text'),
+      leer: document.getElementById('admin-dashboard-leer'),
+      grid: document.getElementById('admin-dashboard-grid'),
+      refreshButton: document.getElementById('admin-dashboard-refresh')
+    };
+  }
+
+  function setzeDashboardStatus(status, meldung) {
+    const elemente = dashboardElemente();
+
+    if (!elemente.dashboard || !elemente.loading || !elemente.fehler || !elemente.leer || !elemente.grid) {
+      return;
+    }
+
+    elemente.loading.classList.toggle('d-none', status !== 'loading');
+    elemente.fehler.classList.toggle('d-none', status !== 'fehler');
+    elemente.leer.classList.toggle('d-none', status !== 'leer');
+    elemente.grid.classList.toggle('d-none', status !== 'bereit');
+
+    if (elemente.fehlerText && meldung) {
+      elemente.fehlerText.textContent = meldung;
+    }
+  }
+
+  function setzeRefreshLaedt(laedt) {
+    const refreshButton = document.getElementById('admin-dashboard-refresh');
+
+    if (!refreshButton) {
+      return;
+    }
+
+    refreshButton.disabled = laedt;
+    refreshButton.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Laden...'
+      : '<i class="bi bi-arrow-clockwise"></i> Aktualisieren';
+  }
+
+  function formatiereAdminDatum(datumWert) {
+    if (!datumWert) {
+      return 'Kein Datum';
+    }
+
+    const datum = new Date(datumWert);
+
+    if (Number.isNaN(datum.getTime())) {
+      return 'Ungueltiges Datum';
+    }
+
+    return datum.toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function contentTypLabel(typ) {
+    const labels = {
+      text: 'Text',
+      image: 'Bild',
+      video: 'Video',
+      game: 'Spiel',
+      quiz: 'Quiz'
+    };
+
+    return labels[typ] || typ || 'Unbekannt';
+  }
+
+  function renderContentBadges(inhalte) {
+    if (inhalte.length === 0) {
+      return '<p class="admin-tag-content-leer">Keine Inhalte zugewiesen</p>';
+    }
+
+    return `
+      <div class="admin-tag-content-badges">
+        ${inhalte.map(function(inhalt) {
+          return `
+            <span class="admin-tag-content-badge">
+              ${contentTypLabel(inhalt.type)}
+              <small>#${inhalt.id}</small>
+            </span>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
+  function renderAdminTagKarte(tag) {
+    const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
+    const karte = document.createElement('article');
+    karte.className = 'admin-tag-karte';
+    karte.setAttribute('data-day-id', tag.id);
+
+    karte.innerHTML = `
+      <div class="admin-tag-karte-kopf">
+        <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
+        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}">
+          ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
+        </span>
+      </div>
+      <dl class="admin-tag-details">
+        <div>
+          <dt>Freischaltung</dt>
+          <dd>${formatiereAdminDatum(tag.unlock_date)}</dd>
+        </div>
+        <div>
+          <dt>Inhalte</dt>
+          <dd>${inhalte.length}</dd>
+        </div>
+      </dl>
+      <div class="admin-tag-content">
+        <span class="admin-tag-content-label">Zugewiesen</span>
+        ${renderContentBadges(inhalte)}
+      </div>
+    `;
+
+    return karte;
+  }
+
+  function renderAdminTage(tage) {
+    const grid = document.getElementById('admin-dashboard-grid');
+
+    if (!grid) {
+      return;
+    }
+
+    grid.innerHTML = '';
+
+    tage
+      .slice()
+      .sort(function(a, b) {
+        return a.day_number - b.day_number;
+      })
+      .forEach(function(tag) {
+        grid.appendChild(renderAdminTagKarte(tag));
+      });
+  }
+
+  function aktualisiereAdminDashboardSichtbarkeit() {
+    const dashboard = dashboardElemente().dashboard;
+
+    if (!dashboard) {
+      return;
+    }
+
+    dashboard.classList.toggle('d-none', !istAdminEingeloggt());
+  }
+
+  function ladeAdminDashboardTage() {
+    if (!istAdminEingeloggt()) {
+      aktualisiereAdminDashboardSichtbarkeit();
+      return Promise.resolve(null);
+    }
+
+    setzeDashboardStatus('loading');
+    setzeRefreshLaedt(true);
+
+    return window.AdventskalenderApi.ladeAdminTage()
+      .then(function(tage) {
+        if (!Array.isArray(tage) || tage.length === 0) {
+          setzeDashboardStatus('leer');
+          return tage;
+        }
+
+        renderAdminTage(tage);
+        setzeDashboardStatus('bereit');
+        return tage;
+      })
+      .catch(function(error) {
+        setzeDashboardStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Admin-Tuerchen konnten nicht geladen werden.'
+          )
+        );
+        throw error;
+      })
+      .finally(function() {
+        setzeRefreshLaedt(false);
+      });
+  }
+
+  function initialisiereAdminDashboard() {
+    const refreshButton = document.getElementById('admin-dashboard-refresh');
+
+    aktualisiereAdminDashboardSichtbarkeit();
+
+    if (refreshButton) {
+      refreshButton.addEventListener('click', function() {
+        ladeAdminDashboardTage().catch(function() {});
+      });
+    }
+
+    if (istAdminEingeloggt()) {
+      ladeAdminDashboardTage().catch(function() {});
+    }
+  }
+
+  function verarbeiteAdminSessionAktualisierung() {
+    aktualisiereAdminDashboardSichtbarkeit();
+
+    if (istAdminEingeloggt()) {
+      ladeAdminDashboardTage().catch(function() {});
+    } else {
+      setzeDashboardStatus('loading');
+    }
+  }
+
+  window.AdminDashboardUi = {
+    aktualisiereSichtbarkeit: aktualisiereAdminDashboardSichtbarkeit,
+    ladeTage: ladeAdminDashboardTage,
+    renderTage: renderAdminTage
+  };
+
+  window.addEventListener('adventskalender:admin-session-verloren', function() {
+    aktualisiereAdminDashboardSichtbarkeit();
+    setzeDashboardStatus('loading');
+  });
+
+  window.addEventListener('adventskalender:admin-session-aktualisiert', verarbeiteAdminSessionAktualisierung);
+
+  document.addEventListener('DOMContentLoaded', initialisiereAdminDashboard);
+})(window, document);
