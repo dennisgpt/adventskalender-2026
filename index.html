@@ -153,6 +153,38 @@
     </div>
   </main>
 
+  <!-- ===== ADMIN DASHBOARD: Türchen-Übersicht ===== -->
+  <section class="admin-dashboard container my-5 d-none" id="admin-dashboard" aria-labelledby="admin-dashboard-titel">
+    <div class="admin-dashboard-kopf">
+      <div>
+        <p class="admin-dashboard-kicker mb-1">Admin-Bereich</p>
+        <h2 id="admin-dashboard-titel" class="admin-dashboard-titel">Türchen-Übersicht</h2>
+      </div>
+      <button class="admin-dashboard-refresh-btn" id="admin-dashboard-refresh" type="button">
+        <i class="bi bi-arrow-clockwise"></i>
+        Aktualisieren
+      </button>
+    </div>
+
+    <div class="admin-dashboard-state" id="admin-dashboard-loading" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Admin-Türchen werden geladen...
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-dashboard-fehler" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span id="admin-dashboard-fehler-text">Admin-Türchen konnten nicht geladen werden.</span>
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-leer d-none" id="admin-dashboard-leer" role="status">
+      Für das aktuelle Kalenderjahr wurden keine Admin-Türchen gefunden.
+    </div>
+
+    <div class="admin-dashboard-grid" id="admin-dashboard-grid">
+      <!-- Admin-Türchen werden per JavaScript eingefügt -->
+    </div>
+  </section>
+
   <!-- ===== HINWEIS FÜR GESPERRTE TÜRCHEN ===== -->
   <div id="gesperrt-hinweis" class="gesperrt-hinweis-toast" role="status" aria-live="polite">
     Verfügbar ab TT.MM.!

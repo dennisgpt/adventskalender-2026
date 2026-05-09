@@ -370,6 +370,88 @@ small span:hover {
   backdrop-filter: blur(7px);
 }
 
+/* ---- Admin Dashboard ---- */
+.admin-dashboard {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 1.25rem;
+  color: #eef4ff;
+  background: linear-gradient(145deg, rgba(7, 16, 38, 0.88), rgba(14, 29, 64, 0.86));
+  box-shadow: 0 24px 42px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(8px);
+}
+
+.admin-dashboard-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.admin-dashboard-kicker {
+  color: #ffdca9;
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.admin-dashboard-titel {
+  margin: 0;
+  color: #ffffff;
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+
+.admin-dashboard-refresh-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  border: 1px solid rgba(255, 228, 163, 0.36);
+  border-radius: 10px;
+  padding: 0.55rem 0.82rem;
+  color: #2a1a10;
+  background: linear-gradient(90deg, #ffe9b8, #ffd06f);
+  font-weight: 800;
+}
+
+.admin-dashboard-refresh-btn:hover,
+.admin-dashboard-refresh-btn:focus-visible {
+  color: #1f120b;
+  background: linear-gradient(90deg, #ffefca, #ffd67e);
+}
+
+.admin-dashboard-state {
+  display: flex;
+  align-items: center;
+  gap: 0.62rem;
+  min-height: 48px;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.72rem 0.9rem;
+  color: #dce8ff;
+  background: rgba(5, 12, 30, 0.46);
+  font-weight: 700;
+}
+
+.admin-dashboard-state-fehler {
+  border-color: rgba(255, 144, 144, 0.4);
+  color: #ffe4e4;
+  background: rgba(92, 18, 34, 0.44);
+}
+
+.admin-dashboard-state-leer {
+  color: #fff0c7;
+}
+
+.admin-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;
@@ -1011,6 +1093,25 @@ footer .text-muted {
   #kalender-grid {
     padding: 0.7rem;
     border-radius: 14px;
+  }
+
+  .admin-dashboard {
+    padding: 0.9rem;
+    border-radius: 14px;
+  }
+
+  .admin-dashboard-kopf {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .admin-dashboard-refresh-btn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .admin-dashboard-grid {
+    grid-template-columns: 1fr;
   }
 
   .tuerchen-karte {
