@@ -452,6 +452,74 @@ small span:hover {
   gap: 0.85rem;
 }
 
+.admin-tag-karte {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 0.92rem;
+  background: rgba(5, 12, 30, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.admin-tag-karte-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.65rem;
+  margin-bottom: 0.78rem;
+}
+
+.admin-tag-nummer {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.admin-tag-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid rgba(214, 229, 255, 0.18);
+  border-radius: 999px;
+  padding: 0.22rem 0.58rem;
+  color: #d9e7ff;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.admin-tag-badge.ist-randomisiert {
+  border-color: rgba(255, 209, 102, 0.4);
+  color: #ffe8a8;
+  background: rgba(255, 209, 102, 0.12);
+}
+
+.admin-tag-details {
+  display: grid;
+  gap: 0.62rem;
+  margin: 0;
+}
+
+.admin-tag-details div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-tag-details dt {
+  color: #aebfe8;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-tag-details dd {
+  margin: 0;
+  color: #f5f8ff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: right;
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;

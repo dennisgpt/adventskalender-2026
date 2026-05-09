@@ -47,6 +47,73 @@
       : '<i class="bi bi-arrow-clockwise"></i> Aktualisieren';
   }
 
+  function formatiereAdminDatum(datumWert) {
+    if (!datumWert) {
+      return 'Kein Datum';
+    }
+
+    const datum = new Date(datumWert);
+
+    if (Number.isNaN(datum.getTime())) {
+      return 'Ungueltiges Datum';
+    }
+
+    return datum.toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function renderAdminTagKarte(tag) {
+    const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
+    const karte = document.createElement('article');
+    karte.className = 'admin-tag-karte';
+    karte.setAttribute('data-day-id', tag.id);
+
+    karte.innerHTML = `
+      <div class="admin-tag-karte-kopf">
+        <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
+        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}">
+          ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
+        </span>
+      </div>
+      <dl class="admin-tag-details">
+        <div>
+          <dt>Freischaltung</dt>
+          <dd>${formatiereAdminDatum(tag.unlock_date)}</dd>
+        </div>
+        <div>
+          <dt>Inhalte</dt>
+          <dd>${inhalte.length}</dd>
+        </div>
+      </dl>
+    `;
+
+    return karte;
+  }
+
+  function renderAdminTage(tage) {
+    const grid = document.getElementById('admin-dashboard-grid');
+
+    if (!grid) {
+      return;
+    }
+
+    grid.innerHTML = '';
+
+    tage
+      .slice()
+      .sort(function(a, b) {
+        return a.day_number - b.day_number;
+      })
+      .forEach(function(tag) {
+        grid.appendChild(renderAdminTagKarte(tag));
+      });
+  }
+
   function aktualisiereAdminDashboardSichtbarkeit() {
     const dashboard = dashboardElemente().dashboard;
 
@@ -73,6 +140,7 @@
           return tage;
         }
 
+        renderAdminTage(tage);
         setzeDashboardStatus('bereit');
         return tage;
       })
@@ -109,7 +177,8 @@
 
   window.AdminDashboardUi = {
     aktualisiereSichtbarkeit: aktualisiereAdminDashboardSichtbarkeit,
-    ladeTage: ladeAdminDashboardTage
+    ladeTage: ladeAdminDashboardTage,
+    renderTage: renderAdminTage
   };
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
