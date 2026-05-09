@@ -89,6 +89,14 @@
     setzeAdminLoginStatus(Boolean(window.AdventskalenderApi.ladeAdminToken()));
   }
 
+  function meldeAdminSessionAktualisiert(aktion) {
+    window.dispatchEvent(new CustomEvent('adventskalender:admin-session-aktualisiert', {
+      detail: {
+        aktion: aktion
+      }
+    }));
+  }
+
   function initialisiereAdminLogin() {
     const formular = document.getElementById('admin-login-form');
     const usernameFeld = document.getElementById('admin-login-username');
@@ -120,6 +128,7 @@
         .finally(function() {
           setzeLogoutLaedt(loginButton, false);
           aktualisiereAdminLoginStatus();
+          meldeAdminSessionAktualisiert('logout');
           zeigeAdminStatusToast('Erfolgreich abgemeldet.', 'erfolg');
         });
     });
@@ -141,6 +150,7 @@
       window.AdventskalenderApi.adminLogin(username, password)
         .then(function() {
           aktualisiereAdminLoginStatus();
+          meldeAdminSessionAktualisiert('login');
           const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
           modal.hide();
           formular.reset();

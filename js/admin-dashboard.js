@@ -210,6 +210,16 @@
     }
   }
 
+  function verarbeiteAdminSessionAktualisierung() {
+    aktualisiereAdminDashboardSichtbarkeit();
+
+    if (istAdminEingeloggt()) {
+      ladeAdminDashboardTage().catch(function() {});
+    } else {
+      setzeDashboardStatus('loading');
+    }
+  }
+
   window.AdminDashboardUi = {
     aktualisiereSichtbarkeit: aktualisiereAdminDashboardSichtbarkeit,
     ladeTage: ladeAdminDashboardTage,
@@ -220,6 +230,8 @@
     aktualisiereAdminDashboardSichtbarkeit();
     setzeDashboardStatus('loading');
   });
+
+  window.addEventListener('adventskalender:admin-session-aktualisiert', verarbeiteAdminSessionAktualisierung);
 
   document.addEventListener('DOMContentLoaded', initialisiereAdminDashboard);
 })(window, document);
