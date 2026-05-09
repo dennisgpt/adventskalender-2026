@@ -67,6 +67,37 @@
     });
   }
 
+  function contentTypLabel(typ) {
+    const labels = {
+      text: 'Text',
+      image: 'Bild',
+      video: 'Video',
+      game: 'Spiel',
+      quiz: 'Quiz'
+    };
+
+    return labels[typ] || typ || 'Unbekannt';
+  }
+
+  function renderContentBadges(inhalte) {
+    if (inhalte.length === 0) {
+      return '<p class="admin-tag-content-leer">Keine Inhalte zugewiesen</p>';
+    }
+
+    return `
+      <div class="admin-tag-content-badges">
+        ${inhalte.map(function(inhalt) {
+          return `
+            <span class="admin-tag-content-badge">
+              ${contentTypLabel(inhalt.type)}
+              <small>#${inhalt.id}</small>
+            </span>
+          `;
+        }).join('')}
+      </div>
+    `;
+  }
+
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
@@ -90,6 +121,10 @@
           <dd>${inhalte.length}</dd>
         </div>
       </dl>
+      <div class="admin-tag-content">
+        <span class="admin-tag-content-label">Zugewiesen</span>
+        ${renderContentBadges(inhalte)}
+      </div>
     `;
 
     return karte;

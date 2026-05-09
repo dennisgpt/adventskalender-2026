@@ -520,6 +520,53 @@ small span:hover {
   text-align: right;
 }
 
+.admin-tag-content {
+  margin-top: 0.88rem;
+  padding-top: 0.78rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-tag-content-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #aebfe8;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-tag-content-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.42rem;
+}
+
+.admin-tag-content-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-height: 26px;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 999px;
+  padding: 0.22rem 0.54rem;
+  color: #dff0ff;
+  background: rgba(82, 158, 222, 0.12);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.admin-tag-content-badge small {
+  color: #9fb6df;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.admin-tag-content-leer {
+  margin: 0;
+  color: #8293bb;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;
