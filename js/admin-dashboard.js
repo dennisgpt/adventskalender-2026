@@ -5,8 +5,50 @@
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
   }
 
+  function dashboardElemente() {
+    return {
+      dashboard: document.getElementById('admin-dashboard'),
+      loading: document.getElementById('admin-dashboard-loading'),
+      fehler: document.getElementById('admin-dashboard-fehler'),
+      fehlerText: document.getElementById('admin-dashboard-fehler-text'),
+      leer: document.getElementById('admin-dashboard-leer'),
+      grid: document.getElementById('admin-dashboard-grid'),
+      refreshButton: document.getElementById('admin-dashboard-refresh')
+    };
+  }
+
+  function setzeDashboardStatus(status, meldung) {
+    const elemente = dashboardElemente();
+
+    if (!elemente.dashboard || !elemente.loading || !elemente.fehler || !elemente.leer || !elemente.grid) {
+      return;
+    }
+
+    elemente.loading.classList.toggle('d-none', status !== 'loading');
+    elemente.fehler.classList.toggle('d-none', status !== 'fehler');
+    elemente.leer.classList.toggle('d-none', status !== 'leer');
+    elemente.grid.classList.toggle('d-none', status !== 'bereit');
+
+    if (elemente.fehlerText && meldung) {
+      elemente.fehlerText.textContent = meldung;
+    }
+  }
+
+  function setzeRefreshLaedt(laedt) {
+    const refreshButton = document.getElementById('admin-dashboard-refresh');
+
+    if (!refreshButton) {
+      return;
+    }
+
+    refreshButton.disabled = laedt;
+    refreshButton.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Laden...'
+      : '<i class="bi bi-arrow-clockwise"></i> Aktualisieren';
+  }
+
   function aktualisiereAdminDashboardSichtbarkeit() {
-    const dashboard = document.getElementById('admin-dashboard');
+    const dashboard = dashboardElemente().dashboard;
 
     if (!dashboard) {
       return;
@@ -15,16 +57,64 @@
     dashboard.classList.toggle('d-none', !istAdminEingeloggt());
   }
 
+  function ladeAdminDashboardTage() {
+    if (!istAdminEingeloggt()) {
+      aktualisiereAdminDashboardSichtbarkeit();
+      return Promise.resolve(null);
+    }
+
+    setzeDashboardStatus('loading');
+    setzeRefreshLaedt(true);
+
+    return window.AdventskalenderApi.ladeAdminTage()
+      .then(function(tage) {
+        if (!Array.isArray(tage) || tage.length === 0) {
+          setzeDashboardStatus('leer');
+          return tage;
+        }
+
+        setzeDashboardStatus('bereit');
+        return tage;
+      })
+      .catch(function(error) {
+        setzeDashboardStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Admin-Tuerchen konnten nicht geladen werden.'
+          )
+        );
+        throw error;
+      })
+      .finally(function() {
+        setzeRefreshLaedt(false);
+      });
+  }
+
   function initialisiereAdminDashboard() {
+    const refreshButton = document.getElementById('admin-dashboard-refresh');
+
     aktualisiereAdminDashboardSichtbarkeit();
+
+    if (refreshButton) {
+      refreshButton.addEventListener('click', function() {
+        ladeAdminDashboardTage().catch(function() {});
+      });
+    }
+
+    if (istAdminEingeloggt()) {
+      ladeAdminDashboardTage().catch(function() {});
+    }
   }
 
   window.AdminDashboardUi = {
-    aktualisiereSichtbarkeit: aktualisiereAdminDashboardSichtbarkeit
+    aktualisiereSichtbarkeit: aktualisiereAdminDashboardSichtbarkeit,
+    ladeTage: ladeAdminDashboardTage
   };
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
     aktualisiereAdminDashboardSichtbarkeit();
+    setzeDashboardStatus('loading');
   });
 
   document.addEventListener('DOMContentLoaded', initialisiereAdminDashboard);
