@@ -67,6 +67,21 @@
     });
   }
 
+  function formatiereAdminDatumInput(datumWert) {
+    if (!datumWert) {
+      return '';
+    }
+
+    const datum = new Date(datumWert);
+
+    if (Number.isNaN(datum.getTime())) {
+      return '';
+    }
+
+    const lokalesDatum = new Date(datum.getTime() - datum.getTimezoneOffset() * 60000);
+    return lokalesDatum.toISOString().slice(0, 16);
+  }
+
   function contentTypLabel(typ) {
     const labels = {
       text: 'Text',
@@ -98,23 +113,150 @@
     `;
   }
 
+  function setzeAdminTagFormGeaendert(formular, istGeaendert) {
+    const speichernButton = formular.querySelector('[data-admin-tag-save]');
+
+    formular.classList.toggle('ist-geaendert', istGeaendert);
+
+    if (speichernButton) {
+      speichernButton.disabled = !istGeaendert;
+    }
+  }
+
+  function setzeAdminTagFormStatus(formular, status, meldung) {
+    const speichernButton = formular.querySelector('[data-admin-tag-save]');
+    const statusElement = formular.querySelector('[data-admin-tag-form-status]');
+    const istLadend = status === 'loading';
+
+    formular.classList.toggle('ist-ladend', istLadend);
+    formular.classList.toggle('hat-fehler', status === 'fehler');
+    formular.classList.toggle('hat-erfolg', status === 'erfolg');
+
+    if (speichernButton) {
+      speichernButton.disabled = istLadend || !formular.classList.contains('ist-geaendert');
+      speichernButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Speichern...'
+        : 'Speichern';
+    }
+
+    if (statusElement) {
+      statusElement.textContent = meldung || '';
+    }
+  }
+
+  function baueAdminTagUpdatePayload(datumFeld, randomFeld) {
+    return {
+      unlock_date: datumFeld.value ? new Date(datumFeld.value).toISOString() : null,
+      is_randomized: randomFeld.checked
+    };
+  }
+
+  function aktualisiereAdminTagAnzeige(karte, daten) {
+    const datumAnzeige = karte.querySelector('[data-admin-tag-unlock-display]');
+    const randomBadge = karte.querySelector('[data-admin-tag-random-badge]');
+
+    if (datumAnzeige) {
+      datumAnzeige.textContent = formatiereAdminDatum(daten.unlock_date);
+    }
+
+    if (randomBadge) {
+      randomBadge.classList.toggle('ist-randomisiert', daten.is_randomized);
+      randomBadge.textContent = daten.is_randomized ? 'Zufällig' : 'Sortiert';
+    }
+  }
+
+  function initialisiereAdminTagForm(karte, tag) {
+    const formular = karte.querySelector('[data-admin-tag-form]');
+    const bearbeitenButton = karte.querySelector('[data-admin-tag-edit]');
+    const datumFeld = formular ? formular.querySelector('[name="unlock_date"]') : null;
+    const randomFeld = formular ? formular.querySelector('[name="is_randomized"]') : null;
+    const speichernButton = formular ? formular.querySelector('[data-admin-tag-save]') : null;
+
+    if (!formular || !bearbeitenButton || !datumFeld || !randomFeld || !speichernButton) {
+      return;
+    }
+
+    let urspruenglichesDatum = datumFeld.value;
+    let urspruenglicheRandomisierung = Boolean(tag.is_randomized);
+
+    function pruefeAenderungen() {
+      const istGeaendert = datumFeld.value !== urspruenglichesDatum
+        || randomFeld.checked !== urspruenglicheRandomisierung;
+
+      setzeAdminTagFormGeaendert(formular, istGeaendert);
+    }
+
+    bearbeitenButton.addEventListener('click', function() {
+      const istOffen = !formular.classList.contains('d-none');
+      const wirdGeoeffnet = !istOffen;
+
+      formular.classList.toggle('d-none', !wirdGeoeffnet);
+      karte.classList.toggle('ist-in-bearbeitung', wirdGeoeffnet);
+      bearbeitenButton.setAttribute('aria-expanded', String(wirdGeoeffnet));
+      bearbeitenButton.innerHTML = wirdGeoeffnet
+        ? '<i class="bi bi-x-lg" aria-hidden="true"></i> Schließen'
+        : '<i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten';
+
+      if (wirdGeoeffnet) {
+        datumFeld.focus();
+      }
+    });
+
+    datumFeld.addEventListener('input', pruefeAenderungen);
+    randomFeld.addEventListener('change', pruefeAenderungen);
+
+    speichernButton.addEventListener('click', function() {
+      if (!formular.classList.contains('ist-geaendert')) {
+        return;
+      }
+
+      setzeAdminTagFormStatus(formular, 'loading');
+      const payload = baueAdminTagUpdatePayload(datumFeld, randomFeld);
+
+      window.AdventskalenderApi.aktualisiereAdminTag(
+        tag.id,
+        payload
+      )
+        .then(function() {
+          urspruenglichesDatum = datumFeld.value;
+          urspruenglicheRandomisierung = randomFeld.checked;
+          aktualisiereAdminTagAnzeige(karte, payload);
+          setzeAdminTagFormGeaendert(formular, false);
+          setzeAdminTagFormStatus(formular, 'erfolg', 'Einstellungen gespeichert.');
+        })
+        .catch(function(error) {
+          setzeAdminTagFormStatus(
+            formular,
+            'fehler',
+            window.AdventskalenderApi.fehlertextFuerApiFehler(
+              error,
+              'Einstellungen konnten nicht gespeichert werden.'
+            )
+          );
+        });
+    });
+  }
+
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
+    const unlockInputId = `admin-tag-${tag.id}-unlock-date`;
+    const randomInputId = `admin-tag-${tag.id}-randomized`;
+    const einstellungenId = `admin-tag-${tag.id}-einstellungen`;
     karte.className = 'admin-tag-karte';
     karte.setAttribute('data-day-id', tag.id);
 
     karte.innerHTML = `
       <div class="admin-tag-karte-kopf">
         <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
-        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}">
+        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}" data-admin-tag-random-badge>
           ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
         </span>
       </div>
       <dl class="admin-tag-details">
         <div>
           <dt>Freischaltung</dt>
-          <dd>${formatiereAdminDatum(tag.unlock_date)}</dd>
+          <dd data-admin-tag-unlock-display>${formatiereAdminDatum(tag.unlock_date)}</dd>
         </div>
         <div>
           <dt>Inhalte</dt>
@@ -125,7 +267,42 @@
         <span class="admin-tag-content-label">Zugewiesen</span>
         ${renderContentBadges(inhalte)}
       </div>
+      <button
+        class="admin-tag-edit-btn"
+        type="button"
+        data-admin-tag-edit
+        aria-expanded="false"
+        aria-controls="${einstellungenId}"
+      >
+        <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
+      </button>
+      <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
+        <label class="admin-tag-feld" for="${unlockInputId}">
+          <span>Freischaltung bearbeiten</span>
+          <input
+            id="${unlockInputId}"
+            name="unlock_date"
+            type="datetime-local"
+            value="${formatiereAdminDatumInput(tag.unlock_date)}"
+          >
+        </label>
+        <label class="admin-tag-toggle" for="${randomInputId}">
+          <input
+            id="${randomInputId}"
+            name="is_randomized"
+            type="checkbox"
+            ${tag.is_randomized ? 'checked' : ''}
+          >
+          <span>Content zufällig ausspielen</span>
+        </label>
+        <button class="admin-tag-save-btn" type="button" data-admin-tag-save disabled>
+          Speichern
+        </button>
+        <p class="admin-tag-form-status" data-admin-tag-form-status aria-live="polite"></p>
+      </form>
     `;
+
+    initialisiereAdminTagForm(karte, tag);
 
     return karte;
   }
