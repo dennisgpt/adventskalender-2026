@@ -633,6 +633,17 @@ small span:hover {
   opacity: 0.55;
 }
 
+.admin-tag-einstellungen.ist-geaendert .admin-tag-save-btn {
+  box-shadow: 0 0 0 0.16rem rgba(255, 209, 102, 0.12);
+}
+
+.admin-tag-save-btn:not(:disabled):hover,
+.admin-tag-save-btn:not(:disabled):focus-visible {
+  color: #1f120b;
+  background: linear-gradient(90deg, #ffefca, #ffd67e);
+  transform: translateY(-1px);
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;

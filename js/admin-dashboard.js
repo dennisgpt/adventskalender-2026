@@ -113,6 +113,39 @@
     `;
   }
 
+  function setzeAdminTagFormGeaendert(formular, istGeaendert) {
+    const speichernButton = formular.querySelector('[data-admin-tag-save]');
+
+    formular.classList.toggle('ist-geaendert', istGeaendert);
+
+    if (speichernButton) {
+      speichernButton.disabled = !istGeaendert;
+    }
+  }
+
+  function initialisiereAdminTagForm(karte, tag) {
+    const formular = karte.querySelector('[data-admin-tag-form]');
+    const datumFeld = formular ? formular.querySelector('[name="unlock_date"]') : null;
+    const randomFeld = formular ? formular.querySelector('[name="is_randomized"]') : null;
+
+    if (!formular || !datumFeld || !randomFeld) {
+      return;
+    }
+
+    const urspruenglichesDatum = datumFeld.value;
+    const urspruenglicheRandomisierung = Boolean(tag.is_randomized);
+
+    function pruefeAenderungen() {
+      const istGeaendert = datumFeld.value !== urspruenglichesDatum
+        || randomFeld.checked !== urspruenglicheRandomisierung;
+
+      setzeAdminTagFormGeaendert(formular, istGeaendert);
+    }
+
+    datumFeld.addEventListener('input', pruefeAenderungen);
+    randomFeld.addEventListener('change', pruefeAenderungen);
+  }
+
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
@@ -161,11 +194,13 @@
           >
           <span>Content zufällig ausspielen</span>
         </label>
-        <button class="admin-tag-save-btn" type="button" disabled>
+        <button class="admin-tag-save-btn" type="button" data-admin-tag-save disabled>
           Speichern
         </button>
       </form>
     `;
+
+    initialisiereAdminTagForm(karte, tag);
 
     return karte;
   }
