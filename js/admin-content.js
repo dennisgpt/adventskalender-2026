@@ -353,6 +353,9 @@
           .then(function() {
             resetContentForm();
             setzeContentFormSichtbar(false);
+            if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+              window.AdminLoginUi.zeigeStatus('Content wurde erstellt.', 'erfolg');
+            }
             return ladeAdminContentListe();
           })
           .catch(function(error) {
