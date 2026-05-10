@@ -185,6 +185,38 @@
     </div>
   </section>
 
+  <!-- ===== ADMIN CONTENT: Content-Verwaltung ===== -->
+  <section class="admin-dashboard admin-content container my-5 d-none" id="admin-content" aria-labelledby="admin-content-titel">
+    <div class="admin-dashboard-kopf">
+      <div>
+        <p class="admin-dashboard-kicker mb-1">Admin-Bereich</p>
+        <h2 id="admin-content-titel" class="admin-dashboard-titel">Content-Verwaltung</h2>
+      </div>
+      <button class="admin-dashboard-refresh-btn" id="admin-content-create" type="button" disabled>
+        <i class="bi bi-plus-lg"></i>
+        Content erstellen
+      </button>
+    </div>
+
+    <div class="admin-dashboard-state d-none" id="admin-content-loading" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Content-Einträge werden geladen...
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-content-fehler" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span id="admin-content-fehler-text">Content-Einträge konnten nicht geladen werden.</span>
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-leer" id="admin-content-leer" role="status">
+      Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.
+    </div>
+
+    <div class="admin-content-grid d-none" id="admin-content-grid">
+      <!-- Content-Einträge werden per JavaScript eingefügt -->
+    </div>
+  </section>
+
   <!-- ===== HINWEIS FÜR GESPERRTE TÜRCHEN ===== -->
   <div id="gesperrt-hinweis" class="gesperrt-hinweis-toast" role="status" aria-live="polite">
     Verfügbar ab TT.MM.!
@@ -253,6 +285,7 @@
   <script src="js/api.js"></script>        <!-- API-Client -->
   <script src="js/admin-login.js"></script><!-- Admin Login -->
   <script src="js/admin-dashboard.js"></script><!-- Admin Dashboard -->
+  <script src="js/admin-content.js"></script><!-- Admin Content-Verwaltung -->
   <script src="js/kalender.js"></script>   <!-- Dennis:  Türchen-Logik & Grid -->
   <script src="js/inhalte.js"></script>    <!-- Artjom: Inhalte & Modal -->
 

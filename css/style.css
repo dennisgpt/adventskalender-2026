@@ -452,6 +452,16 @@ small span:hover {
   gap: 0.85rem;
 }
 
+.admin-content {
+  margin-top: 1.25rem;
+}
+
+.admin-content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0.85rem;
+}
+
 .admin-tag-karte {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
