@@ -16,9 +16,19 @@
       createButton: document.getElementById('admin-content-create'),
       form: document.getElementById('admin-content-form'),
       cancelButton: document.getElementById('admin-content-cancel'),
+      submitButton: document.getElementById('admin-content-submit'),
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
-      quizFelder: document.getElementById('admin-content-quiz-felder')
+      mediaUrlFeld: document.getElementById('admin-content-media-url'),
+      quizFelder: document.getElementById('admin-content-quiz-felder'),
+      quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
+      quizOptions: [
+        document.getElementById('admin-content-quiz-option-0'),
+        document.getElementById('admin-content-quiz-option-1'),
+        document.getElementById('admin-content-quiz-option-2'),
+        document.getElementById('admin-content-quiz-option-3')
+      ],
+      quizCorrectFeld: document.getElementById('admin-content-quiz-correct')
     };
   }
 
@@ -148,7 +158,61 @@
       : '<i class="bi bi-plus-lg"></i> Content erstellen';
 
     if (sichtbar && elemente.typeFeld) {
+      aktualisiereContentFormValiditaet();
       elemente.typeFeld.focus();
+    }
+  }
+
+  function feldWert(feld) {
+    return feld && typeof feld.value === 'string' ? feld.value.trim() : '';
+  }
+
+  function baueQuizBody(elemente) {
+    return JSON.stringify({
+      question: feldWert(elemente.quizQuestionFeld),
+      options: elemente.quizOptions.map(feldWert),
+      correct: Number.parseInt(elemente.quizCorrectFeld.value, 10)
+    });
+  }
+
+  function baueContentPayload() {
+    const elemente = contentElemente();
+    const typ = elemente.typeFeld ? elemente.typeFeld.value : 'text';
+    const mediaUrl = feldWert(elemente.mediaUrlFeld);
+
+    return {
+      type: typ,
+      body: typ === 'quiz' ? baueQuizBody(elemente) : feldWert(elemente.bodyFeld) || null,
+      media_url: mediaUrl || null
+    };
+  }
+
+  function istContentFormValide() {
+    const elemente = contentElemente();
+
+    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld) {
+      return false;
+    }
+
+    if (elemente.typeFeld.value === 'quiz') {
+      return Boolean(feldWert(elemente.quizQuestionFeld))
+        && elemente.quizOptions.every(function(optionFeld) {
+          return Boolean(feldWert(optionFeld));
+        });
+    }
+
+    if (elemente.typeFeld.value === 'text') {
+      return Boolean(feldWert(elemente.bodyFeld));
+    }
+
+    return Boolean(feldWert(elemente.mediaUrlFeld));
+  }
+
+  function aktualisiereContentFormValiditaet() {
+    const submitButton = contentElemente().submitButton;
+
+    if (submitButton) {
+      submitButton.disabled = !istContentFormValide();
     }
   }
 
@@ -166,6 +230,7 @@
     elemente.bodyFeld.placeholder = istQuiz
       ? 'Quiz-Daten werden aus den Quiz-Feldern vorbereitet'
       : 'Text, Link oder kurze Beschreibung';
+    aktualisiereContentFormValiditaet();
   }
 
   function aktualisiereAdminContentSichtbarkeit() {
@@ -238,8 +303,16 @@
     }
 
     if (elemente.form) {
+      elemente.form.addEventListener('input', aktualisiereContentFormValiditaet);
+      elemente.form.addEventListener('change', aktualisiereContentFormValiditaet);
       elemente.form.addEventListener('submit', function(event) {
         event.preventDefault();
+
+        if (!istContentFormValide()) {
+          return;
+        }
+
+        console.log('Vorbereiteter Content-Payload', baueContentPayload());
       });
     }
 
@@ -261,7 +334,8 @@
   window.AdminContentUi = {
     aktualisiereSichtbarkeit: aktualisiereAdminContentSichtbarkeit,
     ladeContent: ladeAdminContentListe,
-    renderContent: renderAdminContentListe
+    renderContent: renderAdminContentListe,
+    bauePayload: baueContentPayload
   };
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
