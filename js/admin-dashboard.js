@@ -151,6 +151,20 @@
     };
   }
 
+  function aktualisiereAdminTagAnzeige(karte, daten) {
+    const datumAnzeige = karte.querySelector('[data-admin-tag-unlock-display]');
+    const randomBadge = karte.querySelector('[data-admin-tag-random-badge]');
+
+    if (datumAnzeige) {
+      datumAnzeige.textContent = formatiereAdminDatum(daten.unlock_date);
+    }
+
+    if (randomBadge) {
+      randomBadge.classList.toggle('ist-randomisiert', daten.is_randomized);
+      randomBadge.textContent = daten.is_randomized ? 'Zufällig' : 'Sortiert';
+    }
+  }
+
   function initialisiereAdminTagForm(karte, tag) {
     const formular = karte.querySelector('[data-admin-tag-form]');
     const datumFeld = formular ? formular.querySelector('[name="unlock_date"]') : null;
@@ -180,14 +194,16 @@
       }
 
       setzeAdminTagFormStatus(formular, 'loading');
+      const payload = baueAdminTagUpdatePayload(datumFeld, randomFeld);
 
       window.AdventskalenderApi.aktualisiereAdminTag(
         tag.id,
-        baueAdminTagUpdatePayload(datumFeld, randomFeld)
+        payload
       )
         .then(function() {
           urspruenglichesDatum = datumFeld.value;
           urspruenglicheRandomisierung = randomFeld.checked;
+          aktualisiereAdminTagAnzeige(karte, payload);
           setzeAdminTagFormGeaendert(formular, false);
           setzeAdminTagFormStatus(formular, 'erfolg', 'Einstellungen gespeichert.');
         })
@@ -215,14 +231,14 @@
     karte.innerHTML = `
       <div class="admin-tag-karte-kopf">
         <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
-        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}">
+        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}" data-admin-tag-random-badge>
           ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
         </span>
       </div>
       <dl class="admin-tag-details">
         <div>
           <dt>Freischaltung</dt>
-          <dd>${formatiereAdminDatum(tag.unlock_date)}</dd>
+          <dd data-admin-tag-unlock-display>${formatiereAdminDatum(tag.unlock_date)}</dd>
         </div>
         <div>
           <dt>Inhalte</dt>
