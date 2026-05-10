@@ -28,7 +28,8 @@
         document.getElementById('admin-content-quiz-option-2'),
         document.getElementById('admin-content-quiz-option-3')
       ],
-      quizCorrectFeld: document.getElementById('admin-content-quiz-correct')
+      quizCorrectFeld: document.getElementById('admin-content-quiz-correct'),
+      formStatus: document.getElementById('admin-content-form-status')
     };
   }
 
@@ -216,6 +217,39 @@
     }
   }
 
+  function setzeContentFormStatus(status, meldung) {
+    const elemente = contentElemente();
+    const istLadend = status === 'loading';
+
+    if (elemente.form) {
+      elemente.form.classList.toggle('ist-ladend', istLadend);
+      elemente.form.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.form.classList.toggle('hat-erfolg', status === 'erfolg');
+    }
+
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = istLadend || !istContentFormValide();
+      elemente.submitButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Speichern...'
+        : 'Content erstellen';
+    }
+
+    if (elemente.formStatus) {
+      elemente.formStatus.textContent = meldung || '';
+    }
+  }
+
+  function resetContentForm() {
+    const elemente = contentElemente();
+
+    if (elemente.form) {
+      elemente.form.reset();
+    }
+
+    aktualisiereContentFormTyp();
+    setzeContentFormStatus('', '');
+  }
+
   function aktualisiereContentFormTyp() {
     const elemente = contentElemente();
 
@@ -294,6 +328,7 @@
 
     if (elemente.cancelButton) {
       elemente.cancelButton.addEventListener('click', function() {
+        resetContentForm();
         setzeContentFormSichtbar(false);
       });
     }
@@ -312,7 +347,23 @@
           return;
         }
 
-        console.log('Vorbereiteter Content-Payload', baueContentPayload());
+        setzeContentFormStatus('loading');
+
+        window.AdventskalenderApi.erstelleAdminContent(baueContentPayload())
+          .then(function() {
+            resetContentForm();
+            setzeContentFormSichtbar(false);
+            return ladeAdminContentListe();
+          })
+          .catch(function(error) {
+            setzeContentFormStatus(
+              'fehler',
+              window.AdventskalenderApi.fehlertextFuerApiFehler(
+                error,
+                'Content konnte nicht erstellt werden.'
+              )
+            );
+          });
       });
     }
 

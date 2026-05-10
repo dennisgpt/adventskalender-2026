@@ -544,6 +544,23 @@ small span:hover {
   gap: 0.62rem;
 }
 
+.admin-content-form-status {
+  min-height: 1.1rem;
+  margin: 0;
+  color: #9fb6df;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-align: right;
+}
+
+.admin-content-form.hat-erfolg .admin-content-form-status {
+  color: #8de3b0;
+}
+
+.admin-content-form.hat-fehler .admin-content-form-status {
+  color: #ff9aa8;
+}
+
 .admin-content-card {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;

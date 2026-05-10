@@ -273,6 +273,15 @@
     return adminFetch('/api/admin/content');
   }
 
+  // POST /api/admin/content
+  // Erstellt einen neuen Content-Eintrag.
+  function erstelleAdminContent(daten) {
+    return adminFetch('/api/admin/content', {
+      method: 'POST',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -338,6 +347,7 @@
     weiseContentAdminTagZu,
     entferneContentVonAdminTag,
     ladeAdminContent,
+    erstelleAdminContent,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
