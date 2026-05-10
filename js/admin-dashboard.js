@@ -123,17 +123,46 @@
     }
   }
 
+  function setzeAdminTagFormStatus(formular, status, meldung) {
+    const speichernButton = formular.querySelector('[data-admin-tag-save]');
+    const statusElement = formular.querySelector('[data-admin-tag-form-status]');
+    const istLadend = status === 'loading';
+
+    formular.classList.toggle('ist-ladend', istLadend);
+    formular.classList.toggle('hat-fehler', status === 'fehler');
+    formular.classList.toggle('hat-erfolg', status === 'erfolg');
+
+    if (speichernButton) {
+      speichernButton.disabled = istLadend || !formular.classList.contains('ist-geaendert');
+      speichernButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Speichern...'
+        : 'Speichern';
+    }
+
+    if (statusElement) {
+      statusElement.textContent = meldung || '';
+    }
+  }
+
+  function baueAdminTagUpdatePayload(datumFeld, randomFeld) {
+    return {
+      unlock_date: datumFeld.value ? new Date(datumFeld.value).toISOString() : null,
+      is_randomized: randomFeld.checked
+    };
+  }
+
   function initialisiereAdminTagForm(karte, tag) {
     const formular = karte.querySelector('[data-admin-tag-form]');
     const datumFeld = formular ? formular.querySelector('[name="unlock_date"]') : null;
     const randomFeld = formular ? formular.querySelector('[name="is_randomized"]') : null;
+    const speichernButton = formular ? formular.querySelector('[data-admin-tag-save]') : null;
 
-    if (!formular || !datumFeld || !randomFeld) {
+    if (!formular || !datumFeld || !randomFeld || !speichernButton) {
       return;
     }
 
-    const urspruenglichesDatum = datumFeld.value;
-    const urspruenglicheRandomisierung = Boolean(tag.is_randomized);
+    let urspruenglichesDatum = datumFeld.value;
+    let urspruenglicheRandomisierung = Boolean(tag.is_randomized);
 
     function pruefeAenderungen() {
       const istGeaendert = datumFeld.value !== urspruenglichesDatum
@@ -144,6 +173,35 @@
 
     datumFeld.addEventListener('input', pruefeAenderungen);
     randomFeld.addEventListener('change', pruefeAenderungen);
+
+    speichernButton.addEventListener('click', function() {
+      if (!formular.classList.contains('ist-geaendert')) {
+        return;
+      }
+
+      setzeAdminTagFormStatus(formular, 'loading');
+
+      window.AdventskalenderApi.aktualisiereAdminTag(
+        tag.id,
+        baueAdminTagUpdatePayload(datumFeld, randomFeld)
+      )
+        .then(function() {
+          urspruenglichesDatum = datumFeld.value;
+          urspruenglicheRandomisierung = randomFeld.checked;
+          setzeAdminTagFormGeaendert(formular, false);
+          setzeAdminTagFormStatus(formular, 'erfolg', 'Einstellungen gespeichert.');
+        })
+        .catch(function(error) {
+          setzeAdminTagFormStatus(
+            formular,
+            'fehler',
+            window.AdventskalenderApi.fehlertextFuerApiFehler(
+              error,
+              'Einstellungen konnten nicht gespeichert werden.'
+            )
+          );
+        });
+    });
   }
 
   function renderAdminTagKarte(tag) {
@@ -197,6 +255,7 @@
         <button class="admin-tag-save-btn" type="button" data-admin-tag-save disabled>
           Speichern
         </button>
+        <p class="admin-tag-form-status" data-admin-tag-form-status aria-live="polite"></p>
       </form>
     `;
 

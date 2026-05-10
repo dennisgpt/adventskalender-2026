@@ -617,6 +617,10 @@ small span:hover {
 }
 
 .admin-tag-save-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
   justify-self: start;
   min-height: 36px;
   border: 1px solid rgba(255, 228, 163, 0.28);
@@ -642,6 +646,22 @@ small span:hover {
   color: #1f120b;
   background: linear-gradient(90deg, #ffefca, #ffd67e);
   transform: translateY(-1px);
+}
+
+.admin-tag-form-status {
+  min-height: 1.1rem;
+  margin: 0;
+  color: #9fb6df;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.admin-tag-einstellungen.hat-erfolg .admin-tag-form-status {
+  color: #8de3b0;
+}
+
+.admin-tag-einstellungen.hat-fehler .admin-tag-form-status {
+  color: #ff9aa8;
 }
 
 /* ---- TÃ¼rchen-Karten ---- */
