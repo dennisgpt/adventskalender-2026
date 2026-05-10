@@ -462,6 +462,88 @@ small span:hover {
   gap: 0.85rem;
 }
 
+.admin-content-form {
+  display: grid;
+  gap: 0.86rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.95rem;
+  background: rgba(5, 12, 30, 0.46);
+}
+
+.admin-content-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.82rem;
+}
+
+.admin-content-feld {
+  display: grid;
+  gap: 0.36rem;
+  margin: 0;
+  color: #aebfe8;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-content-feld input,
+.admin-content-feld select,
+.admin-content-feld textarea {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  padding: 0.46rem 0.6rem;
+  color: #eef4ff;
+  background: rgba(3, 10, 28, 0.58);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-content-feld textarea {
+  resize: vertical;
+}
+
+.admin-content-feld input:focus,
+.admin-content-feld select:focus,
+.admin-content-feld textarea:focus {
+  border-color: rgba(255, 209, 102, 0.76);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
+.admin-content-feld input:disabled,
+.admin-content-feld textarea:disabled {
+  opacity: 0.62;
+}
+
+.admin-content-quiz-felder {
+  display: grid;
+  gap: 0.82rem;
+  margin: 0;
+  border: 1px solid rgba(142, 201, 255, 0.2);
+  border-radius: 12px;
+  padding: 0.85rem;
+  background: rgba(82, 158, 222, 0.08);
+}
+
+.admin-content-quiz-felder legend {
+  float: none;
+  width: auto;
+  margin: 0;
+  padding: 0 0.35rem;
+  color: #dff0ff;
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+
+.admin-content-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.62rem;
+}
+
 .admin-content-card {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;

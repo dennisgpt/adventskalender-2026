@@ -13,7 +13,12 @@
       fehlerText: document.getElementById('admin-content-fehler-text'),
       leer: document.getElementById('admin-content-leer'),
       grid: document.getElementById('admin-content-grid'),
-      createButton: document.getElementById('admin-content-create')
+      createButton: document.getElementById('admin-content-create'),
+      form: document.getElementById('admin-content-form'),
+      cancelButton: document.getElementById('admin-content-cancel'),
+      typeFeld: document.getElementById('admin-content-type'),
+      bodyFeld: document.getElementById('admin-content-body'),
+      quizFelder: document.getElementById('admin-content-quiz-felder')
     };
   }
 
@@ -129,6 +134,40 @@
     });
   }
 
+  function setzeContentFormSichtbar(sichtbar) {
+    const elemente = contentElemente();
+
+    if (!elemente.form || !elemente.createButton) {
+      return;
+    }
+
+    elemente.form.classList.toggle('d-none', !sichtbar);
+    elemente.createButton.setAttribute('aria-expanded', String(sichtbar));
+    elemente.createButton.innerHTML = sichtbar
+      ? '<i class="bi bi-x-lg"></i> Formular schließen'
+      : '<i class="bi bi-plus-lg"></i> Content erstellen';
+
+    if (sichtbar && elemente.typeFeld) {
+      elemente.typeFeld.focus();
+    }
+  }
+
+  function aktualisiereContentFormTyp() {
+    const elemente = contentElemente();
+
+    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.quizFelder) {
+      return;
+    }
+
+    const istQuiz = elemente.typeFeld.value === 'quiz';
+
+    elemente.quizFelder.classList.toggle('d-none', !istQuiz);
+    elemente.bodyFeld.disabled = istQuiz;
+    elemente.bodyFeld.placeholder = istQuiz
+      ? 'Quiz-Daten werden aus den Quiz-Feldern vorbereitet'
+      : 'Text, Link oder kurze Beschreibung';
+  }
+
   function aktualisiereAdminContentSichtbarkeit() {
     const elemente = contentElemente();
     const eingeloggt = istAdminEingeloggt();
@@ -176,7 +215,33 @@
   }
 
   function initialisiereAdminContent() {
+    const elemente = contentElemente();
+
     aktualisiereAdminContentSichtbarkeit();
+    aktualisiereContentFormTyp();
+
+    if (elemente.createButton) {
+      elemente.createButton.addEventListener('click', function() {
+        const formIstSichtbar = elemente.form && !elemente.form.classList.contains('d-none');
+        setzeContentFormSichtbar(!formIstSichtbar);
+      });
+    }
+
+    if (elemente.cancelButton) {
+      elemente.cancelButton.addEventListener('click', function() {
+        setzeContentFormSichtbar(false);
+      });
+    }
+
+    if (elemente.typeFeld) {
+      elemente.typeFeld.addEventListener('change', aktualisiereContentFormTyp);
+    }
+
+    if (elemente.form) {
+      elemente.form.addEventListener('submit', function(event) {
+        event.preventDefault();
+      });
+    }
 
     if (istAdminEingeloggt()) {
       ladeAdminContentListe().catch(function() {});
