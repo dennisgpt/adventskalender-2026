@@ -267,6 +267,12 @@
     );
   }
 
+  // GET /api/admin/content
+  // Erfolgsantwort: Array aller Content-Eintraege inkl. inaktiver Inhalte
+  function ladeAdminContent() {
+    return adminFetch('/api/admin/content');
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -331,6 +337,7 @@
     aktualisiereAdminTag,
     weiseContentAdminTagZu,
     entferneContentVonAdminTag,
+    ladeAdminContent,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
