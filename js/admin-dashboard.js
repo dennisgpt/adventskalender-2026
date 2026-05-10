@@ -67,6 +67,21 @@
     });
   }
 
+  function formatiereAdminDatumInput(datumWert) {
+    if (!datumWert) {
+      return '';
+    }
+
+    const datum = new Date(datumWert);
+
+    if (Number.isNaN(datum.getTime())) {
+      return '';
+    }
+
+    const lokalesDatum = new Date(datum.getTime() - datum.getTimezoneOffset() * 60000);
+    return lokalesDatum.toISOString().slice(0, 16);
+  }
+
   function contentTypLabel(typ) {
     const labels = {
       text: 'Text',
@@ -101,6 +116,8 @@
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
+    const unlockInputId = `admin-tag-${tag.id}-unlock-date`;
+    const randomInputId = `admin-tag-${tag.id}-randomized`;
     karte.className = 'admin-tag-karte';
     karte.setAttribute('data-day-id', tag.id);
 
@@ -125,6 +142,29 @@
         <span class="admin-tag-content-label">Zugewiesen</span>
         ${renderContentBadges(inhalte)}
       </div>
+      <form class="admin-tag-einstellungen" data-admin-tag-form>
+        <label class="admin-tag-feld" for="${unlockInputId}">
+          <span>Freischaltung bearbeiten</span>
+          <input
+            id="${unlockInputId}"
+            name="unlock_date"
+            type="datetime-local"
+            value="${formatiereAdminDatumInput(tag.unlock_date)}"
+          >
+        </label>
+        <label class="admin-tag-toggle" for="${randomInputId}">
+          <input
+            id="${randomInputId}"
+            name="is_randomized"
+            type="checkbox"
+            ${tag.is_randomized ? 'checked' : ''}
+          >
+          <span>Content zufällig ausspielen</span>
+        </label>
+        <button class="admin-tag-save-btn" type="button" disabled>
+          Speichern
+        </button>
+      </form>
     `;
 
     return karte;

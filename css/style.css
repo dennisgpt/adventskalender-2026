@@ -567,6 +567,72 @@ small span:hover {
   font-weight: 700;
 }
 
+.admin-tag-einstellungen {
+  display: grid;
+  gap: 0.64rem;
+  margin-top: 0.9rem;
+  padding-top: 0.82rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.admin-tag-feld,
+.admin-tag-toggle {
+  display: grid;
+  gap: 0.36rem;
+  margin: 0;
+  color: #aebfe8;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-tag-feld input {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 9px;
+  padding: 0.42rem 0.58rem;
+  color: #eef4ff;
+  background: rgba(3, 10, 28, 0.58);
+  font: inherit;
+  font-weight: 700;
+}
+
+.admin-tag-feld input:focus {
+  border-color: rgba(255, 209, 102, 0.76);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
+.admin-tag-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.52rem;
+  color: #dce8ff;
+}
+
+.admin-tag-toggle input {
+  width: 18px;
+  height: 18px;
+  accent-color: #ffd06f;
+}
+
+.admin-tag-save-btn {
+  justify-self: start;
+  min-height: 36px;
+  border: 1px solid rgba(255, 228, 163, 0.28);
+  border-radius: 9px;
+  padding: 0.4rem 0.72rem;
+  color: #2a1a10;
+  background: linear-gradient(90deg, #ffe9b8, #ffd06f);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.admin-tag-save-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 .tuerchen-karte {
   aspect-ratio: 1 / 1;
