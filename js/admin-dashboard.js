@@ -167,11 +167,12 @@
 
   function initialisiereAdminTagForm(karte, tag) {
     const formular = karte.querySelector('[data-admin-tag-form]');
+    const bearbeitenButton = karte.querySelector('[data-admin-tag-edit]');
     const datumFeld = formular ? formular.querySelector('[name="unlock_date"]') : null;
     const randomFeld = formular ? formular.querySelector('[name="is_randomized"]') : null;
     const speichernButton = formular ? formular.querySelector('[data-admin-tag-save]') : null;
 
-    if (!formular || !datumFeld || !randomFeld || !speichernButton) {
+    if (!formular || !bearbeitenButton || !datumFeld || !randomFeld || !speichernButton) {
       return;
     }
 
@@ -184,6 +185,22 @@
 
       setzeAdminTagFormGeaendert(formular, istGeaendert);
     }
+
+    bearbeitenButton.addEventListener('click', function() {
+      const istOffen = !formular.classList.contains('d-none');
+      const wirdGeoeffnet = !istOffen;
+
+      formular.classList.toggle('d-none', !wirdGeoeffnet);
+      karte.classList.toggle('ist-in-bearbeitung', wirdGeoeffnet);
+      bearbeitenButton.setAttribute('aria-expanded', String(wirdGeoeffnet));
+      bearbeitenButton.innerHTML = wirdGeoeffnet
+        ? '<i class="bi bi-x-lg" aria-hidden="true"></i> Schließen'
+        : '<i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten';
+
+      if (wirdGeoeffnet) {
+        datumFeld.focus();
+      }
+    });
 
     datumFeld.addEventListener('input', pruefeAenderungen);
     randomFeld.addEventListener('change', pruefeAenderungen);
@@ -225,6 +242,7 @@
     const karte = document.createElement('article');
     const unlockInputId = `admin-tag-${tag.id}-unlock-date`;
     const randomInputId = `admin-tag-${tag.id}-randomized`;
+    const einstellungenId = `admin-tag-${tag.id}-einstellungen`;
     karte.className = 'admin-tag-karte';
     karte.setAttribute('data-day-id', tag.id);
 
@@ -249,7 +267,16 @@
         <span class="admin-tag-content-label">Zugewiesen</span>
         ${renderContentBadges(inhalte)}
       </div>
-      <form class="admin-tag-einstellungen" data-admin-tag-form>
+      <button
+        class="admin-tag-edit-btn"
+        type="button"
+        data-admin-tag-edit
+        aria-expanded="false"
+        aria-controls="${einstellungenId}"
+      >
+        <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
+      </button>
+      <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
         <label class="admin-tag-feld" for="${unlockInputId}">
           <span>Freischaltung bearbeiten</span>
           <input
