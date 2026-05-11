@@ -31,7 +31,9 @@
       fehler: document.getElementById('admin-zuweisung-fehler'),
       fehlerText: document.getElementById('admin-zuweisung-fehler-text'),
       leer: document.getElementById('admin-zuweisung-leer'),
-      pool: document.getElementById('admin-zuweisung-pool')
+      pool: document.getElementById('admin-zuweisung-pool'),
+      submitButton: document.getElementById('admin-zuweisung-submit'),
+      status: document.getElementById('admin-zuweisung-status')
     };
   }
 
@@ -289,6 +291,24 @@
     }
   }
 
+  function setzeZuweisungAktionStatus(status, meldung) {
+    const elemente = zuweisungElemente();
+    const istLadend = status === 'loading';
+
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = istLadend || !ausgewaehlterTag || !ausgewaehlterContent;
+      elemente.submitButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Zuweisen...'
+        : 'Content zuweisen';
+    }
+
+    if (elemente.status) {
+      elemente.status.textContent = meldung || '';
+      elemente.status.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.status.classList.toggle('hat-erfolg', status === 'erfolg');
+    }
+  }
+
   function aktualisiereAusgewaehlteTagKarte() {
     document.querySelectorAll('.admin-tag-karte').forEach(function(karte) {
       karte.classList.toggle(
@@ -306,6 +326,7 @@
     }
 
     elemente.bereich.classList.toggle('d-none', !ausgewaehlterTag);
+    setzeZuweisungAktionStatus('', '');
 
     if (!ausgewaehlterTag) {
       elemente.titel.textContent = 'Türchen auswählen';
@@ -337,9 +358,50 @@
     button.addEventListener('click', function() {
       ausgewaehlterContent = content;
       renderContentPool(adminContentPool);
+      setzeZuweisungAktionStatus('', '');
     });
 
     return button;
+  }
+
+  function berechneNaechsteSortierung() {
+    if (!ausgewaehlterTag || !Array.isArray(ausgewaehlterTag.contents)) {
+      return 0;
+    }
+
+    return ausgewaehlterTag.contents.length;
+  }
+
+  function weiseAusgewaehltenContentZu() {
+    if (!ausgewaehlterTag || !ausgewaehlterContent) {
+      return;
+    }
+
+    const tagId = ausgewaehlterTag.id;
+    const contentId = ausgewaehlterContent.id;
+    const sortOrder = berechneNaechsteSortierung();
+
+    setzeZuweisungAktionStatus('loading');
+
+    window.AdventskalenderApi.weiseContentAdminTagZu(tagId, contentId, sortOrder)
+      .then(function() {
+        setzeZuweisungAktionStatus('erfolg', 'Content wurde dem Tuerchen zugewiesen.');
+
+        if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+          window.AdminLoginUi.zeigeStatus('Content wurde zugewiesen.', 'erfolg');
+        }
+
+        return ladeAdminDashboardTage();
+      })
+      .catch(function(error) {
+        setzeZuweisungAktionStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content konnte nicht zugewiesen werden.'
+          )
+        );
+      });
   }
 
   function renderContentPool(contentEintraege) {
@@ -398,6 +460,7 @@
     ausgewaehlterContent = null;
     aktualisiereZuweisungKopf();
     aktualisiereAusgewaehlteTagKarte();
+    setzeZuweisungAktionStatus('', '');
     ladeContentPool().catch(function() {});
 
     const bereich = zuweisungElemente().bereich;
@@ -411,6 +474,7 @@
     ausgewaehlterContent = null;
     aktualisiereZuweisungKopf();
     aktualisiereAusgewaehlteTagKarte();
+    setzeZuweisungAktionStatus('', '');
   }
 
   function renderAdminTagKarte(tag) {
@@ -561,6 +625,7 @@
   function initialisiereAdminDashboard() {
     const refreshButton = document.getElementById('admin-dashboard-refresh');
     const zuweisungSchliessenButton = document.getElementById('admin-zuweisung-schliessen');
+    const zuweisungSubmitButton = document.getElementById('admin-zuweisung-submit');
 
     aktualisiereAdminDashboardSichtbarkeit();
     aktualisiereZuweisungKopf();
@@ -573,6 +638,10 @@
 
     if (zuweisungSchliessenButton) {
       zuweisungSchliessenButton.addEventListener('click', schliesseZuweisung);
+    }
+
+    if (zuweisungSubmitButton) {
+      zuweisungSubmitButton.addEventListener('click', weiseAusgewaehltenContentZu);
     }
 
     if (istAdminEingeloggt()) {

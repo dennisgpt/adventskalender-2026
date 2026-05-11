@@ -929,6 +929,30 @@ small span:hover {
   box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.1);
 }
 
+.admin-zuweisung-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.8rem;
+}
+
+.admin-zuweisung-status {
+  min-height: 1.1rem;
+  margin: 0;
+  color: #9fb6df;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-zuweisung-status.hat-erfolg {
+  color: #8de3b0;
+}
+
+.admin-zuweisung-status.hat-fehler {
+  color: #ff9aa8;
+}
+
 .admin-tag-einstellungen {
   display: grid;
   gap: 0.64rem;
