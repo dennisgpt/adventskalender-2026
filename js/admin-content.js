@@ -1,6 +1,8 @@
 (function(window, document) {
   'use strict';
 
+  let bearbeiteterContentId = null;
+
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
   }
@@ -126,7 +128,21 @@
           <dd>${formatiereContentDatum(content.created_at)}</dd>
         </div>
       </dl>
+      <div class="admin-content-card-actions">
+        <button class="admin-content-action-btn" type="button" data-admin-content-edit>
+          <i class="bi bi-pencil-square" aria-hidden="true"></i>
+          Bearbeiten
+        </button>
+      </div>
     `;
+
+    const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
+
+    if (bearbeitenButton) {
+      bearbeitenButton.addEventListener('click', function() {
+        fuelleContentForm(content);
+      });
+    }
 
     return karte;
   }
@@ -164,6 +180,10 @@
     }
   }
 
+  function submitButtonText() {
+    return bearbeiteterContentId ? 'Änderungen speichern' : 'Content erstellen';
+  }
+
   function feldWert(feld) {
     return feld && typeof feld.value === 'string' ? feld.value.trim() : '';
   }
@@ -186,6 +206,63 @@
       body: typ === 'quiz' ? baueQuizBody(elemente) : feldWert(elemente.bodyFeld) || null,
       media_url: mediaUrl || null
     };
+  }
+
+  function fuelleQuizFelder(elemente, content) {
+    let quizDaten = {
+      question: '',
+      options: ['', '', '', ''],
+      correct: 0
+    };
+
+    if (content.body) {
+      try {
+        quizDaten = {
+          ...quizDaten,
+          ...JSON.parse(content.body)
+        };
+      } catch (error) {
+        quizDaten.question = content.body;
+      }
+    }
+
+    if (elemente.quizQuestionFeld) {
+      elemente.quizQuestionFeld.value = quizDaten.question || '';
+    }
+
+    elemente.quizOptions.forEach(function(optionFeld, index) {
+      if (optionFeld) {
+        optionFeld.value = quizDaten.options && quizDaten.options[index] ? quizDaten.options[index] : '';
+      }
+    });
+
+    if (elemente.quizCorrectFeld) {
+      elemente.quizCorrectFeld.value = String(Number.isInteger(quizDaten.correct) ? quizDaten.correct : 0);
+    }
+  }
+
+  function fuelleContentForm(content) {
+    const elemente = contentElemente();
+
+    if (!elemente.form || !elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld) {
+      return;
+    }
+
+    bearbeiteterContentId = content.id;
+    elemente.form.reset();
+    elemente.typeFeld.value = content.type || 'text';
+    elemente.mediaUrlFeld.value = content.media_url || '';
+
+    if (content.type === 'quiz') {
+      elemente.bodyFeld.value = '';
+      fuelleQuizFelder(elemente, content);
+    } else {
+      elemente.bodyFeld.value = content.body || '';
+    }
+
+    aktualisiereContentFormTyp();
+    setzeContentFormStatus('', '');
+    setzeContentFormSichtbar(true);
   }
 
   function istContentFormValide() {
@@ -231,7 +308,7 @@
       elemente.submitButton.disabled = istLadend || !istContentFormValide();
       elemente.submitButton.innerHTML = istLadend
         ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Speichern...'
-        : 'Content erstellen';
+        : submitButtonText();
     }
 
     if (elemente.formStatus) {
@@ -241,6 +318,8 @@
 
   function resetContentForm() {
     const elemente = contentElemente();
+
+    bearbeiteterContentId = null;
 
     if (elemente.form) {
       elemente.form.reset();
@@ -322,7 +401,15 @@
     if (elemente.createButton) {
       elemente.createButton.addEventListener('click', function() {
         const formIstSichtbar = elemente.form && !elemente.form.classList.contains('d-none');
-        setzeContentFormSichtbar(!formIstSichtbar);
+
+        if (formIstSichtbar) {
+          resetContentForm();
+          setzeContentFormSichtbar(false);
+          return;
+        }
+
+        resetContentForm();
+        setzeContentFormSichtbar(true);
       });
     }
 
@@ -349,12 +436,20 @@
 
         setzeContentFormStatus('loading');
 
-        window.AdventskalenderApi.erstelleAdminContent(baueContentPayload())
+        const request = bearbeiteterContentId
+          ? window.AdventskalenderApi.aktualisiereAdminContent(bearbeiteterContentId, baueContentPayload())
+          : window.AdventskalenderApi.erstelleAdminContent(baueContentPayload());
+
+        request
           .then(function() {
+            const erfolgsText = bearbeiteterContentId
+              ? 'Content wurde aktualisiert.'
+              : 'Content wurde erstellt.';
+
             resetContentForm();
             setzeContentFormSichtbar(false);
             if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
-              window.AdminLoginUi.zeigeStatus('Content wurde erstellt.', 'erfolg');
+              window.AdminLoginUi.zeigeStatus(erfolgsText, 'erfolg');
             }
             return ladeAdminContentListe();
           })

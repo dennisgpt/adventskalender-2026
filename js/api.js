@@ -282,6 +282,15 @@
     });
   }
 
+  // PUT /api/admin/content/:id
+  // Aktualisiert einen bestehenden Content-Eintrag.
+  function aktualisiereAdminContent(contentId, daten) {
+    return adminFetch(`/api/admin/content/${encodeURIComponent(contentId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -348,6 +357,7 @@
     entferneContentVonAdminTag,
     ladeAdminContent,
     erstelleAdminContent,
+    aktualisiereAdminContent,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,

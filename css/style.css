@@ -648,6 +648,34 @@ small span:hover {
   text-align: right;
 }
 
+.admin-content-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.86rem;
+}
+
+.admin-content-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.38rem;
+  min-height: 36px;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 9px;
+  padding: 0.4rem 0.72rem;
+  color: #dff0ff;
+  background: rgba(82, 158, 222, 0.12);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.admin-content-action-btn:hover,
+.admin-content-action-btn:focus-visible {
+  color: #ffffff;
+  border-color: rgba(142, 201, 255, 0.42);
+  background: rgba(82, 158, 222, 0.2);
+}
+
 .admin-tag-karte {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
