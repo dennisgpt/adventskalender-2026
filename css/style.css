@@ -651,6 +651,8 @@ small span:hover {
 .admin-content-card-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 0.86rem;
 }
 
@@ -674,6 +676,18 @@ small span:hover {
   color: #ffffff;
   border-color: rgba(142, 201, 255, 0.42);
   background: rgba(82, 158, 222, 0.2);
+}
+
+.admin-content-action-btn.ist-warnung {
+  color: #ffe5e7;
+  border-color: rgba(255, 102, 116, 0.28);
+  background: rgba(255, 82, 102, 0.12);
+}
+
+.admin-content-action-btn.ist-warnung:hover,
+.admin-content-action-btn.ist-warnung:focus-visible {
+  border-color: rgba(255, 102, 116, 0.45);
+  background: rgba(255, 82, 102, 0.2);
 }
 
 .admin-tag-karte {

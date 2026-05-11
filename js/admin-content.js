@@ -105,6 +105,8 @@
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
     karte.setAttribute('data-content-id', content.id);
+    const aktivButtonLabel = content.is_active ? 'Deaktivieren' : 'Aktivieren';
+    const aktivButtonIcon = content.is_active ? 'bi-eye-slash' : 'bi-check-circle';
 
     karte.innerHTML = `
       <div class="admin-content-card-kopf">
@@ -133,10 +135,15 @@
           <i class="bi bi-pencil-square" aria-hidden="true"></i>
           Bearbeiten
         </button>
+        <button class="admin-content-action-btn ${content.is_active ? 'ist-warnung' : ''}" type="button" data-admin-content-toggle-active>
+          <i class="bi ${aktivButtonIcon}" aria-hidden="true"></i>
+          ${aktivButtonLabel}
+        </button>
       </div>
     `;
 
     const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
+    const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');
 
     if (bearbeitenButton) {
       bearbeitenButton.addEventListener('click', function() {
@@ -144,7 +151,54 @@
       });
     }
 
+    if (aktivButton) {
+      aktivButton.addEventListener('click', function() {
+        aktualisiereContentAktivstatus(content, aktivButton);
+      });
+    }
+
     return karte;
+  }
+
+  function zeigeContentToast(nachricht, typ) {
+    if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+      window.AdminLoginUi.zeigeStatus(nachricht, typ);
+    }
+  }
+
+  function aktualisiereContentAktivstatus(content, button) {
+    const neuerStatus = !content.is_active;
+    const standardText = neuerStatus ? 'Aktivieren' : 'Deaktivieren';
+
+    if (button) {
+      button.disabled = true;
+      button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Speichern...';
+    }
+
+    return window.AdventskalenderApi.aktualisiereAdminContent(content.id, {
+      is_active: neuerStatus
+    })
+      .then(function() {
+        zeigeContentToast(
+          neuerStatus ? 'Content wurde aktiviert.' : 'Content wurde deaktiviert.',
+          'erfolg'
+        );
+        return ladeAdminContentListe();
+      })
+      .catch(function(error) {
+        if (button) {
+          button.disabled = false;
+          button.innerHTML = standardText;
+        }
+
+        zeigeContentToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content-Status konnte nicht geaendert werden.'
+          ),
+          'fehler'
+        );
+      });
   }
 
   function renderAdminContentListe(contentEintraege) {
