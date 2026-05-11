@@ -1,6 +1,10 @@
 (function(window, document) {
   'use strict';
 
+  let ausgewaehlterTag = null;
+  let ausgewaehlterContent = null;
+  let adminContentPool = [];
+
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
   }
@@ -14,6 +18,20 @@
       leer: document.getElementById('admin-dashboard-leer'),
       grid: document.getElementById('admin-dashboard-grid'),
       refreshButton: document.getElementById('admin-dashboard-refresh')
+    };
+  }
+
+  function zuweisungElemente() {
+    return {
+      bereich: document.getElementById('admin-zuweisung'),
+      titel: document.getElementById('admin-zuweisung-titel'),
+      auswahl: document.getElementById('admin-zuweisung-auswahl'),
+      schliessenButton: document.getElementById('admin-zuweisung-schliessen'),
+      loading: document.getElementById('admin-zuweisung-loading'),
+      fehler: document.getElementById('admin-zuweisung-fehler'),
+      fehlerText: document.getElementById('admin-zuweisung-fehler-text'),
+      leer: document.getElementById('admin-zuweisung-leer'),
+      pool: document.getElementById('admin-zuweisung-pool')
     };
   }
 
@@ -92,6 +110,23 @@
     };
 
     return labels[typ] || typ || 'Unbekannt';
+  }
+
+  function contentBodyVorschau(content) {
+    if (!content.body) {
+      return 'Kein Body';
+    }
+
+    if (content.type === 'quiz') {
+      try {
+        const quiz = JSON.parse(content.body);
+        return quiz.question || 'Quiz ohne Frage';
+      } catch (error) {
+        return 'Quiz-Daten konnten nicht gelesen werden';
+      }
+    }
+
+    return content.body;
   }
 
   function renderContentBadges(inhalte) {
@@ -237,6 +272,147 @@
     });
   }
 
+  function setzeZuweisungStatus(status, meldung) {
+    const elemente = zuweisungElemente();
+
+    if (!elemente.loading || !elemente.fehler || !elemente.leer || !elemente.pool) {
+      return;
+    }
+
+    elemente.loading.classList.toggle('d-none', status !== 'loading');
+    elemente.fehler.classList.toggle('d-none', status !== 'fehler');
+    elemente.leer.classList.toggle('d-none', status !== 'leer');
+    elemente.pool.classList.toggle('d-none', status !== 'bereit');
+
+    if (elemente.fehlerText && meldung) {
+      elemente.fehlerText.textContent = meldung;
+    }
+  }
+
+  function aktualisiereAusgewaehlteTagKarte() {
+    document.querySelectorAll('.admin-tag-karte').forEach(function(karte) {
+      karte.classList.toggle(
+        'ist-ausgewaehlt',
+        Boolean(ausgewaehlterTag) && karte.getAttribute('data-day-id') === String(ausgewaehlterTag.id)
+      );
+    });
+  }
+
+  function aktualisiereZuweisungKopf() {
+    const elemente = zuweisungElemente();
+
+    if (!elemente.bereich || !elemente.titel || !elemente.auswahl) {
+      return;
+    }
+
+    elemente.bereich.classList.toggle('d-none', !ausgewaehlterTag);
+
+    if (!ausgewaehlterTag) {
+      elemente.titel.textContent = 'Türchen auswählen';
+      elemente.auswahl.textContent = 'Kein Türchen ausgewählt.';
+      return;
+    }
+
+    elemente.titel.textContent = `Türchen ${ausgewaehlterTag.day_number}`;
+    elemente.auswahl.textContent = 'Wähle einen Content-Eintrag aus dem Pool aus.';
+  }
+
+  function renderContentPoolKarte(content) {
+    const button = document.createElement('button');
+    button.className = 'admin-zuweisung-content';
+    button.type = 'button';
+    button.setAttribute('data-content-id', content.id);
+    button.setAttribute('aria-pressed', String(Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id));
+    button.innerHTML = `
+      <span class="admin-content-type">${contentTypLabel(content.type)}</span>
+      <strong>${contentBodyVorschau(content)}</strong>
+      <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
+    `;
+
+    button.classList.toggle(
+      'ist-ausgewaehlt',
+      Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id
+    );
+
+    button.addEventListener('click', function() {
+      ausgewaehlterContent = content;
+      renderContentPool(adminContentPool);
+    });
+
+    return button;
+  }
+
+  function renderContentPool(contentEintraege) {
+    const pool = zuweisungElemente().pool;
+
+    if (!pool) {
+      return;
+    }
+
+    pool.innerHTML = '';
+    contentEintraege.forEach(function(content) {
+      pool.appendChild(renderContentPoolKarte(content));
+    });
+  }
+
+  function ladeContentPool() {
+    if (adminContentPool.length > 0) {
+      renderContentPool(adminContentPool);
+      setzeZuweisungStatus('bereit');
+      return Promise.resolve(adminContentPool);
+    }
+
+    setzeZuweisungStatus('loading');
+
+    return window.AdventskalenderApi.ladeAdminContent()
+      .then(function(contentEintraege) {
+        adminContentPool = Array.isArray(contentEintraege)
+          ? contentEintraege.filter(function(content) {
+            return content.is_active !== false;
+          })
+          : [];
+
+        if (adminContentPool.length === 0) {
+          setzeZuweisungStatus('leer');
+          return adminContentPool;
+        }
+
+        renderContentPool(adminContentPool);
+        setzeZuweisungStatus('bereit');
+        return adminContentPool;
+      })
+      .catch(function(error) {
+        setzeZuweisungStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content-Pool konnte nicht geladen werden.'
+          )
+        );
+        throw error;
+      });
+  }
+
+  function waehleAdminTagFuerZuweisung(tag) {
+    ausgewaehlterTag = tag;
+    ausgewaehlterContent = null;
+    aktualisiereZuweisungKopf();
+    aktualisiereAusgewaehlteTagKarte();
+    ladeContentPool().catch(function() {});
+
+    const bereich = zuweisungElemente().bereich;
+    if (bereich) {
+      bereich.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function schliesseZuweisung() {
+    ausgewaehlterTag = null;
+    ausgewaehlterContent = null;
+    aktualisiereZuweisungKopf();
+    aktualisiereAusgewaehlteTagKarte();
+  }
+
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
@@ -276,6 +452,9 @@
       >
         <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
       </button>
+      <button class="admin-tag-assign-btn" type="button" data-admin-tag-assign>
+        <i class="bi bi-plus-square" aria-hidden="true"></i> Content zuweisen
+      </button>
       <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
         <label class="admin-tag-feld" for="${unlockInputId}">
           <span>Freischaltung bearbeiten</span>
@@ -303,6 +482,13 @@
     `;
 
     initialisiereAdminTagForm(karte, tag);
+    const zuweisenButton = karte.querySelector('[data-admin-tag-assign]');
+
+    if (zuweisenButton) {
+      zuweisenButton.addEventListener('click', function() {
+        waehleAdminTagFuerZuweisung(tag);
+      });
+    }
 
     return karte;
   }
@@ -315,6 +501,7 @@
     }
 
     grid.innerHTML = '';
+    schliesseZuweisung();
 
     tage
       .slice()
@@ -373,13 +560,19 @@
 
   function initialisiereAdminDashboard() {
     const refreshButton = document.getElementById('admin-dashboard-refresh');
+    const zuweisungSchliessenButton = document.getElementById('admin-zuweisung-schliessen');
 
     aktualisiereAdminDashboardSichtbarkeit();
+    aktualisiereZuweisungKopf();
 
     if (refreshButton) {
       refreshButton.addEventListener('click', function() {
         ladeAdminDashboardTage().catch(function() {});
       });
+    }
+
+    if (zuweisungSchliessenButton) {
+      zuweisungSchliessenButton.addEventListener('click', schliesseZuweisung);
     }
 
     if (istAdminEingeloggt()) {
@@ -393,6 +586,7 @@
     if (istAdminEingeloggt()) {
       ladeAdminDashboardTage().catch(function() {});
     } else {
+      schliesseZuweisung();
       setzeDashboardStatus('loading');
     }
   }
@@ -405,6 +599,7 @@
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
     aktualisiereAdminDashboardSichtbarkeit();
+    schliesseZuweisung();
     setzeDashboardStatus('loading');
   });
 
