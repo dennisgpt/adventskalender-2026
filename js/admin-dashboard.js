@@ -1,6 +1,10 @@
 (function(window, document) {
   'use strict';
 
+  let ausgewaehlterTag = null;
+  let ausgewaehlterContent = null;
+  let adminContentPool = [];
+
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
   }
@@ -14,6 +18,22 @@
       leer: document.getElementById('admin-dashboard-leer'),
       grid: document.getElementById('admin-dashboard-grid'),
       refreshButton: document.getElementById('admin-dashboard-refresh')
+    };
+  }
+
+  function zuweisungElemente() {
+    return {
+      bereich: document.getElementById('admin-zuweisung'),
+      titel: document.getElementById('admin-zuweisung-titel'),
+      auswahl: document.getElementById('admin-zuweisung-auswahl'),
+      schliessenButton: document.getElementById('admin-zuweisung-schliessen'),
+      loading: document.getElementById('admin-zuweisung-loading'),
+      fehler: document.getElementById('admin-zuweisung-fehler'),
+      fehlerText: document.getElementById('admin-zuweisung-fehler-text'),
+      leer: document.getElementById('admin-zuweisung-leer'),
+      pool: document.getElementById('admin-zuweisung-pool'),
+      submitButton: document.getElementById('admin-zuweisung-submit'),
+      status: document.getElementById('admin-zuweisung-status')
     };
   }
 
@@ -94,6 +114,29 @@
     return labels[typ] || typ || 'Unbekannt';
   }
 
+  function contentBodyVorschau(content) {
+    if (!content.body) {
+      return 'Kein Body';
+    }
+
+    if (content.type === 'quiz') {
+      try {
+        const quiz = JSON.parse(content.body);
+        return quiz.question || 'Quiz ohne Frage';
+      } catch (error) {
+        return 'Quiz-Daten konnten nicht gelesen werden';
+      }
+    }
+
+    return content.body;
+  }
+
+  function zeigeDashboardToast(nachricht, typ) {
+    if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+      window.AdminLoginUi.zeigeStatus(nachricht, typ);
+    }
+  }
+
   function renderContentBadges(inhalte) {
     if (inhalte.length === 0) {
       return '<p class="admin-tag-content-leer">Keine Inhalte zugewiesen</p>';
@@ -103,10 +146,16 @@
       <div class="admin-tag-content-badges">
         ${inhalte.map(function(inhalt) {
           return `
-            <span class="admin-tag-content-badge">
-              ${contentTypLabel(inhalt.type)}
+            <button
+              class="admin-tag-content-badge admin-tag-content-remove"
+              type="button"
+              data-admin-tag-remove-content="${inhalt.id}"
+              aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
+            >
+              <span>${contentTypLabel(inhalt.type)}</span>
               <small>#${inhalt.id}</small>
-            </span>
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
           `;
         }).join('')}
       </div>
@@ -237,6 +286,277 @@
     });
   }
 
+  function setzeZuweisungStatus(status, meldung) {
+    const elemente = zuweisungElemente();
+
+    if (!elemente.loading || !elemente.fehler || !elemente.leer || !elemente.pool) {
+      return;
+    }
+
+    elemente.loading.classList.toggle('d-none', status !== 'loading');
+    elemente.fehler.classList.toggle('d-none', status !== 'fehler');
+    elemente.leer.classList.toggle('d-none', status !== 'leer');
+    elemente.pool.classList.toggle('d-none', status !== 'bereit');
+
+    if (elemente.fehlerText && meldung) {
+      elemente.fehlerText.textContent = meldung;
+    }
+  }
+
+  function setzeZuweisungAktionStatus(status, meldung) {
+    const elemente = zuweisungElemente();
+    const istLadend = status === 'loading';
+
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = istLadend || !ausgewaehlterTag || !ausgewaehlterContent;
+      elemente.submitButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Zuweisen...'
+        : 'Content zuweisen';
+    }
+
+    if (elemente.status) {
+      elemente.status.textContent = meldung || '';
+      elemente.status.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.status.classList.toggle('hat-erfolg', status === 'erfolg');
+    }
+  }
+
+  function aktualisiereAusgewaehlteTagKarte() {
+    document.querySelectorAll('.admin-tag-karte').forEach(function(karte) {
+      karte.classList.toggle(
+        'ist-ausgewaehlt',
+        Boolean(ausgewaehlterTag) && karte.getAttribute('data-day-id') === String(ausgewaehlterTag.id)
+      );
+    });
+  }
+
+  function aktualisiereZuweisungKopf() {
+    const elemente = zuweisungElemente();
+
+    if (!elemente.bereich || !elemente.titel || !elemente.auswahl) {
+      return;
+    }
+
+    elemente.bereich.classList.toggle('d-none', !ausgewaehlterTag);
+    setzeZuweisungAktionStatus('', '');
+
+    if (!ausgewaehlterTag) {
+      elemente.titel.textContent = 'Türchen auswählen';
+      elemente.auswahl.textContent = 'Kein Türchen ausgewählt.';
+      return;
+    }
+
+    elemente.titel.textContent = `Türchen ${ausgewaehlterTag.day_number}`;
+    elemente.auswahl.textContent = 'Wähle einen Content-Eintrag aus dem Pool aus.';
+  }
+
+  function istContentBereitsZugewiesen(contentId) {
+    if (!ausgewaehlterTag || !Array.isArray(ausgewaehlterTag.contents)) {
+      return false;
+    }
+
+    return ausgewaehlterTag.contents.some(function(inhalt) {
+      return String(inhalt.id) === String(contentId);
+    });
+  }
+
+  function renderContentPoolKarte(content) {
+    const istBereitsZugewiesen = istContentBereitsZugewiesen(content.id);
+    const button = document.createElement('button');
+    button.className = 'admin-zuweisung-content';
+    button.type = 'button';
+    button.setAttribute('data-content-id', content.id);
+    button.setAttribute(
+      'aria-pressed',
+      String(!istBereitsZugewiesen && Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id)
+    );
+    button.disabled = istBereitsZugewiesen;
+    button.innerHTML = `
+      <span class="admin-content-type">${contentTypLabel(content.type)}</span>
+      <strong>${contentBodyVorschau(content)}</strong>
+      <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
+      ${istBereitsZugewiesen ? '<em>Bereits zugewiesen</em>' : ''}
+    `;
+
+    button.classList.toggle(
+      'ist-ausgewaehlt',
+      !istBereitsZugewiesen && Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id
+    );
+    button.classList.toggle('ist-gesperrt', istBereitsZugewiesen);
+
+    button.addEventListener('click', function() {
+      if (istBereitsZugewiesen) {
+        return;
+      }
+
+      ausgewaehlterContent = content;
+      renderContentPool(adminContentPool);
+      setzeZuweisungAktionStatus('', '');
+    });
+
+    return button;
+  }
+
+  function berechneNaechsteSortierung() {
+    if (!ausgewaehlterTag || !Array.isArray(ausgewaehlterTag.contents)) {
+      return 0;
+    }
+
+    return ausgewaehlterTag.contents.length;
+  }
+
+  function weiseAusgewaehltenContentZu() {
+    if (!ausgewaehlterTag || !ausgewaehlterContent) {
+      return;
+    }
+
+    if (istContentBereitsZugewiesen(ausgewaehlterContent.id)) {
+      setzeZuweisungAktionStatus('fehler', 'Dieser Content ist diesem Tuerchen bereits zugewiesen.');
+      return;
+    }
+
+    const tagId = ausgewaehlterTag.id;
+    const contentId = ausgewaehlterContent.id;
+    const sortOrder = berechneNaechsteSortierung();
+
+    setzeZuweisungAktionStatus('loading');
+
+    window.AdventskalenderApi.weiseContentAdminTagZu(tagId, contentId, sortOrder)
+      .then(function() {
+        setzeZuweisungAktionStatus('erfolg', 'Content wurde dem Tuerchen zugewiesen.');
+
+        zeigeDashboardToast('Content wurde zugewiesen.', 'erfolg');
+
+        return ladeAdminDashboardTage();
+      })
+      .catch(function(error) {
+        const fehlerText = error && error.status === 409
+          ? 'Dieser Content ist diesem Tuerchen bereits zugewiesen.'
+          : window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content konnte nicht zugewiesen werden.'
+          );
+
+        setzeZuweisungAktionStatus(
+          'fehler',
+          fehlerText
+        );
+      });
+  }
+
+  function setzeEntfernenButtonLaedt(button, laedt) {
+    if (!button) {
+      return;
+    }
+
+    if (laedt) {
+      button.dataset.originalHtml = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+      return;
+    }
+
+    button.disabled = false;
+
+    if (button.dataset.originalHtml) {
+      button.innerHTML = button.dataset.originalHtml;
+      delete button.dataset.originalHtml;
+    }
+  }
+
+  function entferneZugewiesenenContent(tag, contentId, button) {
+    setzeEntfernenButtonLaedt(button, true);
+
+    window.AdventskalenderApi.entferneContentVonAdminTag(tag.id, contentId)
+      .then(function() {
+        zeigeDashboardToast('Content-Zuweisung wurde entfernt.', 'erfolg');
+        return ladeAdminDashboardTage();
+      })
+      .catch(function(error) {
+        setzeEntfernenButtonLaedt(button, false);
+        zeigeDashboardToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content-Zuweisung konnte nicht entfernt werden.'
+          ),
+          'fehler'
+        );
+      });
+  }
+
+  function renderContentPool(contentEintraege) {
+    const pool = zuweisungElemente().pool;
+
+    if (!pool) {
+      return;
+    }
+
+    pool.innerHTML = '';
+    contentEintraege.forEach(function(content) {
+      pool.appendChild(renderContentPoolKarte(content));
+    });
+  }
+
+  function ladeContentPool() {
+    if (adminContentPool.length > 0) {
+      renderContentPool(adminContentPool);
+      setzeZuweisungStatus('bereit');
+      return Promise.resolve(adminContentPool);
+    }
+
+    setzeZuweisungStatus('loading');
+
+    return window.AdventskalenderApi.ladeAdminContent()
+      .then(function(contentEintraege) {
+        adminContentPool = Array.isArray(contentEintraege)
+          ? contentEintraege.filter(function(content) {
+            return content.is_active !== false;
+          })
+          : [];
+
+        if (adminContentPool.length === 0) {
+          setzeZuweisungStatus('leer');
+          return adminContentPool;
+        }
+
+        renderContentPool(adminContentPool);
+        setzeZuweisungStatus('bereit');
+        return adminContentPool;
+      })
+      .catch(function(error) {
+        setzeZuweisungStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content-Pool konnte nicht geladen werden.'
+          )
+        );
+        throw error;
+      });
+  }
+
+  function waehleAdminTagFuerZuweisung(tag) {
+    ausgewaehlterTag = tag;
+    ausgewaehlterContent = null;
+    aktualisiereZuweisungKopf();
+    aktualisiereAusgewaehlteTagKarte();
+    setzeZuweisungAktionStatus('', '');
+    ladeContentPool().catch(function() {});
+
+    const bereich = zuweisungElemente().bereich;
+    if (bereich) {
+      bereich.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+
+  function schliesseZuweisung() {
+    ausgewaehlterTag = null;
+    ausgewaehlterContent = null;
+    aktualisiereZuweisungKopf();
+    aktualisiereAusgewaehlteTagKarte();
+    setzeZuweisungAktionStatus('', '');
+  }
+
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
@@ -276,6 +596,9 @@
       >
         <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
       </button>
+      <button class="admin-tag-assign-btn" type="button" data-admin-tag-assign>
+        <i class="bi bi-plus-square" aria-hidden="true"></i> Content zuweisen
+      </button>
       <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
         <label class="admin-tag-feld" for="${unlockInputId}">
           <span>Freischaltung bearbeiten</span>
@@ -303,6 +626,20 @@
     `;
 
     initialisiereAdminTagForm(karte, tag);
+    const zuweisenButton = karte.querySelector('[data-admin-tag-assign]');
+
+    if (zuweisenButton) {
+      zuweisenButton.addEventListener('click', function() {
+        waehleAdminTagFuerZuweisung(tag);
+      });
+    }
+
+    karte.querySelectorAll('[data-admin-tag-remove-content]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const contentId = button.getAttribute('data-admin-tag-remove-content');
+        entferneZugewiesenenContent(tag, contentId, button);
+      });
+    });
 
     return karte;
   }
@@ -315,6 +652,7 @@
     }
 
     grid.innerHTML = '';
+    schliesseZuweisung();
 
     tage
       .slice()
@@ -373,13 +711,24 @@
 
   function initialisiereAdminDashboard() {
     const refreshButton = document.getElementById('admin-dashboard-refresh');
+    const zuweisungSchliessenButton = document.getElementById('admin-zuweisung-schliessen');
+    const zuweisungSubmitButton = document.getElementById('admin-zuweisung-submit');
 
     aktualisiereAdminDashboardSichtbarkeit();
+    aktualisiereZuweisungKopf();
 
     if (refreshButton) {
       refreshButton.addEventListener('click', function() {
         ladeAdminDashboardTage().catch(function() {});
       });
+    }
+
+    if (zuweisungSchliessenButton) {
+      zuweisungSchliessenButton.addEventListener('click', schliesseZuweisung);
+    }
+
+    if (zuweisungSubmitButton) {
+      zuweisungSubmitButton.addEventListener('click', weiseAusgewaehltenContentZu);
     }
 
     if (istAdminEingeloggt()) {
@@ -393,6 +742,7 @@
     if (istAdminEingeloggt()) {
       ladeAdminDashboardTage().catch(function() {});
     } else {
+      schliesseZuweisung();
       setzeDashboardStatus('loading');
     }
   }
@@ -405,6 +755,7 @@
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
     aktualisiereAdminDashboardSichtbarkeit();
+    schliesseZuweisung();
     setzeDashboardStatus('loading');
   });
 

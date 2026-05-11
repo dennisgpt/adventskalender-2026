@@ -183,6 +183,48 @@
     <div class="admin-dashboard-grid" id="admin-dashboard-grid">
       <!-- Admin-Türchen werden per JavaScript eingefügt -->
     </div>
+
+    <section class="admin-zuweisung d-none" id="admin-zuweisung" aria-labelledby="admin-zuweisung-titel">
+      <div class="admin-zuweisung-kopf">
+        <div>
+          <p class="admin-dashboard-kicker mb-1">Content-Zuweisung</p>
+          <h3 id="admin-zuweisung-titel" class="admin-zuweisung-titel">Türchen auswählen</h3>
+        </div>
+        <button class="admin-content-action-btn" id="admin-zuweisung-schliessen" type="button">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+          Schließen
+        </button>
+      </div>
+
+      <p class="admin-zuweisung-auswahl" id="admin-zuweisung-auswahl">
+        Kein Türchen ausgewählt.
+      </p>
+
+      <div class="admin-dashboard-state d-none" id="admin-zuweisung-loading" role="status" aria-live="polite">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Content-Pool wird geladen...
+      </div>
+
+      <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-zuweisung-fehler" role="alert">
+        <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+        <span id="admin-zuweisung-fehler-text">Content-Pool konnte nicht geladen werden.</span>
+      </div>
+
+      <div class="admin-dashboard-state admin-dashboard-state-leer d-none" id="admin-zuweisung-leer" role="status">
+        Es sind noch keine aktiven Content-Einträge verfügbar.
+      </div>
+
+      <div class="admin-zuweisung-pool d-none" id="admin-zuweisung-pool">
+        <!-- Content-Pool wird per JavaScript eingefügt -->
+      </div>
+
+      <div class="admin-zuweisung-actions">
+        <button class="admin-login-submit-btn" id="admin-zuweisung-submit" type="button" disabled>
+          Content zuweisen
+        </button>
+        <p class="admin-zuweisung-status" id="admin-zuweisung-status" aria-live="polite"></p>
+      </div>
+    </section>
   </section>
 
   <!-- ===== ADMIN CONTENT: Content-Verwaltung ===== -->
