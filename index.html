@@ -185,6 +185,112 @@
     </div>
   </section>
 
+  <!-- ===== ADMIN CONTENT: Content-Verwaltung ===== -->
+  <section class="admin-dashboard admin-content container my-5 d-none" id="admin-content" aria-labelledby="admin-content-titel">
+    <div class="admin-dashboard-kopf">
+      <div>
+        <p class="admin-dashboard-kicker mb-1">Admin-Bereich</p>
+        <h2 id="admin-content-titel" class="admin-dashboard-titel">Content-Verwaltung</h2>
+      </div>
+      <button class="admin-dashboard-refresh-btn" id="admin-content-create" type="button" disabled>
+        <i class="bi bi-plus-lg"></i>
+        Content erstellen
+      </button>
+    </div>
+
+    <form class="admin-content-form d-none" id="admin-content-form" novalidate>
+      <div class="admin-content-form-grid">
+        <label class="admin-content-feld" for="admin-content-type">
+          <span>Content-Typ</span>
+          <select id="admin-content-type" name="type" required>
+            <option value="text">Text</option>
+            <option value="image">Bild</option>
+            <option value="video">Video</option>
+            <option value="game">Game</option>
+            <option value="quiz">Quiz</option>
+          </select>
+        </label>
+
+        <label class="admin-content-feld" for="admin-content-media-url">
+          <span>Media-URL</span>
+          <input id="admin-content-media-url" name="media_url" type="url" placeholder="/uploads/datei.jpg">
+        </label>
+      </div>
+
+      <label class="admin-content-feld" for="admin-content-body">
+        <span>Body</span>
+        <textarea id="admin-content-body" name="body" rows="4" placeholder="Text, Link oder kurze Beschreibung"></textarea>
+      </label>
+
+      <fieldset class="admin-content-quiz-felder d-none" id="admin-content-quiz-felder">
+        <legend>Quiz-Daten</legend>
+
+        <label class="admin-content-feld" for="admin-content-quiz-question">
+          <span>Frage</span>
+          <input id="admin-content-quiz-question" name="quiz_question" type="text" placeholder="Was ist 2+2?">
+        </label>
+
+        <div class="admin-content-form-grid">
+          <label class="admin-content-feld" for="admin-content-quiz-option-0">
+            <span>Antwort 1</span>
+            <input id="admin-content-quiz-option-0" name="quiz_option_0" type="text">
+          </label>
+
+          <label class="admin-content-feld" for="admin-content-quiz-option-1">
+            <span>Antwort 2</span>
+            <input id="admin-content-quiz-option-1" name="quiz_option_1" type="text">
+          </label>
+
+          <label class="admin-content-feld" for="admin-content-quiz-option-2">
+            <span>Antwort 3</span>
+            <input id="admin-content-quiz-option-2" name="quiz_option_2" type="text">
+          </label>
+
+          <label class="admin-content-feld" for="admin-content-quiz-option-3">
+            <span>Antwort 4</span>
+            <input id="admin-content-quiz-option-3" name="quiz_option_3" type="text">
+          </label>
+        </div>
+
+        <label class="admin-content-feld" for="admin-content-quiz-correct">
+          <span>Korrekte Antwort</span>
+          <select id="admin-content-quiz-correct" name="quiz_correct">
+            <option value="0">Antwort 1</option>
+            <option value="1">Antwort 2</option>
+            <option value="2">Antwort 3</option>
+            <option value="3">Antwort 4</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <div class="admin-content-form-actions">
+        <button class="admin-login-secondary-btn" id="admin-content-cancel" type="button">Abbrechen</button>
+        <button class="admin-login-submit-btn" id="admin-content-submit" type="submit" disabled>
+          Content erstellen
+        </button>
+      </div>
+      <p class="admin-content-form-status" id="admin-content-form-status" aria-live="polite"></p>
+    </form>
+
+    <div class="admin-dashboard-state d-none" id="admin-content-loading" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Content-Einträge werden geladen...
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-content-fehler" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span id="admin-content-fehler-text">Content-Einträge konnten nicht geladen werden.</span>
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-leer" id="admin-content-leer" role="status">
+      Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.
+    </div>
+
+    <div class="admin-content-grid d-none" id="admin-content-grid">
+      <!-- Content-Einträge werden per JavaScript eingefügt -->
+    </div>
+  </section>
+
   <!-- ===== HINWEIS FÜR GESPERRTE TÜRCHEN ===== -->
   <div id="gesperrt-hinweis" class="gesperrt-hinweis-toast" role="status" aria-live="polite">
     Verfügbar ab TT.MM.!
@@ -253,8 +359,10 @@
   <script src="js/api.js"></script>        <!-- API-Client -->
   <script src="js/admin-login.js"></script><!-- Admin Login -->
   <script src="js/admin-dashboard.js"></script><!-- Admin Dashboard -->
+  <script src="js/admin-content.js"></script><!-- Admin Content-Verwaltung -->
   <script src="js/kalender.js"></script>   <!-- Dennis:  Türchen-Logik & Grid -->
   <script src="js/inhalte.js"></script>    <!-- Artjom: Inhalte & Modal -->
 
 </body>
 </html>
+ 

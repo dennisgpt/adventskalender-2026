@@ -267,6 +267,30 @@
     );
   }
 
+  // GET /api/admin/content
+  // Erfolgsantwort: Array aller Content-Eintraege inkl. inaktiver Inhalte
+  function ladeAdminContent() {
+    return adminFetch('/api/admin/content');
+  }
+
+  // POST /api/admin/content
+  // Erstellt einen neuen Content-Eintrag.
+  function erstelleAdminContent(daten) {
+    return adminFetch('/api/admin/content', {
+      method: 'POST',
+      body: daten || {}
+    });
+  }
+
+  // PUT /api/admin/content/:id
+  // Aktualisiert einen bestehenden Content-Eintrag.
+  function aktualisiereAdminContent(contentId, daten) {
+    return adminFetch(`/api/admin/content/${encodeURIComponent(contentId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -331,6 +355,9 @@
     aktualisiereAdminTag,
     weiseContentAdminTagZu,
     entferneContentVonAdminTag,
+    ladeAdminContent,
+    erstelleAdminContent,
+    aktualisiereAdminContent,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
