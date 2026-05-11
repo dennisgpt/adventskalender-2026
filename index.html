@@ -333,6 +333,38 @@
     </div>
   </section>
 
+  <!-- ===== ADMIN YEARS: Jahresverwaltung ===== -->
+  <section class="admin-dashboard admin-years container my-5 d-none" id="admin-years" aria-labelledby="admin-years-titel">
+    <div class="admin-dashboard-kopf">
+      <div>
+        <p class="admin-dashboard-kicker mb-1">Admin-Bereich</p>
+        <h2 id="admin-years-titel" class="admin-dashboard-titel">Jahresverwaltung</h2>
+      </div>
+      <button class="admin-dashboard-refresh-btn" id="admin-years-refresh" type="button">
+        <i class="bi bi-arrow-clockwise"></i>
+        Aktualisieren
+      </button>
+    </div>
+
+    <div class="admin-dashboard-state d-none" id="admin-years-loading" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Kalenderjahre werden geladen...
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-years-fehler" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span id="admin-years-fehler-text">Kalenderjahre konnten nicht geladen werden.</span>
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-leer d-none" id="admin-years-leer" role="status">
+      Es wurden noch keine Kalenderjahre angelegt.
+    </div>
+
+    <div class="admin-years-grid d-none" id="admin-years-grid">
+      <!-- Kalenderjahre werden per JavaScript eingefügt -->
+    </div>
+  </section>
+
   <!-- ===== HINWEIS FÜR GESPERRTE TÜRCHEN ===== -->
   <div id="gesperrt-hinweis" class="gesperrt-hinweis-toast" role="status" aria-live="polite">
     Verfügbar ab TT.MM.!
@@ -402,6 +434,7 @@
   <script src="js/admin-login.js"></script><!-- Admin Login -->
   <script src="js/admin-dashboard.js"></script><!-- Admin Dashboard -->
   <script src="js/admin-content.js"></script><!-- Admin Content-Verwaltung -->
+  <script src="js/admin-years.js"></script><!-- Admin Jahresverwaltung -->
   <script src="js/kalender.js"></script>   <!-- Dennis:  Türchen-Logik & Grid -->
   <script src="js/inhalte.js"></script>    <!-- Artjom: Inhalte & Modal -->
 

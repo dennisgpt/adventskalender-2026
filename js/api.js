@@ -291,6 +291,12 @@
     });
   }
 
+  // GET /api/admin/years
+  // Erfolgsantwort: Array aller Kalenderjahre inkl. aktiver Markierung
+  function ladeAdminJahre() {
+    return adminFetch('/api/admin/years');
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -358,6 +364,7 @@
     ladeAdminContent,
     erstelleAdminContent,
     aktualisiereAdminContent,
+    ladeAdminJahre,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,
