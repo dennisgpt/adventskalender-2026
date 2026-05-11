@@ -938,8 +938,26 @@ small span:hover {
   font-weight: 800;
 }
 
-.admin-zuweisung-content:hover,
-.admin-zuweisung-content:focus-visible,
+.admin-zuweisung-content em {
+  justify-self: start;
+  border: 1px solid rgba(141, 227, 176, 0.28);
+  border-radius: 999px;
+  padding: 0.18rem 0.5rem;
+  color: #8de3b0;
+  background: rgba(33, 181, 112, 0.12);
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 900;
+}
+
+.admin-zuweisung-content.ist-gesperrt,
+.admin-zuweisung-content:disabled {
+  cursor: not-allowed;
+  opacity: 0.66;
+}
+
+.admin-zuweisung-content:not(:disabled):hover,
+.admin-zuweisung-content:not(:disabled):focus-visible,
 .admin-zuweisung-content.ist-ausgewaehlt {
   border-color: rgba(255, 209, 102, 0.52);
   outline: none;

@@ -350,24 +350,45 @@
     elemente.auswahl.textContent = 'Wähle einen Content-Eintrag aus dem Pool aus.';
   }
 
+  function istContentBereitsZugewiesen(contentId) {
+    if (!ausgewaehlterTag || !Array.isArray(ausgewaehlterTag.contents)) {
+      return false;
+    }
+
+    return ausgewaehlterTag.contents.some(function(inhalt) {
+      return String(inhalt.id) === String(contentId);
+    });
+  }
+
   function renderContentPoolKarte(content) {
+    const istBereitsZugewiesen = istContentBereitsZugewiesen(content.id);
     const button = document.createElement('button');
     button.className = 'admin-zuweisung-content';
     button.type = 'button';
     button.setAttribute('data-content-id', content.id);
-    button.setAttribute('aria-pressed', String(Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id));
+    button.setAttribute(
+      'aria-pressed',
+      String(!istBereitsZugewiesen && Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id)
+    );
+    button.disabled = istBereitsZugewiesen;
     button.innerHTML = `
       <span class="admin-content-type">${contentTypLabel(content.type)}</span>
       <strong>${contentBodyVorschau(content)}</strong>
       <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
+      ${istBereitsZugewiesen ? '<em>Bereits zugewiesen</em>' : ''}
     `;
 
     button.classList.toggle(
       'ist-ausgewaehlt',
-      Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id
+      !istBereitsZugewiesen && Boolean(ausgewaehlterContent) && ausgewaehlterContent.id === content.id
     );
+    button.classList.toggle('ist-gesperrt', istBereitsZugewiesen);
 
     button.addEventListener('click', function() {
+      if (istBereitsZugewiesen) {
+        return;
+      }
+
       ausgewaehlterContent = content;
       renderContentPool(adminContentPool);
       setzeZuweisungAktionStatus('', '');
@@ -389,6 +410,11 @@
       return;
     }
 
+    if (istContentBereitsZugewiesen(ausgewaehlterContent.id)) {
+      setzeZuweisungAktionStatus('fehler', 'Dieser Content ist diesem Tuerchen bereits zugewiesen.');
+      return;
+    }
+
     const tagId = ausgewaehlterTag.id;
     const contentId = ausgewaehlterContent.id;
     const sortOrder = berechneNaechsteSortierung();
@@ -404,12 +430,16 @@
         return ladeAdminDashboardTage();
       })
       .catch(function(error) {
-        setzeZuweisungAktionStatus(
-          'fehler',
-          window.AdventskalenderApi.fehlertextFuerApiFehler(
+        const fehlerText = error && error.status === 409
+          ? 'Dieser Content ist diesem Tuerchen bereits zugewiesen.'
+          : window.AdventskalenderApi.fehlertextFuerApiFehler(
             error,
             'Content konnte nicht zugewiesen werden.'
-          )
+          );
+
+        setzeZuweisungAktionStatus(
+          'fehler',
+          fehlerText
         );
       });
   }
