@@ -792,6 +792,23 @@ small span:hover {
   font-weight: 800;
 }
 
+.admin-tag-content-remove {
+  cursor: pointer;
+}
+
+.admin-tag-content-remove:hover,
+.admin-tag-content-remove:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 102, 116, 0.42);
+  outline: none;
+  background: rgba(255, 82, 102, 0.16);
+}
+
+.admin-tag-content-remove:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .admin-tag-content-badge small {
   color: #9fb6df;
   font-size: 0.68rem;

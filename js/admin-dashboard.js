@@ -131,6 +131,12 @@
     return content.body;
   }
 
+  function zeigeDashboardToast(nachricht, typ) {
+    if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+      window.AdminLoginUi.zeigeStatus(nachricht, typ);
+    }
+  }
+
   function renderContentBadges(inhalte) {
     if (inhalte.length === 0) {
       return '<p class="admin-tag-content-leer">Keine Inhalte zugewiesen</p>';
@@ -140,10 +146,16 @@
       <div class="admin-tag-content-badges">
         ${inhalte.map(function(inhalt) {
           return `
-            <span class="admin-tag-content-badge">
-              ${contentTypLabel(inhalt.type)}
+            <button
+              class="admin-tag-content-badge admin-tag-content-remove"
+              type="button"
+              data-admin-tag-remove-content="${inhalt.id}"
+              aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
+            >
+              <span>${contentTypLabel(inhalt.type)}</span>
               <small>#${inhalt.id}</small>
-            </span>
+              <i class="bi bi-x-lg" aria-hidden="true"></i>
+            </button>
           `;
         }).join('')}
       </div>
@@ -387,9 +399,7 @@
       .then(function() {
         setzeZuweisungAktionStatus('erfolg', 'Content wurde dem Tuerchen zugewiesen.');
 
-        if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
-          window.AdminLoginUi.zeigeStatus('Content wurde zugewiesen.', 'erfolg');
-        }
+        zeigeDashboardToast('Content wurde zugewiesen.', 'erfolg');
 
         return ladeAdminDashboardTage();
       })
@@ -400,6 +410,46 @@
             error,
             'Content konnte nicht zugewiesen werden.'
           )
+        );
+      });
+  }
+
+  function setzeEntfernenButtonLaedt(button, laedt) {
+    if (!button) {
+      return;
+    }
+
+    if (laedt) {
+      button.dataset.originalHtml = button.innerHTML;
+      button.disabled = true;
+      button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>';
+      return;
+    }
+
+    button.disabled = false;
+
+    if (button.dataset.originalHtml) {
+      button.innerHTML = button.dataset.originalHtml;
+      delete button.dataset.originalHtml;
+    }
+  }
+
+  function entferneZugewiesenenContent(tag, contentId, button) {
+    setzeEntfernenButtonLaedt(button, true);
+
+    window.AdventskalenderApi.entferneContentVonAdminTag(tag.id, contentId)
+      .then(function() {
+        zeigeDashboardToast('Content-Zuweisung wurde entfernt.', 'erfolg');
+        return ladeAdminDashboardTage();
+      })
+      .catch(function(error) {
+        setzeEntfernenButtonLaedt(button, false);
+        zeigeDashboardToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content-Zuweisung konnte nicht entfernt werden.'
+          ),
+          'fehler'
         );
       });
   }
@@ -553,6 +603,13 @@
         waehleAdminTagFuerZuweisung(tag);
       });
     }
+
+    karte.querySelectorAll('[data-admin-tag-remove-content]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        const contentId = button.getAttribute('data-admin-tag-remove-content');
+        entferneZugewiesenenContent(tag, contentId, button);
+      });
+    });
 
     return karte;
   }
