@@ -297,6 +297,15 @@
     return adminFetch('/api/admin/years');
   }
 
+  // POST /api/admin/years
+  // Erstellt ein neues Kalenderjahr und generiert die 24 Tuerchen.
+  function erstelleAdminJahr(daten) {
+    return adminFetch('/api/admin/years', {
+      method: 'POST',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -365,6 +374,7 @@
     erstelleAdminContent,
     aktualisiereAdminContent,
     ladeAdminJahre,
+    erstelleAdminJahr,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,

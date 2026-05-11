@@ -13,7 +13,15 @@
       fehlerText: document.getElementById('admin-years-fehler-text'),
       leer: document.getElementById('admin-years-leer'),
       grid: document.getElementById('admin-years-grid'),
-      refreshButton: document.getElementById('admin-years-refresh')
+      refreshButton: document.getElementById('admin-years-refresh'),
+      createToggleButton: document.getElementById('admin-years-create-toggle'),
+      form: document.getElementById('admin-year-form'),
+      yearFeld: document.getElementById('admin-year-input'),
+      startDateFeld: document.getElementById('admin-year-start-date'),
+      currentFeld: document.getElementById('admin-year-current'),
+      cancelButton: document.getElementById('admin-year-cancel'),
+      submitButton: document.getElementById('admin-year-submit'),
+      formStatus: document.getElementById('admin-year-form-status')
     };
   }
 
@@ -63,6 +71,94 @@
       month: '2-digit',
       year: 'numeric'
     });
+  }
+
+  function feldWert(feld) {
+    return feld && typeof feld.value === 'string' ? feld.value.trim() : '';
+  }
+
+  function istYearFormValide() {
+    const elemente = yearsElemente();
+    const jahr = Number.parseInt(feldWert(elemente.yearFeld), 10);
+
+    return Number.isInteger(jahr)
+      && jahr >= 2026
+      && Boolean(feldWert(elemente.startDateFeld));
+  }
+
+  function baueYearPayload() {
+    const elemente = yearsElemente();
+
+    return {
+      year: Number.parseInt(feldWert(elemente.yearFeld), 10),
+      start_date: feldWert(elemente.startDateFeld),
+      is_current: Boolean(elemente.currentFeld && elemente.currentFeld.checked)
+    };
+  }
+
+  function aktualisiereYearFormValiditaet() {
+    const submitButton = yearsElemente().submitButton;
+
+    if (submitButton) {
+      submitButton.disabled = !istYearFormValide();
+    }
+  }
+
+  function setzeYearFormStatus(status, meldung) {
+    const elemente = yearsElemente();
+    const istLadend = status === 'loading';
+
+    if (elemente.form) {
+      elemente.form.classList.toggle('ist-ladend', istLadend);
+      elemente.form.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.form.classList.toggle('hat-erfolg', status === 'erfolg');
+    }
+
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = istLadend || !istYearFormValide();
+      elemente.submitButton.innerHTML = istLadend
+        ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Erstellen...'
+        : 'Kalenderjahr erstellen';
+    }
+
+    if (elemente.formStatus) {
+      elemente.formStatus.textContent = meldung || '';
+    }
+  }
+
+  function setzeYearFormSichtbar(sichtbar) {
+    const elemente = yearsElemente();
+
+    if (!elemente.form || !elemente.createToggleButton) {
+      return;
+    }
+
+    elemente.form.classList.toggle('d-none', !sichtbar);
+    elemente.createToggleButton.setAttribute('aria-expanded', String(sichtbar));
+    elemente.createToggleButton.innerHTML = sichtbar
+      ? '<i class="bi bi-x-lg"></i> Formular schliessen'
+      : '<i class="bi bi-plus-lg"></i> Jahr erstellen';
+
+    if (sichtbar && elemente.yearFeld) {
+      aktualisiereYearFormValiditaet();
+      elemente.yearFeld.focus();
+    }
+  }
+
+  function resetYearForm() {
+    const elemente = yearsElemente();
+
+    if (elemente.form) {
+      elemente.form.reset();
+    }
+
+    setzeYearFormStatus('', '');
+  }
+
+  function zeigeYearsToast(nachricht, typ) {
+    if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
+      window.AdminLoginUi.zeigeStatus(nachricht, typ);
+    }
   }
 
   function renderAdminYearKarte(jahr) {
@@ -125,6 +221,10 @@
     if (elemente.refreshButton) {
       elemente.refreshButton.disabled = !eingeloggt;
     }
+
+    if (elemente.createToggleButton) {
+      elemente.createToggleButton.disabled = !eingeloggt;
+    }
   }
 
   function ladeAdminJahresliste() {
@@ -163,13 +263,67 @@
   }
 
   function initialisiereAdminYears() {
-    const refreshButton = yearsElemente().refreshButton;
+    const elemente = yearsElemente();
+    const refreshButton = elemente.refreshButton;
 
     aktualisiereAdminYearsSichtbarkeit();
 
     if (refreshButton) {
       refreshButton.addEventListener('click', function() {
         ladeAdminJahresliste().catch(function() {});
+      });
+    }
+
+    if (elemente.createToggleButton) {
+      elemente.createToggleButton.addEventListener('click', function() {
+        const formIstSichtbar = elemente.form && !elemente.form.classList.contains('d-none');
+
+        if (formIstSichtbar) {
+          resetYearForm();
+          setzeYearFormSichtbar(false);
+          return;
+        }
+
+        resetYearForm();
+        setzeYearFormSichtbar(true);
+      });
+    }
+
+    if (elemente.cancelButton) {
+      elemente.cancelButton.addEventListener('click', function() {
+        resetYearForm();
+        setzeYearFormSichtbar(false);
+      });
+    }
+
+    if (elemente.form) {
+      elemente.form.addEventListener('input', aktualisiereYearFormValiditaet);
+      elemente.form.addEventListener('change', aktualisiereYearFormValiditaet);
+      elemente.form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        if (!istYearFormValide()) {
+          return;
+        }
+
+        setzeYearFormStatus('loading');
+
+        window.AdventskalenderApi.erstelleAdminJahr(baueYearPayload())
+          .then(function() {
+            resetYearForm();
+            setzeYearFormSichtbar(false);
+            zeigeYearsToast('Kalenderjahr wurde erstellt.', 'erfolg');
+            return ladeAdminJahresliste();
+          })
+          .catch(function(error) {
+            setzeYearFormStatus(
+              'fehler',
+              window.AdventskalenderApi.fehlertextFuerApiFehler(
+                error,
+                'Kalenderjahr konnte nicht erstellt werden.'
+              )
+            );
+          });
       });
     }
 

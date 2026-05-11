@@ -466,6 +466,32 @@ small span:hover {
   margin-top: 1.25rem;
 }
 
+.admin-years-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.admin-year-form {
+  display: grid;
+  gap: 0.86rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.95rem;
+  background: rgba(5, 12, 30, 0.46);
+}
+
+.admin-year-form.hat-erfolg .admin-content-form-status {
+  color: #8de3b0;
+}
+
+.admin-year-form.hat-fehler .admin-content-form-status {
+  color: #ff9aa8;
+}
+
 .admin-years-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
