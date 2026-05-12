@@ -306,6 +306,15 @@
     });
   }
 
+  // PUT /api/admin/years/:id
+  // Aktualisiert ein Kalenderjahr, z. B. um es als aktuelles Jahr zu setzen.
+  function aktualisiereAdminJahr(yearId, daten) {
+    return adminFetch(`/api/admin/years/${encodeURIComponent(yearId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -375,6 +384,7 @@
     aktualisiereAdminContent,
     ladeAdminJahre,
     erstelleAdminJahr,
+    aktualisiereAdminJahr,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,

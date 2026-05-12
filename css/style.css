@@ -574,6 +574,12 @@ small span:hover {
   text-align: right;
 }
 
+.admin-year-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.95rem;
+}
+
 .admin-content-form {
   display: grid;
   gap: 0.86rem;

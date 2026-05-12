@@ -161,6 +161,45 @@
     }
   }
 
+  function setzeYearButtonLaedt(button, laedt) {
+    if (!button) {
+      return;
+    }
+
+    if (!button.dataset.originalHtml) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+
+    button.disabled = laedt;
+    button.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Setzen...'
+      : button.dataset.originalHtml;
+  }
+
+  function setzeAdminJahrAktuell(jahr, button) {
+    if (!jahr || !jahr.id) {
+      return;
+    }
+
+    setzeYearButtonLaedt(button, true);
+
+    window.AdventskalenderApi.aktualisiereAdminJahr(jahr.id, { is_current: true })
+      .then(function() {
+        zeigeYearsToast('Kalenderjahr wurde als aktuell gesetzt.', 'erfolg');
+        return ladeAdminJahresliste();
+      })
+      .catch(function(error) {
+        setzeYearButtonLaedt(button, false);
+        zeigeYearsToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Kalenderjahr konnte nicht als aktuell gesetzt werden.'
+          ),
+          'fehler'
+        );
+      });
+  }
+
   function renderAdminYearKarte(jahr) {
     const karte = document.createElement('article');
     karte.className = 'admin-year-card';
@@ -184,7 +223,23 @@
           <dd>${formatiereStartDatum(jahr.start_date)}</dd>
         </div>
       </dl>
+      ${jahr.is_current ? '' : `
+        <div class="admin-year-card-actions">
+          <button class="admin-content-action-btn" type="button" data-admin-year-current>
+            <i class="bi bi-check-circle" aria-hidden="true"></i>
+            Als aktuell setzen
+          </button>
+        </div>
+      `}
     `;
+
+    const currentButton = karte.querySelector('[data-admin-year-current]');
+
+    if (currentButton) {
+      currentButton.addEventListener('click', function() {
+        setzeAdminJahrAktuell(jahr, currentButton);
+      });
+    }
 
     return karte;
   }
