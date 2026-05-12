@@ -70,7 +70,7 @@
     const datum = new Date(datumWert);
 
     if (Number.isNaN(datum.getTime())) {
-      return 'Ungueltiges Datum';
+      return 'Ungültiges Datum';
     }
 
     return datum.toLocaleString('de-DE', {
@@ -129,10 +129,18 @@
     const typText = aktiverContentTypFilter === 'all'
       ? 'alle Typen'
       : contentTypLabel(aktiverContentTypFilter);
-    const eintragText = anzahl === 1 ? 'Eintrag' : 'Eintraege';
+    const eintragText = anzahl === 1 ? 'Eintrag' : 'Einträge';
 
     if (filterStatus) {
-      filterStatus.textContent = `${anzahl} ${eintragText} fuer ${typText}`;
+      filterStatus.textContent = `${anzahl} ${eintragText} für ${typText}`;
+    }
+  }
+
+  function setzeContentLeerFehler(istFehler) {
+    const leer = contentElemente().leer;
+
+    if (leer) {
+      leer.classList.toggle('admin-content-leer-fehler', istFehler);
     }
   }
 
@@ -246,7 +254,7 @@
         zeigeContentToast(
           window.AdventskalenderApi.fehlertextFuerApiFehler(
             error,
-            'Content-Status konnte nicht geaendert werden.'
+            'Content-Status konnte nicht geändert werden.'
           ),
           'fehler'
         );
@@ -275,17 +283,20 @@
 
     if (geladeneContentEintraege.length === 0) {
       setzeContentFilterSichtbar(false);
-      setzeAdminContentStatus('leer', 'Es sind noch keine Content-Eintraege vorhanden.');
+      setzeContentLeerFehler(false);
+      setzeAdminContentStatus('leer', 'Es sind noch keine Content-Einträge vorhanden.');
       return;
     }
 
     setzeContentFilterSichtbar(true);
 
     if (gefilterteEintraege.length === 0) {
-      setzeAdminContentStatus('leer', 'Keine Content-Eintraege fuer diesen Typ gefunden.');
+      setzeContentLeerFehler(true);
+      setzeAdminContentStatus('leer', 'Keine Content-Einträge für diesen Typ gefunden.');
       return;
     }
 
+    setzeContentLeerFehler(false);
     setzeAdminContentStatus('bereit');
   }
 
@@ -522,7 +533,7 @@
           'fehler',
           window.AdventskalenderApi.fehlertextFuerApiFehler(
             error,
-            'Content-Eintraege konnten nicht geladen werden.'
+            'Content-Einträge konnten nicht geladen werden.'
           )
         );
         throw error;
