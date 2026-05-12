@@ -291,6 +291,30 @@
     });
   }
 
+  // GET /api/admin/years
+  // Erfolgsantwort: Array aller Kalenderjahre inkl. aktiver Markierung
+  function ladeAdminJahre() {
+    return adminFetch('/api/admin/years');
+  }
+
+  // POST /api/admin/years
+  // Erstellt ein neues Kalenderjahr und generiert die 24 Tuerchen.
+  function erstelleAdminJahr(daten) {
+    return adminFetch('/api/admin/years', {
+      method: 'POST',
+      body: daten || {}
+    });
+  }
+
+  // PUT /api/admin/years/:id
+  // Aktualisiert ein Kalenderjahr, z. B. um es als aktuelles Jahr zu setzen.
+  function aktualisiereAdminJahr(yearId, daten) {
+    return adminFetch(`/api/admin/years/${encodeURIComponent(yearId)}`, {
+      method: 'PUT',
+      body: daten || {}
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -358,6 +382,9 @@
     ladeAdminContent,
     erstelleAdminContent,
     aktualisiereAdminContent,
+    ladeAdminJahre,
+    erstelleAdminJahr,
+    aktualisiereAdminJahr,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,

@@ -462,6 +462,124 @@ small span:hover {
   gap: 0.85rem;
 }
 
+.admin-years {
+  margin-top: 1.25rem;
+}
+
+.admin-years-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem;
+}
+
+.admin-year-form {
+  display: grid;
+  gap: 0.86rem;
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 12px;
+  padding: 0.95rem;
+  background: rgba(5, 12, 30, 0.46);
+}
+
+.admin-year-form.hat-erfolg .admin-content-form-status {
+  color: #8de3b0;
+}
+
+.admin-year-form.hat-fehler .admin-content-form-status {
+  color: #ff9aa8;
+}
+
+.admin-years-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+}
+
+.admin-year-card {
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  padding: 0.95rem;
+  background: rgba(5, 12, 30, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.admin-year-card.ist-aktuell {
+  border-color: rgba(141, 227, 176, 0.42);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.06),
+    0 0 0 0.16rem rgba(33, 181, 112, 0.08);
+}
+
+.admin-year-card-kopf {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.85rem;
+}
+
+.admin-year-zahl {
+  color: #ffffff;
+  font-size: 1.25rem;
+  font-weight: 900;
+}
+
+.admin-year-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+  padding: 0.24rem 0.62rem;
+  color: #cbd8f4;
+  background: rgba(255, 255, 255, 0.08);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.admin-year-status.ist-aktuell {
+  color: #8de3b0;
+  border-color: rgba(141, 227, 176, 0.28);
+  background: rgba(33, 181, 112, 0.12);
+}
+
+.admin-year-details {
+  display: grid;
+  gap: 0.62rem;
+  margin: 0;
+}
+
+.admin-year-details div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.admin-year-details dt {
+  color: #aebfe8;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.admin-year-details dd {
+  margin: 0;
+  color: #f5f8ff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.admin-year-card-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 0.95rem;
+}
+
 .admin-content-form {
   display: grid;
   gap: 0.86rem;

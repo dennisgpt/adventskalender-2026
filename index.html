@@ -333,6 +333,71 @@
     </div>
   </section>
 
+  <!-- ===== ADMIN YEARS: Jahresverwaltung ===== -->
+  <section class="admin-dashboard admin-years container my-5 d-none" id="admin-years" aria-labelledby="admin-years-titel">
+    <div class="admin-dashboard-kopf">
+      <div>
+        <p class="admin-dashboard-kicker mb-1">Admin-Bereich</p>
+        <h2 id="admin-years-titel" class="admin-dashboard-titel">Jahresverwaltung</h2>
+      </div>
+      <div class="admin-years-actions">
+        <button class="admin-dashboard-refresh-btn" id="admin-years-create-toggle" type="button">
+          <i class="bi bi-plus-lg"></i>
+          Jahr erstellen
+        </button>
+        <button class="admin-dashboard-refresh-btn" id="admin-years-refresh" type="button">
+          <i class="bi bi-arrow-clockwise"></i>
+          Aktualisieren
+        </button>
+      </div>
+    </div>
+
+    <form class="admin-year-form d-none" id="admin-year-form" novalidate>
+      <div class="admin-content-form-grid">
+        <label class="admin-content-feld" for="admin-year-input">
+          <span>Jahr</span>
+          <input id="admin-year-input" name="year" type="number" min="2026" step="1" placeholder="2027" required>
+        </label>
+
+        <label class="admin-content-feld" for="admin-year-start-date">
+          <span>Startdatum</span>
+          <input id="admin-year-start-date" name="start_date" type="date" required>
+        </label>
+      </div>
+
+      <label class="admin-tag-toggle" for="admin-year-current">
+        <input id="admin-year-current" name="is_current" type="checkbox">
+        <span>Als aktuelles Kalenderjahr setzen</span>
+      </label>
+
+      <div class="admin-content-form-actions">
+        <button class="admin-login-secondary-btn" id="admin-year-cancel" type="button">Abbrechen</button>
+        <button class="admin-login-submit-btn" id="admin-year-submit" type="submit" disabled>
+          Kalenderjahr erstellen
+        </button>
+      </div>
+      <p class="admin-content-form-status" id="admin-year-form-status" aria-live="polite"></p>
+    </form>
+
+    <div class="admin-dashboard-state d-none" id="admin-years-loading" role="status" aria-live="polite">
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      Kalenderjahre werden geladen...
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-fehler d-none" id="admin-years-fehler" role="alert">
+      <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+      <span id="admin-years-fehler-text">Kalenderjahre konnten nicht geladen werden.</span>
+    </div>
+
+    <div class="admin-dashboard-state admin-dashboard-state-leer d-none" id="admin-years-leer" role="status">
+      Es wurden noch keine Kalenderjahre angelegt.
+    </div>
+
+    <div class="admin-years-grid d-none" id="admin-years-grid">
+      <!-- Kalenderjahre werden per JavaScript eingefügt -->
+    </div>
+  </section>
+
   <!-- ===== HINWEIS FÜR GESPERRTE TÜRCHEN ===== -->
   <div id="gesperrt-hinweis" class="gesperrt-hinweis-toast" role="status" aria-live="polite">
     Verfügbar ab TT.MM.!
@@ -402,6 +467,7 @@
   <script src="js/admin-login.js"></script><!-- Admin Login -->
   <script src="js/admin-dashboard.js"></script><!-- Admin Dashboard -->
   <script src="js/admin-content.js"></script><!-- Admin Content-Verwaltung -->
+  <script src="js/admin-years.js"></script><!-- Admin Jahresverwaltung -->
   <script src="js/kalender.js"></script>   <!-- Dennis:  Türchen-Logik & Grid -->
   <script src="js/inhalte.js"></script>    <!-- Artjom: Inhalte & Modal -->
 
