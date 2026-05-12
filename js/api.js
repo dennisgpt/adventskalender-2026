@@ -291,6 +291,14 @@
     });
   }
 
+  // DELETE /api/admin/content/:id
+  // Loescht einen bestehenden Content-Eintrag.
+  function loescheAdminContent(contentId) {
+    return adminFetch(`/api/admin/content/${encodeURIComponent(contentId)}`, {
+      method: 'DELETE'
+    });
+  }
+
   // GET /api/admin/years
   // Erfolgsantwort: Array aller Kalenderjahre inkl. aktiver Markierung
   function ladeAdminJahre() {
@@ -382,6 +390,7 @@
     ladeAdminContent,
     erstelleAdminContent,
     aktualisiereAdminContent,
+    loescheAdminContent,
     ladeAdminJahre,
     erstelleAdminJahr,
     aktualisiereAdminJahr,
