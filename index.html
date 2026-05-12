@@ -314,6 +314,21 @@
       <p class="admin-content-form-status" id="admin-content-form-status" aria-live="polite"></p>
     </form>
 
+    <div class="admin-content-filter d-none" id="admin-content-filter" aria-label="Content filtern">
+      <label class="admin-content-filter-feld" for="admin-content-type-filter">
+        <span>Typ filtern</span>
+        <select id="admin-content-type-filter" name="content_type_filter">
+          <option value="all">Alle</option>
+          <option value="text">Text</option>
+          <option value="image">Bild</option>
+          <option value="video">Video</option>
+          <option value="game">Game</option>
+          <option value="quiz">Quiz</option>
+        </select>
+      </label>
+      <p class="admin-content-filter-status" id="admin-content-filter-status" aria-live="polite"></p>
+    </div>
+
     <div class="admin-dashboard-state d-none" id="admin-content-loading" role="status" aria-live="polite">
       <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
       Content-Einträge werden geladen...
@@ -325,7 +340,7 @@
     </div>
 
     <div class="admin-dashboard-state admin-dashboard-state-leer" id="admin-content-leer" role="status">
-      Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.
+      <span id="admin-content-leer-text">Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.</span>
     </div>
 
     <div class="admin-content-grid d-none" id="admin-content-grid">

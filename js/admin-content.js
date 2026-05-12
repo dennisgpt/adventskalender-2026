@@ -2,6 +2,9 @@
   'use strict';
 
   let bearbeiteterContentId = null;
+  let geladeneContentEintraege = [];
+  let aktiverContentTypFilter = 'all';
+  const STANDARD_ADMIN_CONTENT_LEER_TEXT = 'Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.';
 
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
@@ -14,7 +17,11 @@
       fehler: document.getElementById('admin-content-fehler'),
       fehlerText: document.getElementById('admin-content-fehler-text'),
       leer: document.getElementById('admin-content-leer'),
+      leerText: document.getElementById('admin-content-leer-text'),
       grid: document.getElementById('admin-content-grid'),
+      filter: document.getElementById('admin-content-filter'),
+      filterFeld: document.getElementById('admin-content-type-filter'),
+      filterStatus: document.getElementById('admin-content-filter-status'),
       createButton: document.getElementById('admin-content-create'),
       form: document.getElementById('admin-content-form'),
       cancelButton: document.getElementById('admin-content-cancel'),
@@ -47,8 +54,16 @@
     elemente.leer.classList.toggle('d-none', status !== 'leer');
     elemente.grid.classList.toggle('d-none', status !== 'bereit');
 
+    if (status !== 'leer') {
+      setzeContentLeerFehler(false);
+    }
+
     if (elemente.fehlerText && meldung) {
       elemente.fehlerText.textContent = meldung;
+    }
+
+    if (elemente.leerText && status === 'leer') {
+      elemente.leerText.textContent = meldung || STANDARD_ADMIN_CONTENT_LEER_TEXT;
     }
   }
 
@@ -60,7 +75,7 @@
     const datum = new Date(datumWert);
 
     if (Number.isNaN(datum.getTime())) {
-      return 'Ungueltiges Datum';
+      return 'Ungültiges Datum';
     }
 
     return datum.toLocaleString('de-DE', {
@@ -82,6 +97,60 @@
     };
 
     return labels[typ] || typ || 'Unbekannt';
+  }
+
+  function istBekannterContentTyp(typ) {
+    return ['all', 'text', 'image', 'video', 'game', 'quiz'].includes(typ);
+  }
+
+  function setzeContentFilterSichtbar(sichtbar) {
+    const elemente = contentElemente();
+
+    if (elemente.filter) {
+      elemente.filter.classList.toggle('d-none', !sichtbar);
+    }
+
+    if (!sichtbar && elemente.filterStatus) {
+      elemente.filterStatus.textContent = '';
+    }
+  }
+
+  function synchronisiereContentFilterFeld() {
+    const filterFeld = contentElemente().filterFeld;
+
+    if (filterFeld) {
+      filterFeld.value = aktiverContentTypFilter;
+    }
+  }
+
+  function contentEintraegeNachFilter() {
+    if (aktiverContentTypFilter === 'all') {
+      return geladeneContentEintraege;
+    }
+
+    return geladeneContentEintraege.filter(function(content) {
+      return content.type === aktiverContentTypFilter;
+    });
+  }
+
+  function aktualisiereContentFilterStatus(anzahl) {
+    const filterStatus = contentElemente().filterStatus;
+    const typText = aktiverContentTypFilter === 'all'
+      ? 'alle Typen'
+      : contentTypLabel(aktiverContentTypFilter);
+    const eintragText = anzahl === 1 ? 'Eintrag' : 'Einträge';
+
+    if (filterStatus) {
+      filterStatus.textContent = `${anzahl} ${eintragText} für ${typText}`;
+    }
+  }
+
+  function setzeContentLeerFehler(istFehler) {
+    const leer = contentElemente().leer;
+
+    if (leer) {
+      leer.classList.toggle('admin-content-leer-fehler', istFehler);
+    }
   }
 
   function contentBodyVorschau(content) {
@@ -194,7 +263,7 @@
         zeigeContentToast(
           window.AdventskalenderApi.fehlertextFuerApiFehler(
             error,
-            'Content-Status konnte nicht geaendert werden.'
+            'Content-Status konnte nicht geändert werden.'
           ),
           'fehler'
         );
@@ -213,6 +282,57 @@
     contentEintraege.forEach(function(content) {
       grid.appendChild(renderAdminContentKarte(content));
     });
+  }
+
+  function leereAdminContentZustand(filterZuruecksetzen) {
+    geladeneContentEintraege = [];
+
+    if (filterZuruecksetzen) {
+      aktiverContentTypFilter = 'all';
+    }
+
+    synchronisiereContentFilterFeld();
+    renderAdminContentListe([]);
+    setzeContentFilterSichtbar(false);
+    setzeContentLeerFehler(false);
+  }
+
+  function renderGefilterteAdminContentListe() {
+    const gefilterteEintraege = contentEintraegeNachFilter();
+
+    renderAdminContentListe(gefilterteEintraege);
+    aktualisiereContentFilterStatus(gefilterteEintraege.length);
+
+    if (geladeneContentEintraege.length === 0) {
+      setzeContentFilterSichtbar(false);
+      setzeContentLeerFehler(false);
+      setzeAdminContentStatus('leer', 'Es sind noch keine Content-Einträge vorhanden.');
+      return;
+    }
+
+    setzeContentFilterSichtbar(true);
+
+    if (gefilterteEintraege.length === 0) {
+      setzeContentLeerFehler(true);
+      setzeAdminContentStatus('leer', 'Keine Content-Einträge für diesen Typ gefunden.');
+      return;
+    }
+
+    setzeContentLeerFehler(false);
+    setzeAdminContentStatus('bereit');
+  }
+
+  function setzeAdminContentListe(contentEintraege) {
+    geladeneContentEintraege = Array.isArray(contentEintraege) ? contentEintraege : [];
+    synchronisiereContentFilterFeld();
+    renderGefilterteAdminContentListe();
+    return geladeneContentEintraege;
+  }
+
+  function waehleContentTypFilter(typ) {
+    aktiverContentTypFilter = istBekannterContentTyp(typ) ? typ : 'all';
+    synchronisiereContentFilterFeld();
+    renderGefilterteAdminContentListe();
   }
 
   function setzeContentFormSichtbar(sichtbar) {
@@ -418,28 +538,28 @@
   function ladeAdminContentListe() {
     if (!istAdminEingeloggt()) {
       aktualisiereAdminContentSichtbarkeit();
+      leereAdminContentZustand(true);
+      setzeAdminContentStatus('leer');
       return Promise.resolve(null);
     }
 
     setzeAdminContentStatus('loading');
+    setzeContentFilterSichtbar(false);
+    setzeContentLeerFehler(false);
 
     return window.AdventskalenderApi.ladeAdminContent()
       .then(function(contentEintraege) {
-        if (!Array.isArray(contentEintraege) || contentEintraege.length === 0) {
-          setzeAdminContentStatus('leer');
-          return contentEintraege;
-        }
-
-        renderAdminContentListe(contentEintraege);
-        setzeAdminContentStatus('bereit');
+        setzeAdminContentListe(contentEintraege);
         return contentEintraege;
       })
       .catch(function(error) {
+        setzeContentFilterSichtbar(false);
+        setzeContentLeerFehler(false);
         setzeAdminContentStatus(
           'fehler',
           window.AdventskalenderApi.fehlertextFuerApiFehler(
             error,
-            'Content-Eintraege konnten nicht geladen werden.'
+            'Content-Einträge konnten nicht geladen werden.'
           )
         );
         throw error;
@@ -476,6 +596,12 @@
 
     if (elemente.typeFeld) {
       elemente.typeFeld.addEventListener('change', aktualisiereContentFormTyp);
+    }
+
+    if (elemente.filterFeld) {
+      elemente.filterFeld.addEventListener('change', function(event) {
+        waehleContentTypFilter(event.target.value);
+      });
     }
 
     if (elemente.form) {
@@ -530,6 +656,7 @@
     if (istAdminEingeloggt()) {
       ladeAdminContentListe().catch(function() {});
     } else {
+      leereAdminContentZustand(true);
       setzeAdminContentStatus('leer');
     }
   }
@@ -537,12 +664,14 @@
   window.AdminContentUi = {
     aktualisiereSichtbarkeit: aktualisiereAdminContentSichtbarkeit,
     ladeContent: ladeAdminContentListe,
-    renderContent: renderAdminContentListe,
+    renderContent: setzeAdminContentListe,
+    filterContent: waehleContentTypFilter,
     bauePayload: baueContentPayload
   };
 
   window.addEventListener('adventskalender:admin-session-verloren', function() {
     aktualisiereAdminContentSichtbarkeit();
+    leereAdminContentZustand(true);
     setzeAdminContentStatus('leer');
   });
   window.addEventListener('adventskalender:admin-session-aktualisiert', verarbeiteAdminSessionAktualisierung);
