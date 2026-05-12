@@ -161,6 +161,14 @@
     }
   }
 
+  function fehlertextFuerYearAktion(error, fallback) {
+    if (error && error.status === 409) {
+      return 'Dieses Kalenderjahr existiert bereits.';
+    }
+
+    return window.AdventskalenderApi.fehlertextFuerApiFehler(error, fallback);
+  }
+
   function setzeYearButtonLaedt(button, laedt) {
     if (!button) {
       return;
@@ -191,7 +199,7 @@
       .catch(function(error) {
         setzeYearButtonLaedt(button, false);
         zeigeYearsToast(
-          window.AdventskalenderApi.fehlertextFuerApiFehler(
+          fehlertextFuerYearAktion(
             error,
             'Kalenderjahr konnte nicht als aktuell gesetzt werden.'
           ),
@@ -373,7 +381,7 @@
           .catch(function(error) {
             setzeYearFormStatus(
               'fehler',
-              window.AdventskalenderApi.fehlertextFuerApiFehler(
+              fehlertextFuerYearAktion(
                 error,
                 'Kalenderjahr konnte nicht erstellt werden.'
               )
