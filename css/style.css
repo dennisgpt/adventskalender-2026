@@ -1968,6 +1968,20 @@ footer .text-muted {
   }
 }
 
+@media (max-width: 430px) {
+  .header-breadcrumb {
+    display: none;
+  }
+
+  .thws-logo {
+    max-height: 48px;
+  }
+
+  .thws-header-inner {
+    gap: 6px;
+  }
+}
+
 @media (max-width: 375px) {
   .hero-bereich h1 {
     font-size: 1.55rem;
