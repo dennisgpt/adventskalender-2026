@@ -25,6 +25,11 @@ const geoeffneteDieSitzung = new Set();
  * @returns {number|null} Tuerchen-Nummer (1-24) oder null
  */
 function heutigesTuerchen() {
+  const urlTag = parseInt(new URLSearchParams(window.location.search).get('tag'), 10);
+  if (urlTag >= 1 && urlTag <= 24) {
+    return urlTag;
+  }
+
   if (TESTMODUS_TUERCHEN_NUMMER >= 1 && TESTMODUS_TUERCHEN_NUMMER <= 24) {
     return TESTMODUS_TUERCHEN_NUMMER;
   }
