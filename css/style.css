@@ -1655,6 +1655,7 @@ small span:hover {
 .quiz-antwort.btn-success,
 .quiz-antwort.btn-danger {
   color: #ffffff;
+  padding-right: 3.75rem;
 }
 
 .quiz-antwort.btn-success {
