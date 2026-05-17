@@ -261,6 +261,17 @@
       : button.dataset.originalHtml;
   }
 
+  function fehlertextFuerContentLoeschen(error) {
+    if (error && error.status === 409) {
+      return 'Content ist noch einem Türchen zugewiesen und kann deshalb nicht gelöscht werden.';
+    }
+
+    return window.AdventskalenderApi.fehlertextFuerApiFehler(
+      error,
+      'Content konnte nicht gelöscht werden.'
+    );
+  }
+
   function loescheContentEintrag(content, button) {
     if (!content || !content.id) {
       return;
@@ -276,16 +287,18 @@
 
     return window.AdventskalenderApi.loescheAdminContent(content.id)
       .then(function() {
+        if (String(bearbeiteterContentId) === String(content.id)) {
+          resetContentForm();
+          setzeContentFormSichtbar(false);
+        }
+
         zeigeContentToast('Content wurde gelöscht.', 'erfolg');
         return ladeAdminContentListe();
       })
       .catch(function(error) {
         setzeContentActionButtonLaedt(button, false);
         zeigeContentToast(
-          window.AdventskalenderApi.fehlertextFuerApiFehler(
-            error,
-            'Content konnte nicht gelöscht werden.'
-          ),
+          fehlertextFuerContentLoeschen(error),
           'fehler'
         );
       });
