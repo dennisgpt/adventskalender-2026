@@ -143,12 +143,41 @@ function backendItemNormalisieren(nummer, item) {
         nachricht: item.body || 'Dieses Spiel ist vorbereitet.'
       };
 
+    case 'quiz':
+      return quizItemNormalisieren(titel, item.body);
+
     default:
       return {
         typ: 'karte',
         titel: titel,
         nachricht: item.body || 'Dieser Inhaltstyp wird noch vorbereitet.'
       };
+  }
+}
+
+function quizItemNormalisieren(titel, body) {
+  try {
+    const quiz = typeof body === 'string' ? JSON.parse(body) : body;
+    const antworten = Array.isArray(quiz.options) ? quiz.options : [];
+    const richtig = Number.parseInt(quiz.correct, 10);
+
+    if (!quiz.question || antworten.length === 0 || Number.isNaN(richtig)) {
+      throw new Error('Quiz-Daten unvollstaendig');
+    }
+
+    return {
+      typ: 'quiz',
+      titel: titel,
+      frage: quiz.question,
+      antworten: antworten,
+      richtig: richtig
+    };
+  } catch (error) {
+    return {
+      typ: 'karte',
+      titel: titel,
+      nachricht: 'Dieses Quiz konnte nicht gelesen werden.'
+    };
   }
 }
 
@@ -325,49 +354,61 @@ function quizRendern(data) {
   const antwortButtons = data.antworten.map(function(antwort, index) {
     return `
       <button
-        class="btn btn-outline-warning w-100 mb-2 quiz-antwort"
+        class="btn btn-outline-warning quiz-antwort"
         data-index="${index}"
         data-richtig="${data.richtig}"
         onclick="quizAntwortPruefen(this)">
-        ${antwort}
+        <span class="quiz-antwort-text">${antwort}</span>
       </button>
     `;
   }).join('');
 
   return `
-    <div class="p-3">
-      <p class="lead text-center mb-4">${data.frage}</p>
-      <div id="quiz-antworten">
+    <div class="quiz-card">
+      <div class="quiz-badge">
+        <span aria-hidden="true">?</span>
+        Quiz
+      </div>
+      <p class="quiz-frage">${data.frage}</p>
+      <div id="quiz-antworten" class="quiz-antworten">
         ${antwortButtons}
       </div>
-      <div id="quiz-feedback" class="text-center mt-3 fw-bold" style="display:none;"></div>
+      <div id="quiz-feedback" class="quiz-feedback" style="display:none;"></div>
     </div>
   `;
 }
 
 /**
- * Prueft ob die geklickte Antwort richtig ist und zeigt Feedback.
+ * Prüft, ob die geklickte Antwort richtig ist, und zeigt Feedback.
  * @param {HTMLElement} button
  */
 function quizAntwortPruefen(button) {
   const gewaehlt = parseInt(button.getAttribute('data-index'), 10);
   const richtig = parseInt(button.getAttribute('data-richtig'), 10);
   const feedback = document.getElementById('quiz-feedback');
+  const antwortButtons = document.querySelectorAll('.quiz-antwort');
 
-  document.querySelectorAll('.quiz-antwort').forEach(function(btn) {
+  if (!feedback || Number.isNaN(gewaehlt) || Number.isNaN(richtig)) {
+    return;
+  }
+
+  antwortButtons.forEach(function(btn) {
     btn.disabled = true;
   });
 
   if (gewaehlt === richtig) {
     button.classList.replace('btn-outline-warning', 'btn-success');
+    feedback.classList.remove('ist-falsch');
+    feedback.classList.add('ist-richtig');
     feedback.textContent = 'Richtig! Super gemacht!';
-    feedback.style.color = '#5cb85c';
   } else {
     button.classList.replace('btn-outline-warning', 'btn-danger');
-    document.querySelectorAll('.quiz-antwort')[richtig]
-      .classList.replace('btn-outline-warning', 'btn-success');
-    feedback.textContent = 'Leider falsch. Versuchs naechstes Mal!';
-    feedback.style.color = '#d9534f';
+    if (antwortButtons[richtig]) {
+      antwortButtons[richtig].classList.replace('btn-outline-warning', 'btn-success');
+    }
+    feedback.classList.remove('ist-richtig');
+    feedback.classList.add('ist-falsch');
+    feedback.textContent = 'Leider falsch. Versuch es nächstes Mal!';
   }
 
   feedback.style.display = 'block';
