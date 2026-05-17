@@ -4,6 +4,8 @@
   let bearbeiteterContentId = null;
   let geladeneContentEintraege = [];
   let aktiverContentTypFilter = 'all';
+  let zuLoeschenderContent = null;
+  let zuLoeschenderButton = null;
   const STANDARD_ADMIN_CONTENT_LEER_TEXT = 'Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.';
 
   function istAdminEingeloggt() {
@@ -26,6 +28,9 @@
       form: document.getElementById('admin-content-form'),
       cancelButton: document.getElementById('admin-content-cancel'),
       submitButton: document.getElementById('admin-content-submit'),
+      deleteModal: document.getElementById('admin-content-delete-modal'),
+      deleteModalText: document.getElementById('admin-content-delete-modal-text'),
+      deleteConfirmButton: document.getElementById('admin-content-delete-confirm'),
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
@@ -233,7 +238,7 @@
 
     if (loeschButton) {
       loeschButton.addEventListener('click', function() {
-        loescheContentEintrag(content, loeschButton);
+        oeffneContentLoeschDialog(content, loeschButton);
       });
     }
 
@@ -272,18 +277,60 @@
     );
   }
 
+  function setzeContentLoeschModalLaedt(laedt) {
+    const button = contentElemente().deleteConfirmButton;
+
+    if (!button) {
+      return;
+    }
+
+    if (!button.dataset.originalHtml) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+
+    button.disabled = laedt;
+    button.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>Löschen...'
+      : button.dataset.originalHtml;
+  }
+
+  function oeffneContentLoeschDialog(content, button) {
+    if (!content || !content.id) {
+      return;
+    }
+
+    const elemente = contentElemente();
+    zuLoeschenderContent = content;
+    zuLoeschenderButton = button;
+
+    if (elemente.deleteModalText) {
+      elemente.deleteModalText.textContent = `Soll Content #${content.id} wirklich gelöscht werden?`;
+    }
+
+    setzeContentLoeschModalLaedt(false);
+
+    if (!elemente.deleteModal || !window.bootstrap) {
+      return;
+    }
+
+    bootstrap.Modal.getOrCreateInstance(elemente.deleteModal).show();
+  }
+
+  function schliesseContentLoeschDialog() {
+    const modalElement = contentElemente().deleteModal;
+
+    if (modalElement && window.bootstrap) {
+      bootstrap.Modal.getOrCreateInstance(modalElement).hide();
+    }
+  }
+
   function loescheContentEintrag(content, button) {
     if (!content || !content.id) {
       return;
     }
 
-    const bestaetigt = window.confirm(`Content #${content.id} wirklich löschen?`);
-
-    if (!bestaetigt) {
-      return;
-    }
-
     setzeContentActionButtonLaedt(button, true, 'Löschen...');
+    setzeContentLoeschModalLaedt(true);
 
     return window.AdventskalenderApi.loescheAdminContent(content.id)
       .then(function() {
@@ -293,10 +340,12 @@
         }
 
         zeigeContentToast('Content wurde gelöscht.', 'erfolg');
+        schliesseContentLoeschDialog();
         return ladeAdminContentListe();
       })
       .catch(function(error) {
         setzeContentActionButtonLaedt(button, false);
+        setzeContentLoeschModalLaedt(false);
         zeigeContentToast(
           fehlertextFuerContentLoeschen(error),
           'fehler'
@@ -670,6 +719,24 @@
     if (elemente.filterFeld) {
       elemente.filterFeld.addEventListener('change', function(event) {
         waehleContentTypFilter(event.target.value);
+      });
+    }
+
+    if (elemente.deleteConfirmButton) {
+      elemente.deleteConfirmButton.addEventListener('click', function() {
+        if (!zuLoeschenderContent) {
+          return;
+        }
+
+        loescheContentEintrag(zuLoeschenderContent, zuLoeschenderButton);
+      });
+    }
+
+    if (elemente.deleteModal) {
+      elemente.deleteModal.addEventListener('hidden.bs.modal', function() {
+        zuLoeschenderContent = null;
+        zuLoeschenderButton = null;
+        setzeContentLoeschModalLaedt(false);
       });
     }
 

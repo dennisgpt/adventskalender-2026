@@ -250,6 +250,45 @@ small span:hover {
   background: rgba(255, 255, 255, 0.14);
 }
 
+.admin-delete-modal .modal-body {
+  color: #dce8ff;
+}
+
+.admin-delete-modal-text {
+  margin: 0 0 0.7rem;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.admin-delete-modal-hinweis {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 0.68rem 0.76rem;
+  color: #b9c9ee;
+  background: rgba(5, 12, 30, 0.42);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.admin-delete-confirm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  border: 1px solid rgba(255, 154, 168, 0.4);
+  border-radius: 10px;
+  color: #ffe8ec;
+  background: linear-gradient(135deg, rgba(122, 39, 63, 0.92), rgba(83, 24, 46, 0.95));
+  font-weight: 800;
+}
+
+.admin-delete-confirm-btn:hover,
+.admin-delete-confirm-btn:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 178, 190, 0.58);
+  background: linear-gradient(135deg, rgba(148, 48, 76, 0.96), rgba(105, 29, 55, 0.98));
+}
+
 .admin-login-alert {
   margin-bottom: 1rem;
   border: 1px solid rgba(255, 140, 140, 0.38);
