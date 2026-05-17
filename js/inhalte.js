@@ -143,12 +143,41 @@ function backendItemNormalisieren(nummer, item) {
         nachricht: item.body || 'Dieses Spiel ist vorbereitet.'
       };
 
+    case 'quiz':
+      return quizItemNormalisieren(titel, item.body);
+
     default:
       return {
         typ: 'karte',
         titel: titel,
         nachricht: item.body || 'Dieser Inhaltstyp wird noch vorbereitet.'
       };
+  }
+}
+
+function quizItemNormalisieren(titel, body) {
+  try {
+    const quiz = typeof body === 'string' ? JSON.parse(body) : body;
+    const antworten = Array.isArray(quiz.options) ? quiz.options : [];
+    const richtig = Number.parseInt(quiz.correct, 10);
+
+    if (!quiz.question || antworten.length === 0 || Number.isNaN(richtig)) {
+      throw new Error('Quiz-Daten unvollstaendig');
+    }
+
+    return {
+      typ: 'quiz',
+      titel: titel,
+      frage: quiz.question,
+      antworten: antworten,
+      richtig: richtig
+    };
+  } catch (error) {
+    return {
+      typ: 'karte',
+      titel: titel,
+      nachricht: 'Dieses Quiz konnte nicht gelesen werden.'
+    };
   }
 }
 
