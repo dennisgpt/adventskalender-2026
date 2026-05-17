@@ -354,7 +354,7 @@ function quizRendern(data) {
   const antwortButtons = data.antworten.map(function(antwort, index) {
     return `
       <button
-        class="btn btn-outline-warning w-100 mb-2 quiz-antwort"
+        class="btn btn-outline-warning quiz-antwort"
         data-index="${index}"
         data-richtig="${data.richtig}"
         onclick="quizAntwortPruefen(this)">
@@ -364,12 +364,12 @@ function quizRendern(data) {
   }).join('');
 
   return `
-    <div class="p-3">
-      <p class="lead text-center mb-4">${data.frage}</p>
-      <div id="quiz-antworten">
+    <div class="quiz-card">
+      <p class="quiz-frage">${data.frage}</p>
+      <div id="quiz-antworten" class="quiz-antworten">
         ${antwortButtons}
       </div>
-      <div id="quiz-feedback" class="text-center mt-3 fw-bold" style="display:none;"></div>
+      <div id="quiz-feedback" class="quiz-feedback" style="display:none;"></div>
     </div>
   `;
 }

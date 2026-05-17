@@ -1561,6 +1561,60 @@ small span:hover {
   animation: modal-inhalt-reveal 0.5s ease;
 }
 
+/* ---- Quiz-Inhalte ---- */
+.quiz-card {
+  display: grid;
+  gap: 1rem;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1rem 0.25rem;
+}
+
+.quiz-frage {
+  margin: 0 0 0.25rem;
+  color: #ffffff;
+  font-size: 1.28rem;
+  font-weight: 900;
+  line-height: 1.35;
+  text-align: center;
+}
+
+.quiz-antworten {
+  display: grid;
+  gap: 0.72rem;
+}
+
+.quiz-antwort {
+  min-height: 54px;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 900;
+  color: #ffe39a;
+  border-color: rgba(255, 209, 102, 0.86);
+  background: rgba(5, 12, 30, 0.3);
+}
+
+.quiz-antwort:hover,
+.quiz-antwort:focus-visible {
+  color: #1b1405;
+  border-color: rgba(255, 220, 128, 0.96);
+  background: linear-gradient(135deg, #ffe7a3, #ffc94d);
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.16);
+}
+
+.quiz-antwort:disabled {
+  opacity: 0.9;
+}
+
+.quiz-feedback {
+  min-height: 1.4rem;
+  margin-top: 0.35rem;
+  font-size: 1rem;
+  font-weight: 900;
+  text-align: center;
+}
+
 /* ---- Modal States (Loading / Empty / Error) ---- */
 .modal-state-card {
   text-align: center;
