@@ -190,13 +190,8 @@ function kalenderGridAufbauen(apiTage) {
     karte.setAttribute('data-nummer', nummer);
     karte.setAttribute('aria-label', 'Tuerchen ' + nummer);
 
-    let symbol = '';
-    if (zustand === 'geoeffnet') symbol = '\u2713';
-    else if (zustand === 'gesperrt') symbol = '\uD83D\uDD12';
-    else symbol = '\uD83C\uDF81';
-
     karte.innerHTML = `
-      <span class="tuerchen-nummer">${symbol}</span>
+      <div class="geschenk-icon"></div>
       <span class="tuerchen-label">${nummer}</span>
     `;
 

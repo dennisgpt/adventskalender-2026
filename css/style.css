@@ -1317,133 +1317,122 @@ small span:hover {
 }
 
 /* ---- TÃ¼rchen-Karten ---- */
+/* ---- Geschenkbox-Karten ---- */
+
 .tuerchen-karte {
   aspect-ratio: 1 / 1;
-  border-radius: 10px;
-  border: 2.5px solid rgba(212, 175, 55, 0.55);
+  border-radius: 8px;
+  border: 2px solid rgba(232, 200, 74, 0.35);
   cursor: pointer;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 6%;
   position: relative;
-  overflow: visible;
-  margin-top: 42px;
+  overflow: hidden;
+  margin-top: 0;
   user-select: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.55);
-}
-
-/* Schleife (echte Bow-Form via clip-path) */
-.tuerchen-karte::before {
-  content: "";
-  position: absolute;
-  top: -38px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 56px;
-  height: 34px;
-  background: radial-gradient(ellipse at 50% 50%, #7a5000 0%, #b87800 18%, #f0d020 42%, #e8a800 68%, #c07800 100%);
-  clip-path: polygon(0% 100%, 50% 50%, 100% 100%, 100% 0%, 50% 50%, 0% 0%);
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.6));
-  z-index: 4;
-}
-
-/* Geschenkband-Kreuz + Deckel-Effekt */
-.tuerchen-karte::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to bottom,
-      rgba(255, 255, 255, 0.14) 0%,
-      rgba(255, 255, 255, 0.14) 33%,
-      rgba(0, 0, 0, 0.1) 33%,
-      rgba(0, 0, 0, 0.1) 36%,
-      transparent 36%
-    ),
-    linear-gradient(to right,
-      transparent 44%, rgba(212, 175, 55, 0.65) 44%,
-      rgba(212, 175, 55, 0.65) 56%, transparent 56%
-    ),
-    linear-gradient(to bottom,
-      transparent 30%, rgba(212, 175, 55, 0.65) 30%,
-      rgba(212, 175, 55, 0.65) 40%, transparent 40%
-    );
-  border-radius: 10px;
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* 7 Geschenkbox-Farben */
-.tuerchen-farbe-1 { background: linear-gradient(145deg, #e02828 0%, #a01818 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-2 { background: linear-gradient(145deg, #2258b8 0%, #143a82 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-3 { background: linear-gradient(145deg, #1e8844 0%, #125c2e 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-4 { background: linear-gradient(145deg, #8a38b8 0%, #5e2082 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-5 { background: linear-gradient(145deg, #3a6080 0%, #204458 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-6 { background: linear-gradient(145deg, #c8960a 0%, #8b6508 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-.tuerchen-farbe-7 { background: linear-gradient(145deg, #a01e4a 0%, #6e1230 100%); box-shadow: 0 10px 28px rgba(0,0,0,0.55); }
-
-/* Türchen 24 – besondere Hervorhebung */
-.tuerchen-karte[data-nummer="24"]:not(.gesperrt) {
-  border-color: rgba(212, 175, 55, 0.95);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.6), 0 0 22px rgba(212,175,55,0.55), 0 0 48px rgba(212,175,55,0.25);
-}
-
-/* Verfügbares Türchen: goldener Rand */
-.tuerchen-karte.verfuegbar {
-  cursor: pointer;
-  border-color: rgba(212, 175, 55, 0.9);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.55),
-    0 0 14px rgba(212, 175, 55, 0.65),
-    0 0 30px rgba(212, 175, 55, 0.3),
-    inset 0 0 0 4px rgba(212, 175, 55, 0.7);
+    5px 8px 0 rgba(0, 0, 0, 0.4),
+    0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
+/* 3 Kartenfarben via nth-child */
+#kalender-grid > div:nth-child(3n+1) .tuerchen-karte { background: linear-gradient(150deg, #a50e25 0%, #8b0a20 100%); }
+#kalender-grid > div:nth-child(3n+2) .tuerchen-karte { background: linear-gradient(150deg, #162660 0%, #0f1f4a 100%); }
+#kalender-grid > div:nth-child(3n)   .tuerchen-karte { background: linear-gradient(150deg, #0d2d15 0%, #0a1f10 100%); }
+
+/* SVG-Geschenkbox via CSS Mask */
+.geschenk-icon {
+  width: 52%;
+  aspect-ratio: 1 / 1;
+  background-color: #e8c84a;
+  mask-image: url('../img/geschenkbox.svg');
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-position: center;
+  -webkit-mask-image: url('../img/geschenkbox.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  -webkit-mask-position: center;
+  flex-shrink: 0;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover */
 .tuerchen-karte.verfuegbar:hover,
 .tuerchen-karte.heute:hover {
-  transform: scale(1.08) translateY(-3px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 0 2px rgba(212, 175, 55, 0.5);
+  transform: translateY(-6px);
+  box-shadow:
+    6px 14px 0 rgba(0, 0, 0, 0.4),
+    0 22px 40px rgba(0, 0, 0, 0.55);
 }
 
 .tuerchen-karte.verfuegbar:focus-visible,
 .tuerchen-karte.heute:focus-visible {
-  outline: 3px solid #ffd166;
-  outline-offset: 4px;
+  outline: 3px solid #e8c84a;
+  outline-offset: 3px;
 }
 
-/* Bereits geöffnetes Türchen */
+/* Verfügbar */
+.tuerchen-karte.verfuegbar {
+  cursor: pointer;
+}
+
+/* Bereits geöffnet */
 .tuerchen-karte.geoeffnet {
-  filter: brightness(0.7) saturate(0.55);
-  border-color: rgba(127, 209, 185, 0.55);
   cursor: default;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+  filter: brightness(0.52) saturate(0.35);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow:
+    3px 5px 0 rgba(0, 0, 0, 0.3),
+    0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
-/* Gesperrtes Türchen */
+.tuerchen-karte.geoeffnet .tuerchen-label {
+  display: none;
+}
+
+/* Gesperrt */
 .tuerchen-karte.gesperrt {
-  filter: grayscale(75%) brightness(0.48);
-  border-color: rgba(90, 100, 130, 0.35);
+  background: #0a0a15 !important;
   cursor: not-allowed;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.45);
+  border-color: rgba(255, 255, 255, 0.05);
+  box-shadow:
+    4px 6px 0 rgba(0, 0, 0, 0.5),
+    0 8px 18px rgba(0, 0, 0, 0.5);
+}
+
+.tuerchen-karte.gesperrt .geschenk-icon {
+  background-color: rgba(255, 255, 255, 0.07);
 }
 
 .tuerchen-karte.schuetteln {
   animation: schuetteln 0.5s ease-in-out;
 }
 
-/* Heutiges Türchen: roter Puls-Glow */
+/* Heute */
 .tuerchen-karte.heute {
   cursor: pointer;
-  border-color: #ff4d6d;
-  border-width: 3px;
+  border-color: #e8c84a;
+  border-width: 2.5px;
+  animation: pulsieren 1.6s ease-in-out infinite;
+}
+
+.tuerchen-karte.heute .geschenk-icon {
+  background-color: #ffffff;
+}
+
+/* Türchen 24 – goldener Glow */
+.tuerchen-karte[data-nummer="24"]:not(.gesperrt) {
+  border-color: #e8c84a;
   box-shadow:
-    0 10px 28px rgba(0, 0, 0, 0.55),
-    0 0 14px rgba(212, 175, 55, 0.55),
-    0 0 30px rgba(212, 175, 55, 0.25),
-    0 0 0 3px rgba(255, 77, 109, 0.45);
-  animation: pulsieren 1.5s infinite;
+    5px 8px 0 rgba(0, 0, 0, 0.4),
+    0 12px 28px rgba(0, 0, 0, 0.5),
+    0 0 22px rgba(232, 200, 74, 0.5),
+    0 0 48px rgba(232, 200, 74, 0.2);
 }
 
 .tuerchen-karte.loading {
@@ -1473,17 +1462,16 @@ small span:hover {
 @keyframes pulsieren {
   0%, 100% {
     box-shadow:
-      0 10px 28px rgba(0, 0, 0, 0.55),
-      0 0 12px rgba(212, 175, 55, 0.45),
-      0 0 26px rgba(212, 175, 55, 0.2),
-      0 0 0 3px rgba(255, 77, 109, 0.4);
+      5px 8px 0 rgba(0, 0, 0, 0.4),
+      0 12px 28px rgba(0, 0, 0, 0.5),
+      0 0 0 0px rgba(232, 200, 74, 0.5);
   }
   50% {
     box-shadow:
-      0 10px 28px rgba(0, 0, 0, 0.55),
-      0 0 20px rgba(212, 175, 55, 0.65),
-      0 0 40px rgba(212, 175, 55, 0.3),
-      0 0 0 7px rgba(255, 77, 109, 0.62);
+      5px 8px 0 rgba(0, 0, 0, 0.4),
+      0 12px 28px rgba(0, 0, 0, 0.5),
+      0 0 0 5px rgba(232, 200, 74, 0.5),
+      0 0 18px rgba(232, 200, 74, 0.35);
   }
 }
 
@@ -1502,47 +1490,14 @@ small span:hover {
   100% { transform: translateX(35%) rotate(12deg); }
 }
 
-/* Türchen-Nummer (✓ / Emoji) – nur bei geöffnetem Türchen */
-.tuerchen-nummer {
-  display: none;
-  font-size: 2.2rem;
-  line-height: 1;
-  font-weight: 800;
-  color: #b8e8da;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
-  position: relative;
-  z-index: 3;
-}
-
-.tuerchen-karte.geoeffnet .tuerchen-nummer {
-  display: block;
-}
-
-.tuerchen-karte.gesperrt .tuerchen-nummer {
-  display: block;
-  font-size: 1.3rem;
-  color: rgba(255, 255, 255, 0.9);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8), 0 0 12px rgba(0, 0, 0, 0.6);
-}
-
-.tuerchen-karte.gesperrt .tuerchen-label {
-  display: block;
-  font-size: 1.5rem;
-}
-
-/* Türchen-Label (Zahl) – groß, weiß, gut lesbar auf allen Farben */
+/* Türchen-Label (Zahl) */
 .tuerchen-label {
-  font-size: 2.1rem;
+  font-size: 1.6rem;
   font-weight: 900;
-  color: #ffffff;
-  text-shadow:
-    0 0 8px rgba(0, 0, 0, 0.9),
-    0 2px 6px rgba(0, 0, 0, 0.85),
-    1px 1px 0 rgba(0, 0, 0, 0.6);
+  color: rgba(255, 255, 255, 0.95);
   letter-spacing: -0.02em;
   line-height: 1;
-  position: relative;
-  z-index: 3;
+  text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
 }
 
 .tuerchen-karte.geoeffnet .tuerchen-label {
@@ -1550,10 +1505,7 @@ small span:hover {
 }
 
 .tuerchen-karte.gesperrt .tuerchen-label {
-  color: #e8ecf4;
-  text-shadow:
-    0 0 6px rgba(0, 0, 0, 0.8),
-    0 2px 5px rgba(0, 0, 0, 0.75);
+  color: rgba(255, 255, 255, 0.22);
 }
 
 /* ---- Modal (TÃ¼rchen-Inhalt) ---- */
@@ -2197,23 +2149,25 @@ footer .text-muted {
 
   .tuerchen-karte {
     border-width: 2px;
-    margin-top: 30px;
-    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.48);
+    box-shadow:
+      4px 6px 0 rgba(0, 0, 0, 0.4),
+      0 8px 18px rgba(0, 0, 0, 0.48);
   }
 
-  .tuerchen-karte::before {
-    top: -26px;
-    width: 40px;
-    height: 24px;
+  .geschenk-icon {
+    width: 48%;
   }
 
   .tuerchen-karte.verfuegbar:hover,
   .tuerchen-karte.heute:hover {
-    transform: scale(1.05) translateY(-2px);
+    transform: translateY(-4px);
   }
 
   .tuerchen-karte.heute {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(255, 77, 109, 0.4);
+    box-shadow:
+      4px 6px 0 rgba(0, 0, 0, 0.4),
+      0 8px 18px rgba(0, 0, 0, 0.48),
+      0 0 0 2px rgba(232, 200, 74, 0.55);
   }
 
   .modal-state-card {
@@ -2232,12 +2186,8 @@ footer .text-muted {
     font-size: 0.85rem;
   }
 
-  .tuerchen-nummer {
-    font-size: 1.7rem;
-  }
-
   .tuerchen-label {
-    font-size: 1.5rem;
+    font-size: 1.3rem;
   }
 }
 
