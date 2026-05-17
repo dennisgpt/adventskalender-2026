@@ -1120,14 +1120,17 @@ small span:hover {
 
 .admin-zuweisung-pool {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
   gap: 0.85rem;
 }
 
 .admin-zuweisung-content {
   display: grid;
+  align-content: start;
   gap: 0.58rem;
+  min-width: 0;
   min-height: 130px;
+  overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 11px;
   padding: 0.9rem;
@@ -1136,16 +1139,34 @@ small span:hover {
   background: rgba(3, 10, 28, 0.54);
 }
 
+.admin-zuweisung-content .admin-content-type {
+  justify-self: start;
+  max-width: 100%;
+  min-width: 0;
+}
+
 .admin-zuweisung-content strong {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   color: #ffffff;
   font-size: 0.94rem;
   font-weight: 900;
+  line-height: 1.35;
 }
 
 .admin-zuweisung-content small {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
   color: #9fb6df;
   font-size: 0.76rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 
 .admin-zuweisung-content em {
