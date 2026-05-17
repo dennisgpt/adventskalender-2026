@@ -358,13 +358,17 @@ function quizRendern(data) {
         data-index="${index}"
         data-richtig="${data.richtig}"
         onclick="quizAntwortPruefen(this)">
-        ${antwort}
+        <span class="quiz-antwort-text">${antwort}</span>
       </button>
     `;
   }).join('');
 
   return `
     <div class="quiz-card">
+      <div class="quiz-badge">
+        <span aria-hidden="true">?</span>
+        Quiz
+      </div>
       <p class="quiz-frage">${data.frage}</p>
       <div id="quiz-antworten" class="quiz-antworten">
         ${antwortButtons}
@@ -394,15 +398,17 @@ function quizAntwortPruefen(button) {
 
   if (gewaehlt === richtig) {
     button.classList.replace('btn-outline-warning', 'btn-success');
+    feedback.classList.remove('ist-falsch');
+    feedback.classList.add('ist-richtig');
     feedback.textContent = 'Richtig! Super gemacht!';
-    feedback.style.color = '#5cb85c';
   } else {
     button.classList.replace('btn-outline-warning', 'btn-danger');
     if (antwortButtons[richtig]) {
       antwortButtons[richtig].classList.replace('btn-outline-warning', 'btn-success');
     }
+    feedback.classList.remove('ist-richtig');
+    feedback.classList.add('ist-falsch');
     feedback.textContent = 'Leider falsch. Versuch es nächstes Mal!';
-    feedback.style.color = '#d9534f';
   }
 
   feedback.style.display = 'block';
