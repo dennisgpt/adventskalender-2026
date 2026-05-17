@@ -375,15 +375,20 @@ function quizRendern(data) {
 }
 
 /**
- * Prueft ob die geklickte Antwort richtig ist und zeigt Feedback.
+ * Prüft, ob die geklickte Antwort richtig ist, und zeigt Feedback.
  * @param {HTMLElement} button
  */
 function quizAntwortPruefen(button) {
   const gewaehlt = parseInt(button.getAttribute('data-index'), 10);
   const richtig = parseInt(button.getAttribute('data-richtig'), 10);
   const feedback = document.getElementById('quiz-feedback');
+  const antwortButtons = document.querySelectorAll('.quiz-antwort');
 
-  document.querySelectorAll('.quiz-antwort').forEach(function(btn) {
+  if (!feedback || Number.isNaN(gewaehlt) || Number.isNaN(richtig)) {
+    return;
+  }
+
+  antwortButtons.forEach(function(btn) {
     btn.disabled = true;
   });
 
@@ -393,9 +398,10 @@ function quizAntwortPruefen(button) {
     feedback.style.color = '#5cb85c';
   } else {
     button.classList.replace('btn-outline-warning', 'btn-danger');
-    document.querySelectorAll('.quiz-antwort')[richtig]
-      .classList.replace('btn-outline-warning', 'btn-success');
-    feedback.textContent = 'Leider falsch. Versuchs naechstes Mal!';
+    if (antwortButtons[richtig]) {
+      antwortButtons[richtig].classList.replace('btn-outline-warning', 'btn-success');
+    }
+    feedback.textContent = 'Leider falsch. Versuch es nächstes Mal!';
     feedback.style.color = '#d9534f';
   }
 
