@@ -208,11 +208,16 @@
           <i class="bi ${aktivButtonIcon}" aria-hidden="true"></i>
           ${aktivButtonLabel}
         </button>
+        <button class="admin-content-action-btn ist-warnung" type="button" data-admin-content-delete>
+          <i class="bi bi-trash" aria-hidden="true"></i>
+          Löschen
+        </button>
       </div>
     `;
 
     const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
     const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');
+    const loeschButton = karte.querySelector('[data-admin-content-delete]');
 
     if (bearbeitenButton) {
       bearbeitenButton.addEventListener('click', function() {
@@ -226,6 +231,12 @@
       });
     }
 
+    if (loeschButton) {
+      loeschButton.addEventListener('click', function() {
+        loescheContentEintrag(content, loeschButton);
+      });
+    }
+
     return karte;
   }
 
@@ -233,6 +244,51 @@
     if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
       window.AdminLoginUi.zeigeStatus(nachricht, typ);
     }
+  }
+
+  function setzeContentActionButtonLaedt(button, laedt, ladeText) {
+    if (!button) {
+      return;
+    }
+
+    if (!button.dataset.originalHtml) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+
+    button.disabled = laedt;
+    button.innerHTML = laedt
+      ? `<span class="spinner-border spinner-border-sm" aria-hidden="true"></span>${ladeText}`
+      : button.dataset.originalHtml;
+  }
+
+  function loescheContentEintrag(content, button) {
+    if (!content || !content.id) {
+      return;
+    }
+
+    const bestaetigt = window.confirm(`Content #${content.id} wirklich löschen?`);
+
+    if (!bestaetigt) {
+      return;
+    }
+
+    setzeContentActionButtonLaedt(button, true, 'Löschen...');
+
+    return window.AdventskalenderApi.loescheAdminContent(content.id)
+      .then(function() {
+        zeigeContentToast('Content wurde gelöscht.', 'erfolg');
+        return ladeAdminContentListe();
+      })
+      .catch(function(error) {
+        setzeContentActionButtonLaedt(button, false);
+        zeigeContentToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Content konnte nicht gelöscht werden.'
+          ),
+          'fehler'
+        );
+      });
   }
 
   function aktualisiereContentAktivstatus(content, button) {
