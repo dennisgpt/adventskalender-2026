@@ -77,9 +77,18 @@
       'aria-label',
       eingeloggt ? 'Admin-Bereich öffnen' : 'Admin Login öffnen'
     );
+
+    if (eingeloggt) {
+      loginButton.removeAttribute('data-bs-toggle');
+      loginButton.removeAttribute('data-bs-target');
+    } else {
+      loginButton.setAttribute('data-bs-toggle', 'modal');
+      loginButton.setAttribute('data-bs-target', '#login-modal');
+    }
+
     loginButtonIcon.className = eingeloggt
       ? 'bi bi-shield-check'
-      : 'bi bi-mortarboard-fill';
+      : 'bi bi-person-gear';
     loginButtonText.textContent = eingeloggt
       ? loginButton.getAttribute('data-admin-text')
       : loginButton.getAttribute('data-login-text');

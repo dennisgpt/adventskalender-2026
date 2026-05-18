@@ -690,6 +690,7 @@ small span:hover {
 
 .admin-content-feld {
   display: grid;
+  align-content: start;
   gap: 0.36rem;
   margin: 0;
   color: #aebfe8;
@@ -701,7 +702,6 @@ small span:hover {
 .admin-content-feld select,
 .admin-content-feld textarea {
   width: 100%;
-  min-height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9px;
   padding: 0.46rem 0.6rem;
@@ -711,7 +711,13 @@ small span:hover {
   font-weight: 700;
 }
 
+.admin-content-feld input,
+.admin-content-feld select {
+  min-height: 40px;
+}
+
 .admin-content-feld textarea {
+  min-height: 40px;
   resize: vertical;
 }
 
@@ -726,6 +732,132 @@ small span:hover {
 .admin-content-feld input:disabled,
 .admin-content-feld textarea:disabled {
   opacity: 0.62;
+}
+
+.admin-content-file-feld {
+  align-self: start;
+}
+
+.admin-content-media-spalte {
+  display: grid;
+  align-self: start;
+  gap: 0.72rem;
+  max-width: 640px;
+}
+
+.admin-content-file-auswahl {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 48px;
+  border: 1px solid rgba(151, 179, 226, 0.24);
+  border-radius: 8px;
+  padding: 0.42rem 0.54rem;
+  background: rgba(4, 13, 35, 0.62);
+}
+
+.admin-content-file-button {
+  min-height: 32px;
+  border: 1px solid rgba(255, 209, 102, 0.34);
+  border-radius: 8px;
+  padding: 0.32rem 0.62rem;
+  color: #1b1405;
+  background: linear-gradient(135deg, #ffe7a3, #ffc94d);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-content-file-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.24);
+}
+
+.admin-content-file-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.admin-content-file-name {
+  color: #f4f7ff;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.admin-content-file-feld small {
+  color: #8fa7d1;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
+.admin-content-upload-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.1rem;
+  color: #9fb6df;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-content-upload-status.ist-ladend {
+  color: #ffd97f;
+}
+
+.admin-content-upload-status.hat-erfolg {
+  color: #8de3b0;
+}
+
+.admin-content-upload-status.hat-fehler {
+  color: #ff9aa8;
+}
+
+.admin-content-upload-preview {
+  display: block;
+  width: min(100%, 260px);
+  justify-self: start;
+  overflow: hidden;
+  border: 1px solid rgba(141, 227, 176, 0.28);
+  border-radius: 10px;
+  background: rgba(5, 12, 30, 0.5);
+  padding: 0;
+  text-align: left;
+}
+
+.admin-content-upload-preview img {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+}
+
+.admin-content-upload-preview-name {
+  display: block;
+  padding: 0.48rem 0.58rem;
+  color: #d9e7ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.admin-content-upload-preview:hover,
+.admin-content-upload-preview:focus-visible {
+  border-color: rgba(255, 209, 102, 0.72);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
+.admin-upload-preview-modal .modal-body {
+  padding: 1rem;
+}
+
+.admin-upload-preview-modal img {
+  display: block;
+  width: 100%;
+  max-height: min(76vh, 720px);
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(2, 8, 24, 0.62);
 }
 
 .admin-content-quiz-felder {
