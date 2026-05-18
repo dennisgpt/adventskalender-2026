@@ -780,6 +780,8 @@ small span:hover {
   border: 1px solid rgba(141, 227, 176, 0.28);
   border-radius: 10px;
   background: rgba(5, 12, 30, 0.5);
+  padding: 0;
+  text-align: left;
 }
 
 .admin-content-upload-preview img {
@@ -796,6 +798,26 @@ small span:hover {
   font-size: 0.76rem;
   font-weight: 800;
   overflow-wrap: anywhere;
+}
+
+.admin-content-upload-preview:hover,
+.admin-content-upload-preview:focus-visible {
+  border-color: rgba(255, 209, 102, 0.72);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
+.admin-upload-preview-modal .modal-body {
+  padding: 1rem;
+}
+
+.admin-upload-preview-modal img {
+  display: block;
+  width: 100%;
+  max-height: min(76vh, 720px);
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(2, 8, 24, 0.62);
 }
 
 .admin-content-quiz-felder {

@@ -161,6 +161,22 @@
     </div>
   </div>
 
+  <!-- ===== MODAL: Admin Upload-Vorschau ===== -->
+  <div class="modal fade" id="admin-content-upload-preview-modal" tabindex="-1" aria-labelledby="admin-content-upload-preview-modal-titel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content admin-login-modal admin-upload-preview-modal">
+        <div class="modal-header">
+          <h5 class="modal-title" id="admin-content-upload-preview-modal-titel">Bildvorschau</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+        </div>
+
+        <div class="modal-body">
+          <img id="admin-content-upload-preview-modal-bild" src="" alt="Vergrößerte Bildvorschau">
+        </div>
+      </div>
+    </div>
+  </div>
+
 
   <!-- ===== HERO-BEREICH ===== -->
   <section class="hero-bereich text-center py-5">
@@ -291,10 +307,10 @@
           <span class="admin-content-upload-status" id="admin-content-upload-status" aria-live="polite"></span>
         </label>
 
-        <span class="admin-content-upload-preview d-none" id="admin-content-upload-preview">
+        <button class="admin-content-upload-preview d-none" id="admin-content-upload-preview" type="button">
           <img id="admin-content-upload-preview-bild" src="" alt="Vorschau der hochgeladenen Datei">
           <span class="admin-content-upload-preview-name" id="admin-content-upload-preview-name"></span>
-        </span>
+        </button>
 
         <input id="admin-content-media-url" name="media_url" type="hidden">
       </div>

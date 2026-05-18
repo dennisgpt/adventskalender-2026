@@ -39,6 +39,9 @@
       uploadPreview: document.getElementById('admin-content-upload-preview'),
       uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
       uploadPreviewName: document.getElementById('admin-content-upload-preview-name'),
+      uploadPreviewModal: document.getElementById('admin-content-upload-preview-modal'),
+      uploadPreviewModalTitel: document.getElementById('admin-content-upload-preview-modal-titel'),
+      uploadPreviewModalBild: document.getElementById('admin-content-upload-preview-modal-bild'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
@@ -517,17 +520,47 @@
   function setzeContentUploadVorschau(mediaUrl, dateiname) {
     const elemente = contentElemente();
     const hatMediaUrl = Boolean(mediaUrl);
+    const titel = dateiname || 'Hochgeladene Datei';
 
     if (elemente.uploadPreview) {
       elemente.uploadPreview.classList.toggle('d-none', !hatMediaUrl);
+      elemente.uploadPreview.setAttribute('aria-label', hatMediaUrl ? `${titel} vergrößert anzeigen` : '');
     }
 
     if (elemente.uploadPreviewBild) {
       elemente.uploadPreviewBild.src = hatMediaUrl ? mediaUrl : '';
+      elemente.uploadPreviewBild.alt = hatMediaUrl ? `Vorschau von ${titel}` : 'Vorschau der hochgeladenen Datei';
     }
 
     if (elemente.uploadPreviewName) {
-      elemente.uploadPreviewName.textContent = hatMediaUrl ? dateiname || 'Hochgeladene Datei' : '';
+      elemente.uploadPreviewName.textContent = hatMediaUrl ? titel : '';
+    }
+  }
+
+  function zeigeContentUploadVorschauGross() {
+    const elemente = contentElemente();
+    const mediaUrl = elemente.mediaUrlFeld ? elemente.mediaUrlFeld.value : '';
+    const dateiname = elemente.uploadPreviewName ? elemente.uploadPreviewName.textContent : '';
+
+    if (!mediaUrl || !elemente.uploadPreviewModal || !elemente.uploadPreviewModalBild) {
+      return;
+    }
+
+    if (elemente.uploadPreviewModalTitel) {
+      elemente.uploadPreviewModalTitel.textContent = dateiname || 'Bildvorschau';
+    }
+
+    elemente.uploadPreviewModalBild.src = mediaUrl;
+    elemente.uploadPreviewModalBild.alt = dateiname ? `Vergrößerte Vorschau von ${dateiname}` : 'Vergrößerte Bildvorschau';
+
+    bootstrap.Modal.getOrCreateInstance(elemente.uploadPreviewModal).show();
+  }
+
+  function resetContentUploadVorschauModal() {
+    const elemente = contentElemente();
+
+    if (elemente.uploadPreviewModalBild) {
+      elemente.uploadPreviewModalBild.src = '';
     }
   }
 
@@ -824,6 +857,14 @@
           ladeContentDateiHoch(datei);
         }
       });
+    }
+
+    if (elemente.uploadPreview) {
+      elemente.uploadPreview.addEventListener('click', zeigeContentUploadVorschauGross);
+    }
+
+    if (elemente.uploadPreviewModal) {
+      elemente.uploadPreviewModal.addEventListener('hidden.bs.modal', resetContentUploadVorschauModal);
     }
 
     if (elemente.deleteConfirmButton) {
