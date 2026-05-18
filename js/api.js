@@ -182,13 +182,14 @@
 
   function adminFetch(pfad, optionen) {
     const fetchOptionen = optionen || {};
+    const istFormData = typeof FormData !== 'undefined' && fetchOptionen.body instanceof FormData;
     const headers = {
       Accept: 'application/json',
       ...baueAdminAuthHeader(),
       ...(fetchOptionen.headers || {})
     };
 
-    if (Object.prototype.hasOwnProperty.call(fetchOptionen, 'body') && typeof fetchOptionen.body !== 'string') {
+    if (Object.prototype.hasOwnProperty.call(fetchOptionen, 'body') && typeof fetchOptionen.body !== 'string' && !istFormData) {
       headers['Content-Type'] = headers['Content-Type'] || 'application/json';
       fetchOptionen.body = JSON.stringify(fetchOptionen.body);
     }
@@ -299,6 +300,18 @@
     });
   }
 
+  // POST /api/admin/upload
+  // Laedt eine Datei per multipart/form-data hoch.
+  function ladeAdminDateiHoch(datei) {
+    const daten = new FormData();
+    daten.append('file', datei);
+
+    return adminFetch('/api/admin/upload', {
+      method: 'POST',
+      body: daten
+    });
+  }
+
   // GET /api/admin/years
   // Erfolgsantwort: Array aller Kalenderjahre inkl. aktiver Markierung
   function ladeAdminJahre() {
@@ -391,6 +404,7 @@
     erstelleAdminContent,
     aktualisiereAdminContent,
     loescheAdminContent,
+    ladeAdminDateiHoch,
     ladeAdminJahre,
     erstelleAdminJahr,
     aktualisiereAdminJahr,

@@ -6,6 +6,7 @@
   let aktiverContentTypFilter = 'all';
   let zuLoeschenderContent = null;
   let zuLoeschenderButton = null;
+  let contentUploadLaeuft = false;
   const STANDARD_ADMIN_CONTENT_LEER_TEXT = 'Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.';
 
   function istAdminEingeloggt() {
@@ -33,6 +34,14 @@
       deleteConfirmButton: document.getElementById('admin-content-delete-confirm'),
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
+      fileFeld: document.getElementById('admin-content-file'),
+      uploadStatus: document.getElementById('admin-content-upload-status'),
+      uploadPreview: document.getElementById('admin-content-upload-preview'),
+      uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
+      uploadPreviewName: document.getElementById('admin-content-upload-preview-name'),
+      uploadPreviewModal: document.getElementById('admin-content-upload-preview-modal'),
+      uploadPreviewModalTitel: document.getElementById('admin-content-upload-preview-modal-titel'),
+      uploadPreviewModalBild: document.getElementById('admin-content-upload-preview-modal-bild'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
@@ -500,6 +509,131 @@
     };
   }
 
+  function mediaUrlAusUploadAntwort(antwort) {
+    if (!antwort || typeof antwort !== 'object') {
+      return '';
+    }
+
+    return antwort.media_url || antwort.secure_url || antwort.url || '';
+  }
+
+  function setzeContentUploadVorschau(mediaUrl, dateiname) {
+    const elemente = contentElemente();
+    const hatMediaUrl = Boolean(mediaUrl);
+    const titel = dateiname || 'Hochgeladene Datei';
+
+    if (elemente.uploadPreview) {
+      elemente.uploadPreview.classList.toggle('d-none', !hatMediaUrl);
+      elemente.uploadPreview.setAttribute('aria-label', hatMediaUrl ? `${titel} vergrößert anzeigen` : '');
+    }
+
+    if (elemente.uploadPreviewBild) {
+      elemente.uploadPreviewBild.src = hatMediaUrl ? mediaUrl : '';
+      elemente.uploadPreviewBild.alt = hatMediaUrl ? `Vorschau von ${titel}` : 'Vorschau der hochgeladenen Datei';
+    }
+
+    if (elemente.uploadPreviewName) {
+      elemente.uploadPreviewName.textContent = hatMediaUrl ? titel : '';
+    }
+  }
+
+  function zeigeContentUploadVorschauGross() {
+    const elemente = contentElemente();
+    const mediaUrl = elemente.mediaUrlFeld ? elemente.mediaUrlFeld.value : '';
+    const dateiname = elemente.uploadPreviewName ? elemente.uploadPreviewName.textContent : '';
+
+    if (!mediaUrl || !elemente.uploadPreviewModal || !elemente.uploadPreviewModalBild) {
+      return;
+    }
+
+    if (elemente.uploadPreviewModalTitel) {
+      elemente.uploadPreviewModalTitel.textContent = dateiname || 'Bildvorschau';
+    }
+
+    elemente.uploadPreviewModalBild.src = mediaUrl;
+    elemente.uploadPreviewModalBild.alt = dateiname ? `Vergrößerte Vorschau von ${dateiname}` : 'Vergrößerte Bildvorschau';
+
+    bootstrap.Modal.getOrCreateInstance(elemente.uploadPreviewModal).show();
+  }
+
+  function resetContentUploadVorschauModal() {
+    const elemente = contentElemente();
+
+    if (elemente.uploadPreviewModalBild) {
+      elemente.uploadPreviewModalBild.src = '';
+    }
+  }
+
+  function uploadFehlerText(error) {
+    const meldung = error && error.message ? error.message : '';
+
+    if (meldung.toLowerCase() === 'file too large') {
+      return 'Die Datei ist zu groß!';
+    }
+
+    return window.AdventskalenderApi.fehlertextFuerApiFehler(
+      error,
+      'Datei konnte nicht hochgeladen werden!'
+    );
+  }
+
+  function setzeContentUploadStatus(status, meldung) {
+    const elemente = contentElemente();
+
+    contentUploadLaeuft = status === 'loading';
+
+    if (elemente.fileFeld) {
+      elemente.fileFeld.disabled = contentUploadLaeuft;
+    }
+
+    if (elemente.uploadStatus) {
+      elemente.uploadStatus.classList.toggle('ist-ladend', status === 'loading');
+      elemente.uploadStatus.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.uploadStatus.classList.toggle('hat-erfolg', status === 'erfolg');
+
+      if (status === 'loading') {
+        elemente.uploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Datei wird hochgeladen...';
+      } else {
+        elemente.uploadStatus.textContent = meldung || '';
+      }
+    }
+
+    aktualisiereContentFormValiditaet();
+  }
+
+  function ladeContentDateiHoch(datei) {
+    const elemente = contentElemente();
+
+    if (!datei || !elemente.mediaUrlFeld) {
+      return;
+    }
+
+    elemente.mediaUrlFeld.value = '';
+    setzeContentUploadVorschau('');
+    setzeContentUploadStatus('loading');
+
+    window.AdventskalenderApi.ladeAdminDateiHoch(datei)
+      .then(function(antwort) {
+        const mediaUrl = mediaUrlAusUploadAntwort(antwort);
+
+        if (!mediaUrl) {
+          throw new Error('Upload erfolgreich, aber die Datei-URL fehlt in der Server-Antwort.');
+        }
+
+        elemente.mediaUrlFeld.value = mediaUrl;
+        setzeContentUploadVorschau(mediaUrl, datei.name);
+        setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
+      })
+      .catch(function(error) {
+        elemente.mediaUrlFeld.value = '';
+        setzeContentUploadVorschau('');
+        setzeContentUploadStatus(
+          'fehler',
+          uploadFehlerText(error)
+        );
+      });
+  }
+
   function fuelleQuizFelder(elemente, content) {
     let quizDaten = {
       question: '',
@@ -544,6 +678,7 @@
     elemente.form.reset();
     elemente.typeFeld.value = content.type || 'text';
     elemente.mediaUrlFeld.value = content.media_url || '';
+    setzeContentUploadVorschau(content.media_url || '');
 
     if (content.type === 'quiz') {
       elemente.bodyFeld.value = '';
@@ -560,7 +695,7 @@
   function istContentFormValide() {
     const elemente = contentElemente();
 
-    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld) {
+    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld || contentUploadLaeuft) {
       return false;
     }
 
@@ -617,6 +752,8 @@
       elemente.form.reset();
     }
 
+    setzeContentUploadStatus('', '');
+    setzeContentUploadVorschau('');
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
   }
@@ -720,6 +857,24 @@
       elemente.filterFeld.addEventListener('change', function(event) {
         waehleContentTypFilter(event.target.value);
       });
+    }
+
+    if (elemente.fileFeld) {
+      elemente.fileFeld.addEventListener('change', function(event) {
+        const datei = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+
+        if (datei) {
+          ladeContentDateiHoch(datei);
+        }
+      });
+    }
+
+    if (elemente.uploadPreview) {
+      elemente.uploadPreview.addEventListener('click', zeigeContentUploadVorschauGross);
+    }
+
+    if (elemente.uploadPreviewModal) {
+      elemente.uploadPreviewModal.addEventListener('hidden.bs.modal', resetContentUploadVorschauModal);
     }
 
     if (elemente.deleteConfirmButton) {
