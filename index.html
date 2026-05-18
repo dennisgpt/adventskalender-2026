@@ -300,6 +300,15 @@
           </select>
         </label>
 
+        <input id="admin-content-media-url" name="media_url" type="hidden">
+      </div>
+
+      <label class="admin-content-feld" for="admin-content-body">
+        <span>Body</span>
+        <textarea id="admin-content-body" name="body" rows="4" placeholder="Text, Link oder kurze Beschreibung"></textarea>
+      </label>
+
+      <div class="admin-content-media-spalte">
         <div class="admin-content-feld admin-content-file-feld">
           <span>Bilddatei</span>
           <div class="admin-content-file-auswahl">
@@ -310,19 +319,11 @@
           <small>JPG, PNG, WebP, HEIC oder HEIF auswählen</small>
           <span class="admin-content-upload-status" id="admin-content-upload-status" aria-live="polite"></span>
         </div>
-
         <button class="admin-content-upload-preview d-none" id="admin-content-upload-preview" type="button">
           <img id="admin-content-upload-preview-bild" src="" alt="Vorschau der hochgeladenen Datei">
           <span class="admin-content-upload-preview-name" id="admin-content-upload-preview-name"></span>
         </button>
-
-        <input id="admin-content-media-url" name="media_url" type="hidden">
       </div>
-
-      <label class="admin-content-feld" for="admin-content-body">
-        <span>Body</span>
-        <textarea id="admin-content-body" name="body" rows="4" placeholder="Text, Link oder kurze Beschreibung"></textarea>
-      </label>
 
       <fieldset class="admin-content-quiz-felder d-none" id="admin-content-quiz-felder">
         <legend>Quiz-Daten</legend>

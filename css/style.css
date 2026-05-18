@@ -690,6 +690,7 @@ small span:hover {
 
 .admin-content-feld {
   display: grid;
+  align-content: start;
   gap: 0.36rem;
   margin: 0;
   color: #aebfe8;
@@ -701,7 +702,6 @@ small span:hover {
 .admin-content-feld select,
 .admin-content-feld textarea {
   width: 100%;
-  min-height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9px;
   padding: 0.46rem 0.6rem;
@@ -711,7 +711,13 @@ small span:hover {
   font-weight: 700;
 }
 
+.admin-content-feld input,
+.admin-content-feld select {
+  min-height: 40px;
+}
+
 .admin-content-feld textarea {
+  min-height: 40px;
   resize: vertical;
 }
 
@@ -726,6 +732,17 @@ small span:hover {
 .admin-content-feld input:disabled,
 .admin-content-feld textarea:disabled {
   opacity: 0.62;
+}
+
+.admin-content-file-feld {
+  align-self: start;
+}
+
+.admin-content-media-spalte {
+  display: grid;
+  align-self: start;
+  gap: 0.72rem;
+  max-width: 640px;
 }
 
 .admin-content-file-auswahl {
@@ -798,6 +815,7 @@ small span:hover {
 .admin-content-upload-preview {
   display: block;
   width: min(100%, 260px);
+  justify-self: start;
   overflow: hidden;
   border: 1px solid rgba(141, 227, 176, 0.28);
   border-radius: 10px;
