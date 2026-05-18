@@ -79,7 +79,7 @@
     );
     loginButtonIcon.className = eingeloggt
       ? 'bi bi-shield-check'
-      : 'bi bi-mortarboard-fill';
+      : 'bi bi-person-gear';
     loginButtonText.textContent = eingeloggt
       ? loginButton.getAttribute('data-admin-text')
       : loginButton.getAttribute('data-login-text');
