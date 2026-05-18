@@ -789,6 +789,15 @@ small span:hover {
   object-fit: cover;
 }
 
+.admin-content-upload-preview-name {
+  display: block;
+  padding: 0.48rem 0.58rem;
+  color: #d9e7ff;
+  font-size: 0.76rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
 .admin-content-quiz-felder {
   display: grid;
   gap: 0.82rem;

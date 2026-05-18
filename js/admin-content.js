@@ -38,6 +38,7 @@
       uploadStatus: document.getElementById('admin-content-upload-status'),
       uploadPreview: document.getElementById('admin-content-upload-preview'),
       uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
+      uploadPreviewName: document.getElementById('admin-content-upload-preview-name'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
@@ -513,7 +514,7 @@
     return antwort.media_url || antwort.secure_url || antwort.url || '';
   }
 
-  function setzeContentUploadVorschau(mediaUrl) {
+  function setzeContentUploadVorschau(mediaUrl, dateiname) {
     const elemente = contentElemente();
     const hatMediaUrl = Boolean(mediaUrl);
 
@@ -523,6 +524,10 @@
 
     if (elemente.uploadPreviewBild) {
       elemente.uploadPreviewBild.src = hatMediaUrl ? mediaUrl : '';
+    }
+
+    if (elemente.uploadPreviewName) {
+      elemente.uploadPreviewName.textContent = hatMediaUrl ? dateiname || 'Hochgeladene Datei' : '';
     }
   }
 
@@ -570,7 +575,7 @@
         }
 
         elemente.mediaUrlFeld.value = mediaUrl;
-        setzeContentUploadVorschau(mediaUrl);
+        setzeContentUploadVorschau(mediaUrl, datei.name);
         setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
       })
       .catch(function(error) {
