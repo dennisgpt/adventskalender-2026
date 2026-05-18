@@ -751,6 +751,28 @@ small span:hover {
   font-weight: 700;
 }
 
+.admin-content-upload-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 1.1rem;
+  color: #9fb6df;
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.admin-content-upload-status.ist-ladend {
+  color: #ffd97f;
+}
+
+.admin-content-upload-status.hat-erfolg {
+  color: #8de3b0;
+}
+
+.admin-content-upload-status.hat-fehler {
+  color: #ff9aa8;
+}
+
 .admin-content-quiz-felder {
   display: grid;
   gap: 0.82rem;

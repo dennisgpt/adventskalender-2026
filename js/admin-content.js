@@ -6,6 +6,7 @@
   let aktiverContentTypFilter = 'all';
   let zuLoeschenderContent = null;
   let zuLoeschenderButton = null;
+  let contentUploadLaeuft = false;
   const STANDARD_ADMIN_CONTENT_LEER_TEXT = 'Die Content-Verwaltung ist bereit. Die Content-Liste wird im nächsten Schritt angebunden.';
 
   function istAdminEingeloggt() {
@@ -34,6 +35,7 @@
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
       fileFeld: document.getElementById('admin-content-file'),
+      uploadStatus: document.getElementById('admin-content-upload-status'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
@@ -501,6 +503,71 @@
     };
   }
 
+  function mediaUrlAusUploadAntwort(antwort) {
+    if (!antwort || typeof antwort !== 'object') {
+      return '';
+    }
+
+    return antwort.media_url || antwort.secure_url || antwort.url || '';
+  }
+
+  function setzeContentUploadStatus(status, meldung) {
+    const elemente = contentElemente();
+
+    contentUploadLaeuft = status === 'loading';
+
+    if (elemente.fileFeld) {
+      elemente.fileFeld.disabled = contentUploadLaeuft;
+    }
+
+    if (elemente.uploadStatus) {
+      elemente.uploadStatus.classList.toggle('ist-ladend', status === 'loading');
+      elemente.uploadStatus.classList.toggle('hat-fehler', status === 'fehler');
+      elemente.uploadStatus.classList.toggle('hat-erfolg', status === 'erfolg');
+
+      if (status === 'loading') {
+        elemente.uploadStatus.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Datei wird hochgeladen...';
+      } else {
+        elemente.uploadStatus.textContent = meldung || '';
+      }
+    }
+
+    aktualisiereContentFormValiditaet();
+  }
+
+  function ladeContentDateiHoch(datei) {
+    const elemente = contentElemente();
+
+    if (!datei || !elemente.mediaUrlFeld) {
+      return;
+    }
+
+    elemente.mediaUrlFeld.value = '';
+    setzeContentUploadStatus('loading');
+
+    window.AdventskalenderApi.ladeAdminDateiHoch(datei)
+      .then(function(antwort) {
+        const mediaUrl = mediaUrlAusUploadAntwort(antwort);
+
+        if (!mediaUrl) {
+          throw new Error('Upload erfolgreich, aber die Datei-URL fehlt in der Server-Antwort.');
+        }
+
+        elemente.mediaUrlFeld.value = mediaUrl;
+        setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
+      })
+      .catch(function(error) {
+        elemente.mediaUrlFeld.value = '';
+        setzeContentUploadStatus(
+          'fehler',
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Datei konnte nicht hochgeladen werden.'
+          )
+        );
+      });
+  }
+
   function fuelleQuizFelder(elemente, content) {
     let quizDaten = {
       question: '',
@@ -561,7 +628,7 @@
   function istContentFormValide() {
     const elemente = contentElemente();
 
-    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld) {
+    if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld || contentUploadLaeuft) {
       return false;
     }
 
@@ -618,6 +685,7 @@
       elemente.form.reset();
     }
 
+    setzeContentUploadStatus('', '');
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
   }
@@ -720,6 +788,21 @@
     if (elemente.filterFeld) {
       elemente.filterFeld.addEventListener('change', function(event) {
         waehleContentTypFilter(event.target.value);
+      });
+    }
+
+    if (elemente.fileFeld) {
+      elemente.fileFeld.addEventListener('change', function(event) {
+        const datei = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+
+        if (datei) {
+          ladeContentDateiHoch(datei);
+        } else {
+          setzeContentUploadStatus('', '');
+          if (elemente.mediaUrlFeld) {
+            elemente.mediaUrlFeld.value = '';
+          }
+        }
       });
     }
 

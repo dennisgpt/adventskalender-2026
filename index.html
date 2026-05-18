@@ -286,8 +286,9 @@
 
         <label class="admin-content-feld admin-content-file-feld" for="admin-content-file">
           <span>Bilddatei</span>
-          <input id="admin-content-file" name="file" type="file" accept="image/*">
-          <small>JPG, PNG oder WebP auswählen</small>
+          <input id="admin-content-file" name="file" type="file" accept="image/*,.jpg,.jpeg,.png,.webp,.heic,.heif">
+          <small>JPG, PNG, WebP, HEIC oder HEIF auswählen</small>
+          <span class="admin-content-upload-status" id="admin-content-upload-status" aria-live="polite"></span>
         </label>
 
         <input id="admin-content-media-url" name="media_url" type="hidden">
