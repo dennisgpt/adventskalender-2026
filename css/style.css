@@ -690,6 +690,7 @@ small span:hover {
 
 .admin-content-feld {
   display: grid;
+  align-content: start;
   gap: 0.36rem;
   margin: 0;
   color: #aebfe8;
@@ -701,7 +702,6 @@ small span:hover {
 .admin-content-feld select,
 .admin-content-feld textarea {
   width: 100%;
-  min-height: 40px;
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 9px;
   padding: 0.46rem 0.6rem;
@@ -711,7 +711,13 @@ small span:hover {
   font-weight: 700;
 }
 
+.admin-content-feld input,
+.admin-content-feld select {
+  min-height: 40px;
+}
+
 .admin-content-feld textarea {
+  min-height: 40px;
   resize: vertical;
 }
 
@@ -728,13 +734,30 @@ small span:hover {
   opacity: 0.62;
 }
 
-.admin-content-file-feld input[type="file"] {
-  cursor: pointer;
+.admin-content-file-feld {
+  align-self: start;
 }
 
-.admin-content-file-feld input[type="file"]::file-selector-button {
+.admin-content-media-spalte {
+  display: grid;
+  align-self: start;
+  gap: 0.72rem;
+  max-width: 640px;
+}
+
+.admin-content-file-auswahl {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 48px;
+  border: 1px solid rgba(151, 179, 226, 0.24);
+  border-radius: 8px;
+  padding: 0.42rem 0.54rem;
+  background: rgba(4, 13, 35, 0.62);
+}
+
+.admin-content-file-button {
   min-height: 32px;
-  margin-right: 0.72rem;
   border: 1px solid rgba(255, 209, 102, 0.34);
   border-radius: 8px;
   padding: 0.32rem 0.62rem;
@@ -743,6 +766,22 @@ small span:hover {
   font: inherit;
   font-weight: 900;
   cursor: pointer;
+}
+
+.admin-content-file-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.24);
+}
+
+.admin-content-file-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.62;
+}
+
+.admin-content-file-name {
+  color: #f4f7ff;
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 .admin-content-file-feld small {
@@ -776,6 +815,7 @@ small span:hover {
 .admin-content-upload-preview {
   display: block;
   width: min(100%, 260px);
+  justify-self: start;
   overflow: hidden;
   border: 1px solid rgba(141, 227, 176, 0.28);
   border-radius: 10px;

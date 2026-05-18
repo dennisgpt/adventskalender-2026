@@ -35,6 +35,8 @@
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
       fileFeld: document.getElementById('admin-content-file'),
+      fileButton: document.getElementById('admin-content-file-button'),
+      fileName: document.getElementById('admin-content-file-name'),
       uploadStatus: document.getElementById('admin-content-upload-status'),
       uploadPreview: document.getElementById('admin-content-upload-preview'),
       uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
@@ -517,10 +519,25 @@
     return antwort.media_url || antwort.secure_url || antwort.url || '';
   }
 
+  function dateinameAusMediaUrl(mediaUrl) {
+    if (!mediaUrl || typeof mediaUrl !== 'string') {
+      return '';
+    }
+
+    try {
+      const url = new URL(mediaUrl, window.location.href);
+      const dateiname = url.pathname.split('/').filter(Boolean).pop();
+      return dateiname ? decodeURIComponent(dateiname) : '';
+    } catch (error) {
+      const dateiname = mediaUrl.split('?')[0].split('/').filter(Boolean).pop();
+      return dateiname ? decodeURIComponent(dateiname) : '';
+    }
+  }
+
   function setzeContentUploadVorschau(mediaUrl, dateiname) {
     const elemente = contentElemente();
     const hatMediaUrl = Boolean(mediaUrl);
-    const titel = dateiname || 'Hochgeladene Datei';
+    const titel = dateiname || dateinameAusMediaUrl(mediaUrl) || 'Hochgeladene Datei';
 
     if (elemente.uploadPreview) {
       elemente.uploadPreview.classList.toggle('d-none', !hatMediaUrl);
@@ -534,6 +551,14 @@
 
     if (elemente.uploadPreviewName) {
       elemente.uploadPreviewName.textContent = hatMediaUrl ? titel : '';
+    }
+  }
+
+  function setzeContentDateiName(dateiname) {
+    const elemente = contentElemente();
+
+    if (elemente.fileName) {
+      elemente.fileName.textContent = dateiname || 'Keine Datei ausgewählt';
     }
   }
 
@@ -586,6 +611,10 @@
       elemente.fileFeld.disabled = contentUploadLaeuft;
     }
 
+    if (elemente.fileButton) {
+      elemente.fileButton.disabled = contentUploadLaeuft;
+    }
+
     if (elemente.uploadStatus) {
       elemente.uploadStatus.classList.toggle('ist-ladend', status === 'loading');
       elemente.uploadStatus.classList.toggle('hat-fehler', status === 'fehler');
@@ -608,8 +637,10 @@
       return;
     }
 
-    elemente.mediaUrlFeld.value = '';
-    setzeContentUploadVorschau('');
+    const bisherigeMediaUrl = elemente.mediaUrlFeld.value;
+    const bisherigerDateiname = elemente.uploadPreviewName ? elemente.uploadPreviewName.textContent : '';
+
+    setzeContentDateiName(datei.name);
     setzeContentUploadStatus('loading');
 
     window.AdventskalenderApi.ladeAdminDateiHoch(datei)
@@ -625,8 +656,12 @@
         setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
       })
       .catch(function(error) {
-        elemente.mediaUrlFeld.value = '';
-        setzeContentUploadVorschau('');
+        elemente.mediaUrlFeld.value = bisherigeMediaUrl;
+        if (elemente.fileFeld) {
+          elemente.fileFeld.value = '';
+        }
+        setzeContentDateiName('');
+        setzeContentUploadVorschau(bisherigeMediaUrl, bisherigerDateiname);
         setzeContentUploadStatus(
           'fehler',
           uploadFehlerText(error)
@@ -676,6 +711,7 @@
 
     bearbeiteterContentId = content.id;
     elemente.form.reset();
+    setzeContentDateiName('');
     elemente.typeFeld.value = content.type || 'text';
     elemente.mediaUrlFeld.value = content.media_url || '';
     setzeContentUploadVorschau(content.media_url || '');
@@ -693,31 +729,48 @@
   }
 
   function istContentFormValide() {
+    return !contentFormValidierungsMeldung();
+  }
+
+  function contentFormValidierungsMeldung() {
     const elemente = contentElemente();
 
     if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld || contentUploadLaeuft) {
-      return false;
+      return contentUploadLaeuft ? 'Bitte warte, bis der Upload abgeschlossen ist.' : 'Das Content-Formular ist noch nicht bereit.';
     }
 
     if (elemente.typeFeld.value === 'quiz') {
-      return Boolean(feldWert(elemente.quizQuestionFeld))
-        && elemente.quizOptions.every(function(optionFeld) {
-          return Boolean(feldWert(optionFeld));
-        });
+      if (!feldWert(elemente.quizQuestionFeld)) {
+        return 'Bitte trage eine Quiz-Frage ein.';
+      }
+
+      if (!elemente.quizOptions.every(function(optionFeld) {
+        return Boolean(feldWert(optionFeld));
+      })) {
+        return 'Bitte trage alle Antwortoptionen ein.';
+      }
+
+      return '';
     }
 
     if (elemente.typeFeld.value === 'text') {
-      return Boolean(feldWert(elemente.bodyFeld));
+      return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage einen Body ein.';
     }
 
-    return Boolean(feldWert(elemente.mediaUrlFeld));
+    return feldWert(elemente.mediaUrlFeld) ? '' : 'Bitte lade zuerst eine Datei hoch, damit die media_url gespeichert werden kann.';
   }
 
   function aktualisiereContentFormValiditaet() {
-    const submitButton = contentElemente().submitButton;
+    const elemente = contentElemente();
+    const validierungsMeldung = contentFormValidierungsMeldung();
 
-    if (submitButton) {
-      submitButton.disabled = !istContentFormValide();
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = Boolean(validierungsMeldung);
+    }
+
+    if (elemente.form && elemente.formStatus && !contentUploadLaeuft) {
+      elemente.form.classList.toggle('hat-fehler', Boolean(validierungsMeldung));
+      elemente.formStatus.textContent = validierungsMeldung;
     }
   }
 
@@ -753,6 +806,7 @@
     }
 
     setzeContentUploadStatus('', '');
+    setzeContentDateiName('');
     setzeContentUploadVorschau('');
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
@@ -869,6 +923,12 @@
       });
     }
 
+    if (elemente.fileButton && elemente.fileFeld) {
+      elemente.fileButton.addEventListener('click', function() {
+        elemente.fileFeld.click();
+      });
+    }
+
     if (elemente.uploadPreview) {
       elemente.uploadPreview.addEventListener('click', zeigeContentUploadVorschauGross);
     }
@@ -901,7 +961,10 @@
       elemente.form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        if (!istContentFormValide()) {
+        const validierungsMeldung = contentFormValidierungsMeldung();
+
+        if (validierungsMeldung) {
+          setzeContentFormStatus('fehler', validierungsMeldung);
           return;
         }
 
