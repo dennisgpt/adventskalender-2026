@@ -519,10 +519,25 @@
     return antwort.media_url || antwort.secure_url || antwort.url || '';
   }
 
+  function dateinameAusMediaUrl(mediaUrl) {
+    if (!mediaUrl || typeof mediaUrl !== 'string') {
+      return '';
+    }
+
+    try {
+      const url = new URL(mediaUrl, window.location.href);
+      const dateiname = url.pathname.split('/').filter(Boolean).pop();
+      return dateiname ? decodeURIComponent(dateiname) : '';
+    } catch (error) {
+      const dateiname = mediaUrl.split('?')[0].split('/').filter(Boolean).pop();
+      return dateiname ? decodeURIComponent(dateiname) : '';
+    }
+  }
+
   function setzeContentUploadVorschau(mediaUrl, dateiname) {
     const elemente = contentElemente();
     const hatMediaUrl = Boolean(mediaUrl);
-    const titel = dateiname || 'Hochgeladene Datei';
+    const titel = dateiname || dateinameAusMediaUrl(mediaUrl) || 'Hochgeladene Datei';
 
     if (elemente.uploadPreview) {
       elemente.uploadPreview.classList.toggle('d-none', !hatMediaUrl);
