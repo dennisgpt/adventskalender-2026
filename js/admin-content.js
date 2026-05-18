@@ -35,6 +35,8 @@
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
       fileFeld: document.getElementById('admin-content-file'),
+      fileButton: document.getElementById('admin-content-file-button'),
+      fileName: document.getElementById('admin-content-file-name'),
       uploadStatus: document.getElementById('admin-content-upload-status'),
       uploadPreview: document.getElementById('admin-content-upload-preview'),
       uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
@@ -537,6 +539,14 @@
     }
   }
 
+  function setzeContentDateiName(dateiname) {
+    const elemente = contentElemente();
+
+    if (elemente.fileName) {
+      elemente.fileName.textContent = dateiname || 'Keine Datei ausgewählt';
+    }
+  }
+
   function zeigeContentUploadVorschauGross() {
     const elemente = contentElemente();
     const mediaUrl = elemente.mediaUrlFeld ? elemente.mediaUrlFeld.value : '';
@@ -586,6 +596,10 @@
       elemente.fileFeld.disabled = contentUploadLaeuft;
     }
 
+    if (elemente.fileButton) {
+      elemente.fileButton.disabled = contentUploadLaeuft;
+    }
+
     if (elemente.uploadStatus) {
       elemente.uploadStatus.classList.toggle('ist-ladend', status === 'loading');
       elemente.uploadStatus.classList.toggle('hat-fehler', status === 'fehler');
@@ -611,6 +625,7 @@
     const bisherigeMediaUrl = elemente.mediaUrlFeld.value;
     const bisherigerDateiname = elemente.uploadPreviewName ? elemente.uploadPreviewName.textContent : '';
 
+    setzeContentDateiName(datei.name);
     setzeContentUploadStatus('loading');
 
     window.AdventskalenderApi.ladeAdminDateiHoch(datei)
@@ -627,6 +642,10 @@
       })
       .catch(function(error) {
         elemente.mediaUrlFeld.value = bisherigeMediaUrl;
+        if (elemente.fileFeld) {
+          elemente.fileFeld.value = '';
+        }
+        setzeContentDateiName('');
         setzeContentUploadVorschau(bisherigeMediaUrl, bisherigerDateiname);
         setzeContentUploadStatus(
           'fehler',
@@ -677,6 +696,7 @@
 
     bearbeiteterContentId = content.id;
     elemente.form.reset();
+    setzeContentDateiName('');
     elemente.typeFeld.value = content.type || 'text';
     elemente.mediaUrlFeld.value = content.media_url || '';
     setzeContentUploadVorschau(content.media_url || '');
@@ -754,6 +774,7 @@
     }
 
     setzeContentUploadStatus('', '');
+    setzeContentDateiName('');
     setzeContentUploadVorschau('');
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
@@ -867,6 +888,12 @@
         if (datei) {
           ladeContentDateiHoch(datei);
         }
+      });
+    }
+
+    if (elemente.fileButton && elemente.fileFeld) {
+      elemente.fileButton.addEventListener('click', function() {
+        elemente.fileFeld.click();
       });
     }
 
