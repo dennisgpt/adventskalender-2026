@@ -564,6 +564,19 @@
     }
   }
 
+  function uploadFehlerText(error) {
+    const meldung = error && error.message ? error.message : '';
+
+    if (meldung.toLowerCase() === 'file too large') {
+      return 'Die Datei ist zu groß!';
+    }
+
+    return window.AdventskalenderApi.fehlertextFuerApiFehler(
+      error,
+      'Datei konnte nicht hochgeladen werden!'
+    );
+  }
+
   function setzeContentUploadStatus(status, meldung) {
     const elemente = contentElemente();
 
@@ -616,10 +629,7 @@
         setzeContentUploadVorschau('');
         setzeContentUploadStatus(
           'fehler',
-          window.AdventskalenderApi.fehlertextFuerApiFehler(
-            error,
-            'Datei konnte nicht hochgeladen werden.'
-          )
+          uploadFehlerText(error)
         );
       });
   }
