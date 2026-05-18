@@ -714,31 +714,48 @@
   }
 
   function istContentFormValide() {
+    return !contentFormValidierungsMeldung();
+  }
+
+  function contentFormValidierungsMeldung() {
     const elemente = contentElemente();
 
     if (!elemente.typeFeld || !elemente.bodyFeld || !elemente.mediaUrlFeld || contentUploadLaeuft) {
-      return false;
+      return contentUploadLaeuft ? 'Bitte warte, bis der Upload abgeschlossen ist.' : 'Das Content-Formular ist noch nicht bereit.';
     }
 
     if (elemente.typeFeld.value === 'quiz') {
-      return Boolean(feldWert(elemente.quizQuestionFeld))
-        && elemente.quizOptions.every(function(optionFeld) {
-          return Boolean(feldWert(optionFeld));
-        });
+      if (!feldWert(elemente.quizQuestionFeld)) {
+        return 'Bitte trage eine Quiz-Frage ein.';
+      }
+
+      if (!elemente.quizOptions.every(function(optionFeld) {
+        return Boolean(feldWert(optionFeld));
+      })) {
+        return 'Bitte trage alle Antwortoptionen ein.';
+      }
+
+      return '';
     }
 
     if (elemente.typeFeld.value === 'text') {
-      return Boolean(feldWert(elemente.bodyFeld));
+      return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage einen Body ein.';
     }
 
-    return Boolean(feldWert(elemente.mediaUrlFeld));
+    return feldWert(elemente.mediaUrlFeld) ? '' : 'Bitte lade zuerst eine Datei hoch, damit die media_url gespeichert werden kann.';
   }
 
   function aktualisiereContentFormValiditaet() {
-    const submitButton = contentElemente().submitButton;
+    const elemente = contentElemente();
+    const validierungsMeldung = contentFormValidierungsMeldung();
 
-    if (submitButton) {
-      submitButton.disabled = !istContentFormValide();
+    if (elemente.submitButton) {
+      elemente.submitButton.disabled = Boolean(validierungsMeldung);
+    }
+
+    if (elemente.form && elemente.formStatus && !contentUploadLaeuft) {
+      elemente.form.classList.toggle('hat-fehler', Boolean(validierungsMeldung));
+      elemente.formStatus.textContent = validierungsMeldung;
     }
   }
 
@@ -929,7 +946,10 @@
       elemente.form.addEventListener('submit', function(event) {
         event.preventDefault();
 
-        if (!istContentFormValide()) {
+        const validierungsMeldung = contentFormValidierungsMeldung();
+
+        if (validierungsMeldung) {
+          setzeContentFormStatus('fehler', validierungsMeldung);
           return;
         }
 
