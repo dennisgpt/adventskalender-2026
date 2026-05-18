@@ -608,8 +608,9 @@
       return;
     }
 
-    elemente.mediaUrlFeld.value = '';
-    setzeContentUploadVorschau('');
+    const bisherigeMediaUrl = elemente.mediaUrlFeld.value;
+    const bisherigerDateiname = elemente.uploadPreviewName ? elemente.uploadPreviewName.textContent : '';
+
     setzeContentUploadStatus('loading');
 
     window.AdventskalenderApi.ladeAdminDateiHoch(datei)
@@ -625,8 +626,8 @@
         setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
       })
       .catch(function(error) {
-        elemente.mediaUrlFeld.value = '';
-        setzeContentUploadVorschau('');
+        elemente.mediaUrlFeld.value = bisherigeMediaUrl;
+        setzeContentUploadVorschau(bisherigeMediaUrl, bisherigerDateiname);
         setzeContentUploadStatus(
           'fehler',
           uploadFehlerText(error)
