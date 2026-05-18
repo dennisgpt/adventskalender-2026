@@ -817,12 +817,6 @@
 
         if (datei) {
           ladeContentDateiHoch(datei);
-        } else {
-          setzeContentUploadStatus('', '');
-          if (elemente.mediaUrlFeld) {
-            elemente.mediaUrlFeld.value = '';
-          }
-          setzeContentUploadVorschau('');
         }
       });
     }
