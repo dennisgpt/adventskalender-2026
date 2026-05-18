@@ -36,6 +36,8 @@
       bodyFeld: document.getElementById('admin-content-body'),
       fileFeld: document.getElementById('admin-content-file'),
       uploadStatus: document.getElementById('admin-content-upload-status'),
+      uploadPreview: document.getElementById('admin-content-upload-preview'),
+      uploadPreviewBild: document.getElementById('admin-content-upload-preview-bild'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
@@ -511,6 +513,19 @@
     return antwort.media_url || antwort.secure_url || antwort.url || '';
   }
 
+  function setzeContentUploadVorschau(mediaUrl) {
+    const elemente = contentElemente();
+    const hatMediaUrl = Boolean(mediaUrl);
+
+    if (elemente.uploadPreview) {
+      elemente.uploadPreview.classList.toggle('d-none', !hatMediaUrl);
+    }
+
+    if (elemente.uploadPreviewBild) {
+      elemente.uploadPreviewBild.src = hatMediaUrl ? mediaUrl : '';
+    }
+  }
+
   function setzeContentUploadStatus(status, meldung) {
     const elemente = contentElemente();
 
@@ -543,6 +558,7 @@
     }
 
     elemente.mediaUrlFeld.value = '';
+    setzeContentUploadVorschau('');
     setzeContentUploadStatus('loading');
 
     window.AdventskalenderApi.ladeAdminDateiHoch(datei)
@@ -554,10 +570,12 @@
         }
 
         elemente.mediaUrlFeld.value = mediaUrl;
+        setzeContentUploadVorschau(mediaUrl);
         setzeContentUploadStatus('erfolg', 'Datei wurde hochgeladen.');
       })
       .catch(function(error) {
         elemente.mediaUrlFeld.value = '';
+        setzeContentUploadVorschau('');
         setzeContentUploadStatus(
           'fehler',
           window.AdventskalenderApi.fehlertextFuerApiFehler(
@@ -612,6 +630,7 @@
     elemente.form.reset();
     elemente.typeFeld.value = content.type || 'text';
     elemente.mediaUrlFeld.value = content.media_url || '';
+    setzeContentUploadVorschau(content.media_url || '');
 
     if (content.type === 'quiz') {
       elemente.bodyFeld.value = '';
@@ -686,6 +705,7 @@
     }
 
     setzeContentUploadStatus('', '');
+    setzeContentUploadVorschau('');
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
   }
@@ -802,6 +822,7 @@
           if (elemente.mediaUrlFeld) {
             elemente.mediaUrlFeld.value = '';
           }
+          setzeContentUploadVorschau('');
         }
       });
     }

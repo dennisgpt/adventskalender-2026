@@ -773,6 +773,22 @@ small span:hover {
   color: #ff9aa8;
 }
 
+.admin-content-upload-preview {
+  display: block;
+  width: min(100%, 260px);
+  overflow: hidden;
+  border: 1px solid rgba(141, 227, 176, 0.28);
+  border-radius: 10px;
+  background: rgba(5, 12, 30, 0.5);
+}
+
+.admin-content-upload-preview img {
+  display: block;
+  width: 100%;
+  max-height: 150px;
+  object-fit: cover;
+}
+
 .admin-content-quiz-felder {
   display: grid;
   gap: 0.82rem;
