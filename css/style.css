@@ -728,6 +728,29 @@ small span:hover {
   opacity: 0.62;
 }
 
+.admin-content-file-feld input[type="file"] {
+  cursor: pointer;
+}
+
+.admin-content-file-feld input[type="file"]::file-selector-button {
+  min-height: 32px;
+  margin-right: 0.72rem;
+  border: 1px solid rgba(255, 209, 102, 0.34);
+  border-radius: 8px;
+  padding: 0.32rem 0.62rem;
+  color: #1b1405;
+  background: linear-gradient(135deg, #ffe7a3, #ffc94d);
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.admin-content-file-feld small {
+  color: #8fa7d1;
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+
 .admin-content-quiz-felder {
   display: grid;
   gap: 0.82rem;

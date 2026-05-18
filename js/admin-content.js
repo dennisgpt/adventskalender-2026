@@ -33,6 +33,7 @@
       deleteConfirmButton: document.getElementById('admin-content-delete-confirm'),
       typeFeld: document.getElementById('admin-content-type'),
       bodyFeld: document.getElementById('admin-content-body'),
+      fileFeld: document.getElementById('admin-content-file'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
       quizQuestionFeld: document.getElementById('admin-content-quiz-question'),

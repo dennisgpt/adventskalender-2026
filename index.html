@@ -284,10 +284,13 @@
           </select>
         </label>
 
-        <label class="admin-content-feld" for="admin-content-media-url">
-          <span>Media-URL</span>
-          <input id="admin-content-media-url" name="media_url" type="url" placeholder="/uploads/datei.jpg">
+        <label class="admin-content-feld admin-content-file-feld" for="admin-content-file">
+          <span>Bilddatei</span>
+          <input id="admin-content-file" name="file" type="file" accept="image/*">
+          <small>JPG, PNG oder WebP auswählen</small>
         </label>
+
+        <input id="admin-content-media-url" name="media_url" type="hidden">
       </div>
 
       <label class="admin-content-feld" for="admin-content-body">
