@@ -902,6 +902,10 @@
       return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage einen Body ein.';
     }
 
+    if (elemente.typeFeld.value === 'video') {
+      return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage eine YouTube-Embed-URL in das Body-Feld ein.';
+    }
+
     return feldWert(elemente.mediaUrlFeld) ? '' : 'Bitte lade zuerst eine Datei hoch, damit die media_url gespeichert werden kann.';
   }
 
