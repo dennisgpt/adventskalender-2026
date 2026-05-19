@@ -116,6 +116,19 @@ small span:hover {
   color: #0f8a55;
 }
 
+.logout-btn {
+  color: #8b1f35;
+}
+
+.logout-btn i {
+  color: #c8102e;
+}
+
+.logout-btn:hover,
+.logout-btn:focus-visible {
+  color: var(--thws-orange);
+}
+
 .content-btn {
   background: transparent;
   border: none;
@@ -2241,7 +2254,8 @@ footer .text-muted {
   }
 
   .content-btn,
-  .login-btn {
+  .login-btn,
+  .logout-btn {
     font-size: 0.9rem;
     padding-top: 2px;
   }
