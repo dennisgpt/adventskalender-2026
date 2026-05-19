@@ -157,20 +157,26 @@ function backendItemNormalisieren(nummer, item) {
 
 function quizItemNormalisieren(titel, body) {
   try {
-    const quiz = typeof body === 'string' ? JSON.parse(body) : body;
-    const antworten = Array.isArray(quiz.options) ? quiz.options : [];
-    const richtig = Number.parseInt(quiz.correct, 10);
+    const fragen = window.AdventskalenderQuiz.quizBodyZuFragen(body);
+    const ersteFrage = fragen[0];
 
-    if (!quiz.question || antworten.length === 0 || Number.isNaN(richtig)) {
+    if (!ersteFrage) {
       throw new Error('Quiz-Daten unvollstaendig');
     }
 
     return {
       typ: 'quiz',
       titel: titel,
-      frage: quiz.question,
-      antworten: antworten,
-      richtig: richtig
+      frage: ersteFrage.question,
+      antworten: ersteFrage.options,
+      richtig: ersteFrage.correct,
+      fragen: fragen.map(function(frage) {
+        return {
+          frage: frage.question,
+          antworten: frage.options,
+          richtig: frage.correct
+        };
+      })
     };
   } catch (error) {
     return {

@@ -176,8 +176,7 @@
 
     if (content.type === 'quiz') {
       try {
-        const quiz = JSON.parse(content.body);
-        return quiz.question || 'Quiz ohne Frage';
+        return window.AdventskalenderQuiz.quizVorschau(content.body);
       } catch (error) {
         return 'Quiz-Daten konnten nicht gelesen werden';
       }
@@ -492,11 +491,11 @@
   }
 
   function baueQuizBody(elemente) {
-    return JSON.stringify({
+    return window.AdventskalenderQuiz.baueQuizBodyAusFragen([{
       question: feldWert(elemente.quizQuestionFeld),
       options: elemente.quizOptions.map(feldWert),
       correct: Number.parseInt(elemente.quizCorrectFeld.value, 10)
-    });
+    }]);
   }
 
   function baueContentPayload() {
@@ -677,12 +676,14 @@
     };
 
     if (content.body) {
-      try {
+      const fragen = window.AdventskalenderQuiz.quizBodyZuFragen(content.body);
+
+      if (fragen.length > 0) {
         quizDaten = {
           ...quizDaten,
-          ...JSON.parse(content.body)
+          ...fragen[0]
         };
-      } catch (error) {
+      } else {
         quizDaten.question = content.body;
       }
     }
