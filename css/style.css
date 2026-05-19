@@ -1525,6 +1525,92 @@ small span:hover {
     0 22px 40px rgba(0, 0, 0, 0.55);
 }
 
+/* Deckel-Aufklapp-Animation: Sneak-Peek beim Hover */
+/* Scharnier links – rechte Seite klappt nach oben */
+.gk-deckel {
+  transform-box: fill-box;
+  transform-origin: left bottom;
+  transition: transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1);
+}
+
+.tuerchen-karte.verfuegbar:hover .gk-deckel,
+.tuerchen-karte.heute:hover .gk-deckel {
+  transform: rotate(-38deg);
+}
+
+@media (hover: none) {
+  .tuerchen-karte.verfuegbar:hover .gk-deckel,
+  .tuerchen-karte.heute:hover .gk-deckel {
+    transform: none;
+  }
+}
+
+/* Goldener Lichtstrahl aus der Öffnung – erscheint wenn Deckel aufklappt */
+.geschenk-icon {
+  position: relative;
+}
+
+/* Weiches Ambient-Glühen über die gesamte Öffnung (füllt linken Bereich) */
+.geschenk-icon::before {
+  content: '';
+  position: absolute;
+  bottom: 48%;
+  left: 50%;
+  transform: translateX(-50%) scaleY(0.3);
+  transform-origin: bottom center;
+  width: 75%;
+  height: 38%;
+  background: radial-gradient(ellipse at bottom,
+    rgba(255, 230, 80,  0.7)  0%,
+    rgba(232, 190, 40,  0.35) 40%,
+    transparent               75%
+  );
+  filter: blur(8px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1);
+}
+
+.tuerchen-karte.verfuegbar:hover .geschenk-icon::before,
+.tuerchen-karte.heute:hover .geschenk-icon::before {
+  opacity: 1;
+  transform: translateX(-50%) scaleY(1);
+}
+
+.geschenk-icon::after {
+  content: '';
+  position: absolute;
+  bottom: 50%;
+  left: 66%;
+  transform: translateX(-50%) rotate(28deg) scaleY(0.4);
+  transform-origin: bottom center;
+  width: 62%;
+  height: 48%;
+  background: radial-gradient(ellipse at bottom,
+    rgba(255, 245, 100, 1)    0%,
+    rgba(255, 220, 60,  0.88) 20%,
+    rgba(232, 190, 40,  0.55) 44%,
+    rgba(200, 160, 20,  0.18) 68%,
+    transparent               86%
+  );
+  filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.42s cubic-bezier(0.34, 1.15, 0.64, 1);
+}
+
+.tuerchen-karte.verfuegbar:hover .geschenk-icon::after,
+.tuerchen-karte.heute:hover .geschenk-icon::after {
+  opacity: 1;
+  transform: translateX(-50%) rotate(28deg) scaleY(1);
+  animation: strahl-pulsieren 1.2s ease-in-out infinite;
+}
+
+@keyframes strahl-pulsieren {
+  0%, 100% { opacity: 0.82; filter: blur(6px); transform: translateX(-50%) rotate(28deg) scaleY(1);    }
+  50%       { opacity: 1;    filter: blur(4px); transform: translateX(-50%) rotate(28deg) scaleY(1.08); }
+}
+
 .tuerchen-karte.verfuegbar:focus-visible,
 .tuerchen-karte.heute:focus-visible {
   outline: 3px solid #e8c84a;

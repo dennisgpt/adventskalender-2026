@@ -265,23 +265,29 @@ function geschenkIconHTML(nummer) {
 
   return '<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
     + '<defs>' + pat + '</defs>'
-    // Geschenk-Koerper
+    // Koerper (statisch)
     + '<rect x="9" y="37" width="62" height="37" rx="5" fill="var(--icon-farbe)"/>'
     + '<rect x="9" y="37" width="62" height="37" rx="5" fill="url(#' + id + '-p)"/>'
     + '<rect x="43" y="37" width="28" height="37" fill="rgba(0,0,0,0.15)"/>'
-    // Deckel
-    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="var(--icon-farbe)"/>'
-    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="url(#' + id + '-p)"/>'
-    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="rgba(255,255,255,0.18)"/>'
-    + '<rect x="43" y="27" width="31" height="13" fill="rgba(0,0,0,0.10)"/>'
-    + '<rect x="9" y="28" width="20" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>'
     + '<rect x="11" y="42" width="15" height="5" rx="2" fill="rgba(255,255,255,0.08)"/>'
-    // Band
-    + '<rect x="35" y="27" width="10" height="47" fill="' + rib + '"/>'
-    + '<rect x="6" y="32" width="68" height="7" fill="' + rib + '"/>'
-    // Schleife
-    + bogen
-    // Goldener Rahmen (nur Tuerchen 24)
+    // Band am Koerper – sichtbar wenn Deckel aufklappt
+    + '<rect x="35" y="37" width="10" height="37" fill="' + rib + '"/>'
+    + '<rect x="6" y="37" width="68" height="6" fill="' + rib + '"/>'
+    // Deckel-Gruppe – dreht sich beim Hover auf
+    // Scharnier liegt an der Unterkante des Deckels (y=40)
+    + '<g class="gk-deckel">'
+    +   '<rect x="6" y="27" width="68" height="13" rx="5" fill="var(--icon-farbe)"/>'
+    +   '<rect x="6" y="27" width="68" height="13" rx="5" fill="url(#' + id + '-p)"/>'
+    +   '<rect x="6" y="27" width="68" height="13" rx="5" fill="rgba(255,255,255,0.18)"/>'
+    +   '<rect x="43" y="27" width="31" height="13" fill="rgba(0,0,0,0.10)"/>'
+    +   '<rect x="9" y="28" width="20" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>'
+    // Band auf dem Deckel (hebt sich mit)
+    +   '<rect x="35" y="27" width="10" height="13" fill="' + rib + '"/>'
+    +   '<rect x="6" y="32" width="68" height="8" fill="' + rib + '"/>'
+    // Schleife sitzt auf dem Deckel und hebt sich mit
+    +   bogen
+    + '</g>'
+    // Goldener Rahmen (nur Tuerchen 24, immer sichtbar)
     + rahmen
     + '</svg>';
 }
