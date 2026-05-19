@@ -1498,26 +1498,22 @@ small span:hover {
 .tuerchen-karte[data-nummer="23"] .geschenk-icon { --icon-farbe: #2a6b8b; }
 .tuerchen-karte[data-nummer="24"] .geschenk-icon { --icon-farbe: #c8b870; }
 
-/* SVG-Geschenkbox via CSS Mask */
+/* Realistisches Geschenk-Icon (inline SVG) */
 .geschenk-icon {
   --icon-farbe: #c8960a;
   width: 52%;
   aspect-ratio: 1 / 1;
-  background: linear-gradient(145deg,
-    rgba(255, 255, 255, 0.35) 0%,
-    var(--icon-farbe) 40%,
-    rgba(0, 0, 0, 0.2) 100%
-  );
-  mask-image: url('../img/geschenkbox.svg');
-  mask-repeat: no-repeat;
-  mask-size: contain;
-  mask-position: center;
-  -webkit-mask-image: url('../img/geschenkbox.svg');
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
-  -webkit-mask-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  transition: background 0.2s ease;
+}
+
+.geschenk-icon svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  overflow: visible;
 }
 
 /* Hover */
@@ -1585,7 +1581,7 @@ small span:hover {
 }
 
 .tuerchen-karte.heute .geschenk-icon {
-  background: #ffffff;
+  filter: brightness(1.35);
 }
 
 /* Türchen 24 – goldener Glow */

@@ -172,6 +172,120 @@ function tuerchenzustandAusApi(nummer, tage) {
 // GRID AUFBAUEN
 // ============================================================
 
+// ============================================================
+// GESCHENK-ICON (inline SVG, realistisch mit Muster)
+// ============================================================
+
+/**
+ * Hilfsfunktion: Hellere oder dunklere Variante einer Hex-Farbe.
+ * @param {string} hex - z.B. '#c8102e'
+ * @param {number} menge - Positiv = heller, negativ = dunkler
+ * @returns {string}
+ */
+function adjFarbe(hex, menge) {
+  try {
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return 'rgb('
+      + Math.max(0, Math.min(255, r + menge)) + ','
+      + Math.max(0, Math.min(255, g + menge)) + ','
+      + Math.max(0, Math.min(255, b + menge)) + ')';
+  } catch (e) { return hex; }
+}
+
+/**
+ * Gibt das inline SVG fuer das Geschenk-Icon zurueck.
+ * Jede Nummer bekommt ein eigenes Muster (zyklisch ueber 5 Muster).
+ * Tuerchen 24 erhaelt goldenes Band, goldene Schleife und Goldrahmen.
+ * Box-Farbe kommt aus der CSS-Variable --icon-farbe (per data-nummer gesetzt).
+ * @param {number} nummer - Tuerchen-Nummer (1-24)
+ * @returns {string} SVG-HTML-String
+ */
+function geschenkIconHTML(nummer) {
+  var id = 'gk' + nummer;
+  var MUSTER = ['dots', 'stripes', 'stars', 'diamonds', 'crosses'];
+  var muster = MUSTER[(nummer - 1) % MUSTER.length];
+
+  // Schleife & Band: rot fuer 1-23, gold fuer Tuerchen 24
+  var rib     = nummer === 24 ? '#e8c84a' : '#c8102e';
+  var ribDark = nummer === 24 ? '#b8960a' : '#8b0a1e';
+
+  // ---- Muster-Definition (Geschenkpapier) ----
+  var pat = '';
+  if (muster === 'dots') {
+    pat = '<pattern id="' + id + '-p" x="0" y="0" width="11" height="11" patternUnits="userSpaceOnUse">'
+        + '<circle cx="5.5" cy="5.5" r="2.2" fill="rgba(255,255,255,0.22)"/>'
+        + '</pattern>';
+  } else if (muster === 'stripes') {
+    pat = '<pattern id="' + id + '-p" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">'
+        + '<rect x="0" y="0" width="5" height="10" fill="rgba(255,255,255,0.17)"/>'
+        + '</pattern>';
+  } else if (muster === 'stars') {
+    pat = '<pattern id="' + id + '-p" x="0" y="0" width="16" height="16" patternUnits="userSpaceOnUse">'
+        + '<polygon points="8,1.5 9.6,6.4 14.8,6.4 10.7,9.6 12.2,14.5 8,11.4 3.8,14.5 5.3,9.6 1.2,6.4 6.4,6.4" fill="rgba(255,255,255,0.22)"/>'
+        + '</pattern>';
+  } else if (muster === 'diamonds') {
+    pat = '<pattern id="' + id + '-p" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">'
+        + '<rect x="3" y="3" width="6" height="6" fill="rgba(255,255,255,0.20)" transform="rotate(45 6 6)"/>'
+        + '</pattern>';
+  } else if (muster === 'crosses') {
+    pat = '<pattern id="' + id + '-p" x="0" y="0" width="12" height="12" patternUnits="userSpaceOnUse">'
+        + '<line x1="6" y1="2" x2="6" y2="10" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" stroke-linecap="round"/>'
+        + '<line x1="2" y1="6" x2="10" y2="6" stroke="rgba(255,255,255,0.20)" stroke-width="1.5" stroke-linecap="round"/>'
+        + '</pattern>';
+  }
+
+  // ---- Schleife (groesser & luxurioese fuer #24) ----
+  var bogen = '';
+  if (nummer === 24) {
+    bogen += '<ellipse cx="30" cy="17" rx="15" ry="9" fill="' + ribDark + '" transform="rotate(-28 30 17)" opacity=".72"/>';
+    bogen += '<ellipse cx="50" cy="17" rx="15" ry="9" fill="' + ribDark + '" transform="rotate(28 50 17)" opacity=".72"/>';
+    bogen += '<path d="M37 26 L32 37" stroke="' + rib + '" stroke-width="5.5" stroke-linecap="round"/>';
+    bogen += '<path d="M43 26 L48 37" stroke="' + rib + '" stroke-width="5.5" stroke-linecap="round"/>';
+  }
+  bogen += '<ellipse cx="29" cy="20" rx="13" ry="8" fill="' + adjFarbe(rib, -20) + '" transform="rotate(-18 29 20)"/>';
+  bogen += '<ellipse cx="51" cy="20" rx="13" ry="8" fill="' + adjFarbe(rib, -20) + '" transform="rotate(18 51 20)"/>';
+  bogen += '<ellipse cx="25" cy="18" rx="5" ry="2.5" fill="rgba(255,255,255,0.26)" transform="rotate(-18 25 18)"/>';
+  bogen += '<ellipse cx="55" cy="18" rx="5" ry="2.5" fill="rgba(255,255,255,0.26)" transform="rotate(18 55 18)"/>';
+  bogen += '<circle cx="40" cy="21" r="7" fill="' + rib + '"/>';
+  bogen += '<circle cx="38.5" cy="19.5" r="2.8" fill="rgba(255,255,255,0.28)"/>';
+
+  // ---- Goldener Rahmen nur fuer Tuerchen 24 ----
+  var rahmen = '';
+  if (nummer === 24) {
+    rahmen = '<rect x="5" y="23" width="70" height="53" rx="7" fill="none" stroke="#e8c84a" stroke-width="2.5"/>'
+           + '<rect x="2" y="20" width="76" height="59" rx="9" fill="none" stroke="#e8c84a" stroke-width="1" opacity=".4"/>'
+           // Goldene Eckverzierungen
+           + '<polygon points="6,29 8,24 13,22 8,27 11,32" fill="#e8c84a" opacity=".85"/>'
+           + '<polygon points="74,29 72,24 67,22 72,27 69,32" fill="#e8c84a" opacity=".85"/>'
+           + '<polygon points="6,67 8,72 13,74 8,69 11,64" fill="#e8c84a" opacity=".85"/>'
+           + '<polygon points="74,67 72,72 67,74 72,69 69,64" fill="#e8c84a" opacity=".85"/>';
+  }
+
+  return '<svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">'
+    + '<defs>' + pat + '</defs>'
+    // Geschenk-Koerper
+    + '<rect x="9" y="37" width="62" height="37" rx="5" fill="var(--icon-farbe)"/>'
+    + '<rect x="9" y="37" width="62" height="37" rx="5" fill="url(#' + id + '-p)"/>'
+    + '<rect x="43" y="37" width="28" height="37" fill="rgba(0,0,0,0.15)"/>'
+    // Deckel
+    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="var(--icon-farbe)"/>'
+    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="url(#' + id + '-p)"/>'
+    + '<rect x="6" y="27" width="68" height="13" rx="5" fill="rgba(255,255,255,0.18)"/>'
+    + '<rect x="43" y="27" width="31" height="13" fill="rgba(0,0,0,0.10)"/>'
+    + '<rect x="9" y="28" width="20" height="4" rx="2" fill="rgba(255,255,255,0.12)"/>'
+    + '<rect x="11" y="42" width="15" height="5" rx="2" fill="rgba(255,255,255,0.08)"/>'
+    // Band
+    + '<rect x="35" y="27" width="10" height="47" fill="' + rib + '"/>'
+    + '<rect x="6" y="32" width="68" height="7" fill="' + rib + '"/>'
+    // Schleife
+    + bogen
+    // Goldener Rahmen (nur Tuerchen 24)
+    + rahmen
+    + '</svg>';
+}
+
 // apiTage: Array<{ day_number, unlock_date, is_unlocked }> oder null (Fallback auf lokale Logik)
 function kalenderGridAufbauen(apiTage) {
   const grid = document.getElementById('kalender-grid');
@@ -191,7 +305,7 @@ function kalenderGridAufbauen(apiTage) {
     karte.setAttribute('aria-label', 'Tuerchen ' + nummer);
 
     karte.innerHTML = `
-      <div class="geschenk-icon"></div>
+      <div class="geschenk-icon">${geschenkIconHTML(nummer)}</div>
       <span class="tuerchen-label">${nummer}</span>
     `;
 
