@@ -150,7 +150,7 @@ function backendItemNormalisieren(nummer, item) {
       };
 
     case 'quiz':
-      return quizItemNormalisieren(titel, item.body);
+      return quizItemNormalisieren(titel, item.body, item.media_url);
 
     default:
       return {
@@ -161,7 +161,7 @@ function backendItemNormalisieren(nummer, item) {
   }
 }
 
-function quizItemNormalisieren(titel, body) {
+function quizItemNormalisieren(titel, body, mediaUrl) {
   try {
     const fragen = window.AdventskalenderQuiz.quizBodyZuFragen(body);
     const ersteFrage = fragen[0];
@@ -176,6 +176,7 @@ function quizItemNormalisieren(titel, body) {
       frage: ersteFrage.question,
       antworten: ersteFrage.options,
       richtig: ersteFrage.correct,
+      bild: mediaUrl || '',
       fragen: fragen.map(function(frage) {
         return {
           frage: frage.question,
@@ -394,6 +395,7 @@ function quizFrageHtml(quizId) {
  */
 function quizRendern(data) {
   const quizId = `quiz-${quizInstanzZaehler}`;
+  const hatIntroBild = Boolean(data.bild);
   quizInstanzZaehler += 1;
   quizZustaende[quizId] = {
     fragen: Array.isArray(data.fragen) && data.fragen.length > 0
@@ -409,11 +411,31 @@ function quizRendern(data) {
         <span aria-hidden="true">?</span>
         Quiz
       </div>
-      <div data-quiz-question-area>
+      ${hatIntroBild ? `
+        <div class="quiz-intro" data-quiz-intro onanimationend="quizIntroBeendet(this)">
+          <div class="quiz-intro-glow" aria-hidden="true"></div>
+          <img src="${data.bild}" alt="${data.titel}" class="quiz-intro-bild">
+        </div>
+      ` : ''}
+      <div class="quiz-fragenbereich ${hatIntroBild ? 'ist-versteckt' : ''}" data-quiz-question-area>
         ${quizFrageHtml(quizId)}
       </div>
     </div>
   `;
+}
+
+function quizIntroBeendet(intro) {
+  const karte = intro ? intro.closest('[data-quiz-id]') : null;
+  const frageBereich = karte ? karte.querySelector('[data-quiz-question-area]') : null;
+
+  if (frageBereich) {
+    frageBereich.classList.remove('ist-versteckt');
+    frageBereich.classList.add('ist-sichtbar');
+  }
+
+  if (intro) {
+    intro.remove();
+  }
 }
 
 /**
