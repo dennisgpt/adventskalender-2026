@@ -1835,6 +1835,7 @@ small span:hover {
   display: grid;
   position: relative;
   align-content: center;
+  align-items: center;
   min-height: 82px;
   border-radius: 15px;
   padding: 0.82rem 1rem;
@@ -1856,6 +1857,8 @@ small span:hover {
   line-height: 1.28;
   position: relative;
   z-index: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .quiz-antwort:hover,
@@ -1872,8 +1875,9 @@ small span:hover {
 
 .quiz-antwort.btn-success,
 .quiz-antwort.btn-danger {
+  grid-template-columns: minmax(0, 1fr) 34px;
+  column-gap: 0.75rem;
   color: #ffffff;
-  padding-right: 3.75rem;
 }
 
 .quiz-antwort.btn-success {
@@ -1896,13 +1900,10 @@ small span:hover {
 .quiz-antwort.btn-danger::after {
   display: grid;
   place-items: center;
-  position: absolute;
-  top: 50%;
-  right: 1rem;
+  position: relative;
   width: 34px;
   height: 34px;
   border-radius: 999px;
-  transform: translateY(-50%);
   color: #11224a;
   font-size: 1.25rem;
   font-weight: 900;
