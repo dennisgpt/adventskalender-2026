@@ -5,6 +5,8 @@
 
 let moodFadeInterval = null;
 let aktivesMoodFrame = null;
+let quizInstanzZaehler = 0;
+let quizZustaende = {};
 
 // ============================================================
 // MODAL-STATES
@@ -47,8 +49,12 @@ function inhaltAnzeigen(nummer) {
   const modalTitel = document.getElementById('tuerchen-modal-titel');
   const modalInhalt = document.getElementById('tuerchen-modal-inhalt');
 
+  quizInstanzZaehler = 0;
+  quizZustaende = {};
+
   modalElement.addEventListener('hidden.bs.modal', function() {
     stoppeMoodMusik(modalElement);
+    quizZustaende = {};
   }, { once: true });
 
   modalStateAnzeigen(nummer, 'modal-state-loading-template');
@@ -144,7 +150,7 @@ function backendItemNormalisieren(nummer, item) {
       };
 
     case 'quiz':
-      return quizItemNormalisieren(titel, item.body);
+      return quizItemNormalisieren(titel, item.body, item.media_url);
 
     default:
       return {
@@ -155,22 +161,29 @@ function backendItemNormalisieren(nummer, item) {
   }
 }
 
-function quizItemNormalisieren(titel, body) {
+function quizItemNormalisieren(titel, body, mediaUrl) {
   try {
-    const quiz = typeof body === 'string' ? JSON.parse(body) : body;
-    const antworten = Array.isArray(quiz.options) ? quiz.options : [];
-    const richtig = Number.parseInt(quiz.correct, 10);
+    const fragen = window.AdventskalenderQuiz.quizBodyZuFragen(body);
+    const ersteFrage = fragen[0];
 
-    if (!quiz.question || antworten.length === 0 || Number.isNaN(richtig)) {
+    if (!ersteFrage) {
       throw new Error('Quiz-Daten unvollstaendig');
     }
 
     return {
       typ: 'quiz',
       titel: titel,
-      frage: quiz.question,
-      antworten: antworten,
-      richtig: richtig
+      frage: ersteFrage.question,
+      antworten: ersteFrage.options,
+      richtig: ersteFrage.correct,
+      bild: mediaUrl || '',
+      fragen: fragen.map(function(frage) {
+        return {
+          frage: frage.question,
+          antworten: frage.options,
+          richtig: frage.correct
+        };
+      })
     };
   } catch (error) {
     return {
@@ -345,18 +358,20 @@ function stoppeLautstaerkeFade() {
 // QUIZ-LOGIK
 // ============================================================
 
-/**
- * Rendert ein Quiz mit Antwort-Buttons.
- * @param {Object} data
- * @returns {string}
- */
-function quizRendern(data) {
-  const antwortButtons = data.antworten.map(function(antwort, index) {
+function quizFrageHtml(quizId) {
+  const zustand = quizZustaende[quizId];
+
+  if (!zustand) {
+    return '';
+  }
+
+  const frage = zustand.fragen[zustand.aktuelleFrage];
+  const antwortButtons = frage.antworten.map(function(antwort, index) {
     return `
       <button
         class="btn btn-outline-warning quiz-antwort"
         data-index="${index}"
-        data-richtig="${data.richtig}"
+        data-quiz-answer
         onclick="quizAntwortPruefen(this)">
         <span class="quiz-antwort-text">${antwort}</span>
       </button>
@@ -364,18 +379,63 @@ function quizRendern(data) {
   }).join('');
 
   return `
-    <div class="quiz-card">
+    <div class="quiz-fortschritt">Frage ${zustand.aktuelleFrage + 1} von ${zustand.fragen.length}</div>
+    <p class="quiz-frage">${frage.frage}</p>
+    <div class="quiz-antworten">
+      ${antwortButtons}
+    </div>
+    <div class="quiz-feedback" data-quiz-feedback style="display:none;"></div>
+  `;
+}
+
+/**
+ * Rendert ein Quiz mit Antwort-Buttons.
+ * @param {Object} data
+ * @returns {string}
+ */
+function quizRendern(data) {
+  const quizId = `quiz-${quizInstanzZaehler}`;
+  const hatIntroBild = Boolean(data.bild);
+  quizInstanzZaehler += 1;
+  quizZustaende[quizId] = {
+    fragen: Array.isArray(data.fragen) && data.fragen.length > 0
+      ? data.fragen
+      : [{ frage: data.frage, antworten: data.antworten, richtig: data.richtig }],
+    aktuelleFrage: 0,
+    antworten: []
+  };
+
+  return `
+    <div class="quiz-card" data-quiz-id="${quizId}">
       <div class="quiz-badge">
         <span aria-hidden="true">?</span>
         Quiz
       </div>
-      <p class="quiz-frage">${data.frage}</p>
-      <div id="quiz-antworten" class="quiz-antworten">
-        ${antwortButtons}
+      ${hatIntroBild ? `
+        <div class="quiz-intro" data-quiz-intro onanimationend="quizIntroBeendet(this)">
+          <div class="quiz-intro-glow" aria-hidden="true"></div>
+          <img src="${data.bild}" alt="${data.titel}" class="quiz-intro-bild">
+        </div>
+      ` : ''}
+      <div class="quiz-fragenbereich ${hatIntroBild ? 'ist-versteckt' : ''}" data-quiz-question-area>
+        ${quizFrageHtml(quizId)}
       </div>
-      <div id="quiz-feedback" class="quiz-feedback" style="display:none;"></div>
     </div>
   `;
+}
+
+function quizIntroBeendet(intro) {
+  const karte = intro ? intro.closest('[data-quiz-id]') : null;
+  const frageBereich = karte ? karte.querySelector('[data-quiz-question-area]') : null;
+
+  if (frageBereich) {
+    frageBereich.classList.remove('ist-versteckt');
+    frageBereich.classList.add('ist-sichtbar');
+  }
+
+  if (intro) {
+    intro.remove();
+  }
 }
 
 /**
@@ -384,11 +444,15 @@ function quizRendern(data) {
  */
 function quizAntwortPruefen(button) {
   const gewaehlt = parseInt(button.getAttribute('data-index'), 10);
-  const richtig = parseInt(button.getAttribute('data-richtig'), 10);
-  const feedback = document.getElementById('quiz-feedback');
-  const antwortButtons = document.querySelectorAll('.quiz-antwort');
+  const karte = button.closest('[data-quiz-id]');
+  const quizId = karte ? karte.getAttribute('data-quiz-id') : '';
+  const zustand = quizZustaende[quizId];
+  const frage = zustand ? zustand.fragen[zustand.aktuelleFrage] : null;
+  const richtig = frage ? frage.richtig : NaN;
+  const feedback = karte ? karte.querySelector('[data-quiz-feedback]') : null;
+  const antwortButtons = karte ? karte.querySelectorAll('[data-quiz-answer]') : [];
 
-  if (!feedback || Number.isNaN(gewaehlt) || Number.isNaN(richtig)) {
+  if (!zustand || !frage || zustand.antworten[zustand.aktuelleFrage] || !feedback || Number.isNaN(gewaehlt) || Number.isNaN(richtig)) {
     return;
   }
 
@@ -396,11 +460,25 @@ function quizAntwortPruefen(button) {
     btn.disabled = true;
   });
 
+  zustand.antworten[zustand.aktuelleFrage] = {
+    frage: frage.frage,
+    antworten: frage.antworten,
+    gewaehlt: gewaehlt,
+    richtig: richtig,
+    istRichtig: gewaehlt === richtig
+  };
+
+  const istLetzteFrage = zustand.aktuelleFrage >= zustand.fragen.length - 1;
+  const buttonText = istLetzteFrage ? 'Ergebnis anzeigen' : 'Weiter';
+
   if (gewaehlt === richtig) {
     button.classList.replace('btn-outline-warning', 'btn-success');
     feedback.classList.remove('ist-falsch');
     feedback.classList.add('ist-richtig');
-    feedback.textContent = 'Richtig! Super gemacht!';
+    feedback.innerHTML = `
+      <span class="quiz-feedback-text">Richtig! Super gemacht!</span>
+      <button class="quiz-naechste-frage" type="button" onclick="quizNaechsteFrage(this)">${buttonText}</button>
+    `;
   } else {
     button.classList.replace('btn-outline-warning', 'btn-danger');
     if (antwortButtons[richtig]) {
@@ -408,8 +486,64 @@ function quizAntwortPruefen(button) {
     }
     feedback.classList.remove('ist-richtig');
     feedback.classList.add('ist-falsch');
-    feedback.textContent = 'Leider falsch. Versuch es nächstes Mal!';
+    feedback.innerHTML = `
+      <span class="quiz-feedback-text">Leider falsch. Die richtige Antwort ist markiert.</span>
+      <button class="quiz-naechste-frage" type="button" onclick="quizNaechsteFrage(this)">${buttonText}</button>
+    `;
   }
 
-  feedback.style.display = 'block';
+  feedback.style.display = 'flex';
+}
+
+function quizNaechsteFrage(button) {
+  const karte = button.closest('[data-quiz-id]');
+  const quizId = karte ? karte.getAttribute('data-quiz-id') : '';
+  const zustand = quizZustaende[quizId];
+  const frageBereich = karte ? karte.querySelector('[data-quiz-question-area]') : null;
+
+  if (!zustand || !frageBereich) {
+    return;
+  }
+
+  if (zustand.aktuelleFrage >= zustand.fragen.length - 1) {
+    frageBereich.innerHTML = quizErgebnisHtml(zustand);
+    return;
+  }
+
+  zustand.aktuelleFrage += 1;
+  frageBereich.innerHTML = quizFrageHtml(quizId);
+}
+
+function quizErgebnisHtml(zustand) {
+  const richtigeAntworten = zustand.antworten.filter(function(antwort) {
+    return antwort && antwort.istRichtig;
+  }).length;
+
+  const eintraege = zustand.antworten.map(function(antwort, index) {
+    const gewaehlteAntwort = antwort.antworten[antwort.gewaehlt] || 'Keine Antwort';
+    const richtigeAntwort = antwort.antworten[antwort.richtig] || '-';
+
+    return `
+      <li class="quiz-ergebnis-eintrag ${antwort.istRichtig ? 'ist-richtig' : 'ist-falsch'}">
+        <span class="quiz-ergebnis-status">${antwort.istRichtig ? '\u2713' : '\u00d7'}</span>
+        <div>
+          <strong>Frage ${index + 1}</strong>
+          <span class="quiz-ergebnis-frage">${antwort.frage}</span>
+          <small>Deine Antwort: ${gewaehlteAntwort}${antwort.istRichtig ? '' : ' | Richtig: ' + richtigeAntwort}</small>
+        </div>
+      </li>
+    `;
+  }).join('');
+
+  return `
+    <div class="quiz-ergebnis">
+      <div class="quiz-ergebnis-kopf">
+        <span>Ergebnis</span>
+        <strong>${richtigeAntworten} von ${zustand.fragen.length} richtig</strong>
+      </div>
+      <ol class="quiz-ergebnis-liste">
+        ${eintraege}
+      </ol>
+    </div>
+  `;
 }

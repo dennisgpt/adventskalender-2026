@@ -121,8 +121,7 @@
 
     if (content.type === 'quiz') {
       try {
-        const quiz = JSON.parse(content.body);
-        return quiz.question || 'Quiz ohne Frage';
+        return window.AdventskalenderQuiz.quizVorschau(content.body);
       } catch (error) {
         return 'Quiz-Daten konnten nicht gelesen werden';
       }

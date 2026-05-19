@@ -118,10 +118,13 @@ If `is_randomized: false`, all items are returned sorted by `sort_order`.
 {
   "id": 15,
   "type": "quiz",
-  "body": "{\"question\":\"Was ist die Hauptstadt von Bayern?\",\"options\":[\"Berlin\",\"München\",\"Nürnberg\",\"Augsburg\"],\"correct\":1}",
+  "body": "{\"questions\":[{\"question\":\"Was ist die Hauptstadt von Bayern?\",\"options\":[\"Berlin\",\"München\",\"Nürnberg\",\"Augsburg\"],\"correct\":1},{\"question\":\"Wie viele Normalformen gibt es?\",\"options\":[\"1\",\"2\",\"3\",\"5\"],\"correct\":2}]}",
   "media_url": null
 }
 ```
+
+Legacy quiz bodies with `question`, `options`, and `correct` at the top level can still be returned for older content items and should remain readable by clients.
+Optional: If `media_url` is set for a quiz, clients may use it as an intro image before showing the first question.
 
 **Response 403** — door not yet unlocked
 ```json
@@ -204,7 +207,7 @@ Returns all content items in the pool (including inactive ones).
   {
     "id": 3,
     "type": "quiz",
-    "body": "{\"question\":\"...\",\"options\":[...],\"correct\":0}",
+    "body": "{\"questions\":[{\"question\":\"...\",\"options\":[...],\"correct\":0}]}",
     "media_url": null,
     "is_active": false,
     "created_at": "2026-11-02T09:00:00.000Z"
@@ -231,8 +234,17 @@ For a quiz:
 ```json
 {
   "type": "quiz",
-  "body": "{\"question\":\"Was ist 2+2?\",\"options\":[\"3\",\"4\",\"5\",\"6\"],\"correct\":1}",
+  "body": "{\"questions\":[{\"question\":\"Was ist 2+2?\",\"options\":[\"3\",\"4\",\"5\",\"6\"],\"correct\":1},{\"question\":\"Was ist 3+3?\",\"options\":[\"5\",\"6\",\"7\",\"8\"],\"correct\":1}]}",
   "media_url": null
+}
+```
+
+Optional quiz intro image:
+```json
+{
+  "type": "quiz",
+  "body": "{\"questions\":[{\"question\":\"Was ist 2+2?\",\"options\":[\"3\",\"4\",\"5\",\"6\"],\"correct\":1}]}",
+  "media_url": "/uploads/quiz-intro.webp"
 }
 ```
 

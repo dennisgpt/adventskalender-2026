@@ -367,42 +367,11 @@
       <fieldset class="admin-content-quiz-felder d-none" id="admin-content-quiz-felder">
         <legend>Quiz-Daten</legend>
 
-        <label class="admin-content-feld" for="admin-content-quiz-question">
-          <span>Frage</span>
-          <input id="admin-content-quiz-question" name="quiz_question" type="text" placeholder="Was ist 2+2?">
-        </label>
-
-        <div class="admin-content-form-grid">
-          <label class="admin-content-feld" for="admin-content-quiz-option-0">
-            <span>Antwort 1</span>
-            <input id="admin-content-quiz-option-0" name="quiz_option_0" type="text">
-          </label>
-
-          <label class="admin-content-feld" for="admin-content-quiz-option-1">
-            <span>Antwort 2</span>
-            <input id="admin-content-quiz-option-1" name="quiz_option_1" type="text">
-          </label>
-
-          <label class="admin-content-feld" for="admin-content-quiz-option-2">
-            <span>Antwort 3</span>
-            <input id="admin-content-quiz-option-2" name="quiz_option_2" type="text">
-          </label>
-
-          <label class="admin-content-feld" for="admin-content-quiz-option-3">
-            <span>Antwort 4</span>
-            <input id="admin-content-quiz-option-3" name="quiz_option_3" type="text">
-          </label>
-        </div>
-
-        <label class="admin-content-feld" for="admin-content-quiz-correct">
-          <span>Korrekte Antwort</span>
-          <select id="admin-content-quiz-correct" name="quiz_correct">
-            <option value="0">Antwort 1</option>
-            <option value="1">Antwort 2</option>
-            <option value="2">Antwort 3</option>
-            <option value="3">Antwort 4</option>
-          </select>
-        </label>
+        <div class="admin-content-quiz-fragen" id="admin-content-quiz-fragen"></div>
+        <button class="admin-content-quiz-add" id="admin-content-quiz-add" type="button">
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
+          Frage hinzufügen
+        </button>
       </fieldset>
 
       <div class="admin-content-form-actions">
@@ -579,6 +548,7 @@
   <!-- Unsere JavaScript-Dateien -->
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>        <!-- API-Client -->
+  <script src="js/quiz-utils.js"></script> <!-- Quiz-Daten normalisieren -->
   <script src="js/admin-login.js"></script><!-- Admin Login -->
   <script src="js/admin-dashboard.js"></script><!-- Admin Dashboard -->
   <script src="js/admin-content.js"></script><!-- Admin Content-Verwaltung -->

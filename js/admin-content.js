@@ -46,14 +46,8 @@
       uploadPreviewModalBild: document.getElementById('admin-content-upload-preview-modal-bild'),
       mediaUrlFeld: document.getElementById('admin-content-media-url'),
       quizFelder: document.getElementById('admin-content-quiz-felder'),
-      quizQuestionFeld: document.getElementById('admin-content-quiz-question'),
-      quizOptions: [
-        document.getElementById('admin-content-quiz-option-0'),
-        document.getElementById('admin-content-quiz-option-1'),
-        document.getElementById('admin-content-quiz-option-2'),
-        document.getElementById('admin-content-quiz-option-3')
-      ],
-      quizCorrectFeld: document.getElementById('admin-content-quiz-correct'),
+      quizFragenListe: document.getElementById('admin-content-quiz-fragen'),
+      quizAddButton: document.getElementById('admin-content-quiz-add'),
       formStatus: document.getElementById('admin-content-form-status')
     };
   }
@@ -176,8 +170,7 @@
 
     if (content.type === 'quiz') {
       try {
-        const quiz = JSON.parse(content.body);
-        return quiz.question || 'Quiz ohne Frage';
+        return window.AdventskalenderQuiz.quizVorschau(content.body);
       } catch (error) {
         return 'Quiz-Daten konnten nicht gelesen werden';
       }
@@ -491,12 +484,167 @@
     return feld && typeof feld.value === 'string' ? feld.value.trim() : '';
   }
 
-  function baueQuizBody(elemente) {
-    return JSON.stringify({
-      question: feldWert(elemente.quizQuestionFeld),
-      options: elemente.quizOptions.map(feldWert),
-      correct: Number.parseInt(elemente.quizCorrectFeld.value, 10)
+  function quizFrageElemente(block) {
+    return {
+      question: block.querySelector('[data-quiz-question-input]'),
+      options: Array.from(block.querySelectorAll('[data-quiz-option-input]')),
+      correct: block.querySelector('[data-quiz-correct-input]')
+    };
+  }
+
+  function leseQuizFragenAusForm(elemente) {
+    if (!elemente.quizFragenListe) {
+      return [];
+    }
+
+    return Array.from(elemente.quizFragenListe.querySelectorAll('[data-quiz-question]'))
+      .map(function(block) {
+        const frageElemente = quizFrageElemente(block);
+
+        return {
+          question: feldWert(frageElemente.question),
+          options: frageElemente.options.map(feldWert),
+          correct: Number.parseInt(frageElemente.correct ? frageElemente.correct.value : '0', 10)
+        };
+      });
+  }
+
+  function aktualisiereQuizFrageNummern(elemente) {
+    if (!elemente.quizFragenListe) {
+      return;
+    }
+
+    const bloecke = Array.from(elemente.quizFragenListe.querySelectorAll('[data-quiz-question]'));
+
+    bloecke.forEach(function(block, index) {
+      const titel = block.querySelector('[data-quiz-question-title]');
+      const loeschButton = block.querySelector('[data-quiz-question-remove]');
+
+      if (titel) {
+        titel.textContent = `Frage ${index + 1}`;
+      }
+
+      if (loeschButton) {
+        loeschButton.disabled = bloecke.length <= 1;
+      }
     });
+  }
+
+  function erstelleQuizFrageBlock(elemente, frage) {
+    if (!elemente.quizFragenListe) {
+      return null;
+    }
+
+    const block = document.createElement('section');
+    const idSuffix = `quiz-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    block.className = 'admin-content-quiz-frage';
+    block.setAttribute('data-quiz-question', '');
+
+    block.innerHTML = `
+      <div class="admin-content-quiz-frage-kopf">
+        <h3 class="admin-content-quiz-frage-titel" data-quiz-question-title>Frage</h3>
+        <button class="admin-content-quiz-remove" type="button" data-quiz-question-remove>
+          <i class="bi bi-trash" aria-hidden="true"></i>
+          Entfernen
+        </button>
+      </div>
+      <label class="admin-content-feld" for="${idSuffix}-question">
+        <span>Frage</span>
+        <input id="${idSuffix}-question" name="quiz_question[]" type="text" placeholder="Was ist 2+2?" data-quiz-question-input>
+      </label>
+      <div class="admin-content-form-grid">
+        <label class="admin-content-feld" for="${idSuffix}-option-0">
+          <span>Antwort 1</span>
+          <input id="${idSuffix}-option-0" name="quiz_option_0[]" type="text" data-quiz-option-input>
+        </label>
+        <label class="admin-content-feld" for="${idSuffix}-option-1">
+          <span>Antwort 2</span>
+          <input id="${idSuffix}-option-1" name="quiz_option_1[]" type="text" data-quiz-option-input>
+        </label>
+        <label class="admin-content-feld" for="${idSuffix}-option-2">
+          <span>Antwort 3</span>
+          <input id="${idSuffix}-option-2" name="quiz_option_2[]" type="text" data-quiz-option-input>
+        </label>
+        <label class="admin-content-feld" for="${idSuffix}-option-3">
+          <span>Antwort 4</span>
+          <input id="${idSuffix}-option-3" name="quiz_option_3[]" type="text" data-quiz-option-input>
+        </label>
+      </div>
+      <label class="admin-content-feld" for="${idSuffix}-correct">
+        <span>Korrekte Antwort</span>
+        <select id="${idSuffix}-correct" name="quiz_correct[]" data-quiz-correct-input>
+          <option value="0">Antwort 1</option>
+          <option value="1">Antwort 2</option>
+          <option value="2">Antwort 3</option>
+          <option value="3">Antwort 4</option>
+        </select>
+      </label>
+    `;
+
+    const daten = {
+      question: frage && frage.question ? frage.question : '',
+      options: frage && Array.isArray(frage.options) ? frage.options : ['', '', '', ''],
+      correct: frage && Number.isInteger(frage.correct) ? frage.correct : 0
+    };
+    const frageElemente = quizFrageElemente(block);
+
+    if (frageElemente.question) {
+      frageElemente.question.value = daten.question;
+    }
+
+    frageElemente.options.forEach(function(optionFeld, index) {
+      optionFeld.value = daten.options[index] || '';
+    });
+
+    if (frageElemente.correct) {
+      frageElemente.correct.value = String(daten.correct >= 0 && daten.correct < 4 ? daten.correct : 0);
+    }
+
+    const loeschButton = block.querySelector('[data-quiz-question-remove]');
+
+    if (loeschButton) {
+      loeschButton.addEventListener('click', function() {
+        block.remove();
+        stelleQuizMindestfrageSicher(elemente);
+        aktualisiereQuizFrageNummern(elemente);
+        aktualisiereContentFormValiditaet();
+      });
+    }
+
+    elemente.quizFragenListe.appendChild(block);
+    aktualisiereQuizFrageNummern(elemente);
+    return block;
+  }
+
+  function setzeQuizFragen(elemente, fragen) {
+    if (!elemente.quizFragenListe) {
+      return;
+    }
+
+    elemente.quizFragenListe.innerHTML = '';
+    const quizFragen = Array.isArray(fragen) && fragen.length > 0
+      ? fragen
+      : [{ question: '', options: ['', '', '', ''], correct: 0 }];
+
+    quizFragen.forEach(function(frage) {
+      erstelleQuizFrageBlock(elemente, frage);
+    });
+
+    aktualisiereQuizFrageNummern(elemente);
+  }
+
+  function stelleQuizMindestfrageSicher(elemente) {
+    if (!elemente.quizFragenListe) {
+      return;
+    }
+
+    if (elemente.quizFragenListe.querySelectorAll('[data-quiz-question]').length === 0) {
+      erstelleQuizFrageBlock(elemente);
+    }
+  }
+
+  function baueQuizBody(elemente) {
+    return window.AdventskalenderQuiz.baueQuizBodyAusFragen(leseQuizFragenAusForm(elemente));
   }
 
   function baueContentPayload() {
@@ -670,36 +818,21 @@
   }
 
   function fuelleQuizFelder(elemente, content) {
-    let quizDaten = {
-      question: '',
-      options: ['', '', '', ''],
-      correct: 0
-    };
+    let quizFragen = [];
 
     if (content.body) {
-      try {
-        quizDaten = {
-          ...quizDaten,
-          ...JSON.parse(content.body)
-        };
-      } catch (error) {
-        quizDaten.question = content.body;
+      quizFragen = window.AdventskalenderQuiz.quizBodyZuFragen(content.body);
+
+      if (quizFragen.length === 0) {
+        quizFragen = [{
+          question: content.body,
+          options: ['', '', '', ''],
+          correct: 0
+        }];
       }
     }
 
-    if (elemente.quizQuestionFeld) {
-      elemente.quizQuestionFeld.value = quizDaten.question || '';
-    }
-
-    elemente.quizOptions.forEach(function(optionFeld, index) {
-      if (optionFeld) {
-        optionFeld.value = quizDaten.options && quizDaten.options[index] ? quizDaten.options[index] : '';
-      }
-    });
-
-    if (elemente.quizCorrectFeld) {
-      elemente.quizCorrectFeld.value = String(Number.isInteger(quizDaten.correct) ? quizDaten.correct : 0);
-    }
+    setzeQuizFragen(elemente, quizFragen);
   }
 
   function fuelleContentForm(content) {
@@ -740,14 +873,26 @@
     }
 
     if (elemente.typeFeld.value === 'quiz') {
-      if (!feldWert(elemente.quizQuestionFeld)) {
-        return 'Bitte trage eine Quiz-Frage ein.';
+      const quizFragen = leseQuizFragenAusForm(elemente);
+
+      if (quizFragen.length === 0) {
+        return 'Bitte lege mindestens eine Quiz-Frage an.';
       }
 
-      if (!elemente.quizOptions.every(function(optionFeld) {
-        return Boolean(feldWert(optionFeld));
-      })) {
-        return 'Bitte trage alle Antwortoptionen ein.';
+      for (let index = 0; index < quizFragen.length; index += 1) {
+        const frage = quizFragen[index];
+
+        if (!frage.question) {
+          return `Bitte trage bei Frage ${index + 1} einen Fragetext ein.`;
+        }
+
+        if (!frage.options.every(Boolean)) {
+          return `Bitte trage bei Frage ${index + 1} alle Antwortoptionen ein.`;
+        }
+
+        if (Number.isNaN(frage.correct) || frage.correct < 0 || frage.correct >= frage.options.length) {
+          return `Bitte waehle bei Frage ${index + 1} eine korrekte Antwort aus.`;
+        }
       }
 
       return '';
@@ -808,6 +953,7 @@
     setzeContentUploadStatus('', '');
     setzeContentDateiName('');
     setzeContentUploadVorschau('');
+    setzeQuizFragen(elemente);
     aktualisiereContentFormTyp();
     setzeContentFormStatus('', '');
   }
@@ -826,6 +972,11 @@
     elemente.bodyFeld.placeholder = istQuiz
       ? 'Quiz-Daten werden aus den Quiz-Feldern vorbereitet'
       : 'Text, Link oder kurze Beschreibung';
+
+    if (istQuiz) {
+      stelleQuizMindestfrageSicher(elemente);
+    }
+
     aktualisiereContentFormValiditaet();
   }
 
@@ -879,6 +1030,7 @@
     const elemente = contentElemente();
 
     aktualisiereAdminContentSichtbarkeit();
+    setzeQuizFragen(elemente);
     aktualisiereContentFormTyp();
 
     if (elemente.createButton) {
@@ -905,6 +1057,22 @@
 
     if (elemente.typeFeld) {
       elemente.typeFeld.addEventListener('change', aktualisiereContentFormTyp);
+    }
+
+    if (elemente.quizAddButton) {
+      elemente.quizAddButton.addEventListener('click', function() {
+        const block = erstelleQuizFrageBlock(elemente);
+
+        if (block) {
+          const frageFeld = block.querySelector('[data-quiz-question-input]');
+
+          if (frageFeld) {
+            frageFeld.focus();
+          }
+        }
+
+        aktualisiereContentFormValiditaet();
+      });
     }
 
     if (elemente.filterFeld) {
