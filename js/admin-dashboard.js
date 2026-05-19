@@ -33,7 +33,12 @@
       leer: document.getElementById('admin-zuweisung-leer'),
       pool: document.getElementById('admin-zuweisung-pool'),
       submitButton: document.getElementById('admin-zuweisung-submit'),
-      status: document.getElementById('admin-zuweisung-status')
+      status: document.getElementById('admin-zuweisung-status'),
+      filter: document.getElementById('admin-zuweisung-filter'),
+      filterTyp: document.getElementById('admin-zuweisung-filter-typ'),
+      filterSuche: document.getElementById('admin-zuweisung-filter-suche'),
+      filterStatus: document.getElementById('admin-zuweisung-filter-status'),
+      filterLeer: document.getElementById('admin-zuweisung-filter-leer')
     };
   }
 
@@ -496,9 +501,54 @@
     });
   }
 
+  function filtereUndRenderContentPool() {
+    const elemente = zuweisungElemente();
+    const typ = elemente.filterTyp ? elemente.filterTyp.value : '';
+    const suche = elemente.filterSuche ? elemente.filterSuche.value.toLowerCase().trim() : '';
+
+    const gefiltert = adminContentPool.filter(function(content) {
+      const typPasst = !typ || content.type === typ;
+      const suchtext = (content.title || content.body || '').toLowerCase();
+      const suchePasst = !suche || suchtext.includes(suche);
+      return typPasst && suchePasst;
+    });
+
+    renderContentPool(gefiltert);
+
+    const keineErgebnisse = gefiltert.length === 0 && adminContentPool.length > 0;
+    if (elemente.filterLeer) {
+      elemente.filterLeer.classList.toggle('d-none', !keineErgebnisse);
+    }
+    if (elemente.pool) {
+      elemente.pool.classList.toggle('d-none', keineErgebnisse);
+    }
+    if (elemente.filterStatus) {
+      elemente.filterStatus.textContent = gefiltert.length !== adminContentPool.length
+        ? gefiltert.length + ' von ' + adminContentPool.length + ' Einträgen'
+        : '';
+    }
+  }
+
+  function resetZuweisungFilter() {
+    const elemente = zuweisungElemente();
+    if (elemente.filterTyp) elemente.filterTyp.value = '';
+    if (elemente.filterSuche) elemente.filterSuche.value = '';
+    if (elemente.filterStatus) elemente.filterStatus.textContent = '';
+    if (elemente.filterLeer) elemente.filterLeer.classList.add('d-none');
+    if (elemente.filter) elemente.filter.classList.add('d-none');
+  }
+
+  function zeigeZuweisungFilter() {
+    const elemente = zuweisungElemente();
+    if (elemente.filter) {
+      elemente.filter.classList.remove('d-none');
+    }
+  }
+
   function ladeContentPool() {
     if (adminContentPool.length > 0) {
-      renderContentPool(adminContentPool);
+      filtereUndRenderContentPool();
+      zeigeZuweisungFilter();
       setzeZuweisungStatus('bereit');
       return Promise.resolve(adminContentPool);
     }
@@ -518,7 +568,8 @@
           return adminContentPool;
         }
 
-        renderContentPool(adminContentPool);
+        filtereUndRenderContentPool();
+        zeigeZuweisungFilter();
         setzeZuweisungStatus('bereit');
         return adminContentPool;
       })
@@ -554,6 +605,7 @@
     aktualisiereZuweisungKopf();
     aktualisiereAusgewaehlteTagKarte();
     setzeZuweisungAktionStatus('', '');
+    resetZuweisungFilter();
   }
 
   function renderAdminTagKarte(tag) {
@@ -728,6 +780,17 @@
 
     if (zuweisungSubmitButton) {
       zuweisungSubmitButton.addEventListener('click', weiseAusgewaehltenContentZu);
+    }
+
+    const filterTyp = document.getElementById('admin-zuweisung-filter-typ');
+    const filterSuche = document.getElementById('admin-zuweisung-filter-suche');
+
+    if (filterTyp) {
+      filterTyp.addEventListener('change', filtereUndRenderContentPool);
+    }
+
+    if (filterSuche) {
+      filterSuche.addEventListener('input', filtereUndRenderContentPool);
     }
 
     if (istAdminEingeloggt()) {

@@ -286,6 +286,28 @@
         Kein Türchen ausgewählt.
       </p>
 
+      <div class="admin-content-filter d-none" id="admin-zuweisung-filter">
+        <label class="admin-content-filter-feld">
+          Typ
+          <select id="admin-zuweisung-filter-typ">
+            <option value="">Alle</option>
+            <option value="quiz">Quiz</option>
+            <option value="video">Video</option>
+            <option value="image">Bild</option>
+            <option value="text">Text</option>
+          </select>
+        </label>
+        <label class="admin-content-filter-feld">
+          Suche
+          <input type="text" id="admin-zuweisung-filter-suche" placeholder="Stichwort suchen...">
+        </label>
+        <p class="admin-content-filter-status" id="admin-zuweisung-filter-status"></p>
+      </div>
+
+      <div class="admin-dashboard-state admin-dashboard-state-leer d-none" id="admin-zuweisung-filter-leer" role="status">
+        Kein Content gefunden.
+      </div>
+
       <div class="admin-dashboard-state d-none" id="admin-zuweisung-loading" role="status" aria-live="polite">
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
         Content-Pool wird geladen...
