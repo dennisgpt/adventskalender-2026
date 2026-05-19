@@ -357,7 +357,7 @@ function tuercheoeffnen(nummer, karte) {
 
       karte.classList.remove('verfuegbar', 'heute', 'gesperrt');
       karte.classList.add('geoeffnet');
-      karte.querySelector('.tuerchen-nummer').textContent = '\u2713';
+      karte.querySelector('.tuerchen-label').textContent = '\u2713';
 
       inhaltAnzeigen(nummer);
     })
