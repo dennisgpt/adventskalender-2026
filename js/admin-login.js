@@ -18,19 +18,15 @@
       : '<i class="bi bi-box-arrow-in-right me-1"></i>Einloggen';
   }
 
-  function setzeLogoutLaedt(loginButton, laedt) {
-    const loginButtonIcon = document.getElementById('admin-login-button-icon');
-    const loginButtonText = document.getElementById('admin-login-button-text');
-
-    if (!loginButton || !loginButtonIcon || !loginButtonText) {
+  function setzeAdminLogoutLaedt(logoutButton, laedt) {
+    if (!logoutButton) {
       return;
     }
 
-    loginButton.disabled = laedt;
-    loginButtonIcon.className = laedt
-      ? 'spinner-border spinner-border-sm'
-      : 'bi bi-shield-check';
-    loginButtonText.textContent = laedt ? 'Abmelden...' : 'Admin';
+    logoutButton.disabled = laedt;
+    logoutButton.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>Abmelden...'
+      : '<i class="bi bi-box-arrow-right me-1" aria-hidden="true"></i>Abmelden';
   }
 
   let adminStatusToastTimeout = null;
@@ -67,12 +63,16 @@
     const loginButton = document.getElementById('admin-login-button');
     const loginButtonIcon = document.getElementById('admin-login-button-icon');
     const loginButtonText = document.getElementById('admin-login-button-text');
+    const logoutButton = document.getElementById('admin-logout-button');
 
     if (!loginButton || !loginButtonIcon || !loginButtonText) {
       return;
     }
 
     loginButton.classList.toggle('ist-eingeloggt', eingeloggt);
+    if (logoutButton) {
+      logoutButton.classList.toggle('d-none', !eingeloggt);
+    }
     loginButton.setAttribute(
       'aria-label',
       eingeloggt ? 'Admin-Bereich öffnen' : 'Admin Login öffnen'
@@ -114,6 +114,9 @@
     const submitButton = document.getElementById('admin-login-submit');
     const modalElement = document.getElementById('login-modal');
     const loginButton = document.getElementById('admin-login-button');
+    const logoutButton = document.getElementById('admin-logout-button');
+    const logoutModalElement = document.getElementById('admin-logout-modal');
+    const logoutConfirmButton = document.getElementById('admin-logout-confirm');
 
     if (!formular || !usernameFeld || !passwortFeld || !fehlerElement || !submitButton || !modalElement || !loginButton) {
       return;
@@ -128,19 +131,37 @@
 
       event.preventDefault();
       event.stopPropagation();
-      setzeLogoutLaedt(loginButton, true);
-
-      window.AdventskalenderApi.adminLogout()
-        .catch(function() {
-          // adminLogout entfernt die lokale Session auch bei Backend-Fehlern.
-        })
-        .finally(function() {
-          setzeLogoutLaedt(loginButton, false);
-          aktualisiereAdminLoginStatus();
-          meldeAdminSessionAktualisiert('logout');
-          zeigeAdminStatusToast('Erfolgreich abgemeldet.', 'erfolg');
-        });
+      document.getElementById('admin-dashboard')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
+
+    if (logoutButton) {
+      logoutButton.addEventListener('click', function(event) {
+        if (window.AdventskalenderApi.ladeAdminToken()) {
+          return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+      });
+    }
+
+    if (logoutConfirmButton && logoutModalElement) {
+      logoutConfirmButton.addEventListener('click', function() {
+        setzeAdminLogoutLaedt(logoutConfirmButton, true);
+
+        window.AdventskalenderApi.adminLogout()
+          .catch(function() {
+            // adminLogout entfernt die lokale Session auch bei Backend-Fehlern.
+          })
+          .finally(function() {
+            setzeAdminLogoutLaedt(logoutConfirmButton, false);
+            bootstrap.Modal.getOrCreateInstance(logoutModalElement).hide();
+            aktualisiereAdminLoginStatus();
+            meldeAdminSessionAktualisiert('logout');
+            zeigeAdminStatusToast('Erfolgreich abgemeldet.', 'erfolg');
+          });
+      });
+    }
 
     formular.addEventListener('submit', function(event) {
       event.preventDefault();
