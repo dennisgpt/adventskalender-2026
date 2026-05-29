@@ -736,45 +736,102 @@ function starteSchneeball() {
     const y = sp.y;
     ctx.save();
     ctx.translate(x, y);
-    // Mantel
-    ctx.fillStyle = '#9b1c1c';
+
+    // --- Grüner Weidenkorb (Option A) ---
+    const kW = 52; // halbe Breite
+    const kT = 32; // Tiefe
+    const rimH = 13; // Rand-Höhe
+
+    // Korb-Körper (geflochtenes Grün)
     ctx.beginPath();
-    ctx.rect(-13, -22, 26, 32);
+    ctx.moveTo(-kW, 0);
+    ctx.bezierCurveTo(-kW, kT + 8, -kW * 0.3, kT + 14, 0, kT + 14);
+    ctx.bezierCurveTo(kW * 0.3, kT + 14, kW, kT + 8, kW, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#2A6B2A';
     ctx.fill();
-    ctx.fillStyle = '#7a1515';
-    ctx.fillRect(-13, -22, 26, 6);
-    // Kopf
-    ctx.fillStyle = '#f5c5b0';
-    ctx.beginPath();
-    ctx.arc(0, -30, 10, 0, Math.PI * 2);
-    ctx.fill();
-    // Muetze
-    ctx.fillStyle = '#c0392b';
-    ctx.fillRect(-12, -40, 24, 8);
-    ctx.fillRect(-9, -54, 18, 16);
-    ctx.fillStyle = '#fff';
-    ctx.beginPath();
-    ctx.arc(0, -54, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(-12, -43, 24, 4);
-    // Korb
-    ctx.shadowColor = 'transparent';
-    ctx.fillStyle = '#7c4a1e';
-    ctx.beginPath();
-    ctx.rect(-22, 8, 44, 22);
-    ctx.fill();
-    ctx.strokeStyle = '#4a2a0a';
+
+    // Flechtmuster vertikal
+    ctx.strokeStyle = '#1E5020';
     ctx.lineWidth = 1.5;
-    ctx.stroke();
-    ctx.strokeStyle = 'rgba(60,30,5,0.5)';
-    ctx.lineWidth = 1;
-    for (let lx = -14; lx <= 14; lx += 9) {
+    for (let i = -3; i <= 3; i++) {
+      const lx = i * (kW / 3.5);
       ctx.beginPath();
-      ctx.moveTo(lx, 10);
-      ctx.lineTo(lx + 2, 29);
+      ctx.moveTo(lx, 1);
+      ctx.lineTo(lx * 0.6, kT + 12);
       ctx.stroke();
     }
+    // Flechtmuster horizontal
+    ctx.lineWidth = 1.2;
+    for (let row = 0; row < 4; row++) {
+      const t = (row + 1) / 5;
+      const ry = kT * t + t * 5;
+      const rw = kW * (1 - t * 0.25);
+      ctx.beginPath();
+      ctx.ellipse(0, ry, rw, rimH * 0.35, 0, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    // Heller Naturholz-Rand oben
+    ctx.beginPath();
+    ctx.ellipse(0, 0, kW, rimH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#D4B87A';
+    ctx.fill();
+    ctx.strokeStyle = '#B89A50';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Innere Ellipse (Tiefe andeuten)
+    ctx.beginPath();
+    ctx.ellipse(0, -3, kW - 8, rimH - 3, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#C4A860';
+    ctx.fill();
+    ctx.strokeStyle = '#B89A50';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Schleife vorne (Naturseil)
+    ctx.save();
+    ctx.translate(0, rimH - 2);
+    // linke Schlaufe
+    ctx.beginPath();
+    ctx.ellipse(-11, 5, 10, 5, -0.45, 0, Math.PI * 2);
+    ctx.fillStyle = '#D4B87A';
+    ctx.strokeStyle = '#A08030';
+    ctx.lineWidth = 1;
+    ctx.fill(); ctx.stroke();
+    // rechte Schlaufe
+    ctx.beginPath();
+    ctx.ellipse(11, 5, 10, 5, 0.45, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // Knoten
+    ctx.beginPath();
+    ctx.arc(0, 5, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#C4A860';
+    ctx.fill(); ctx.stroke();
+
+    // Weihnachtsbaum-Anhänger
+    ctx.fillStyle = '#D4B87A';
+    ctx.strokeStyle = '#A08030';
+    ctx.lineWidth = 0.8;
+    ctx.fillRect(-3, 10, 5, 7);
+    ctx.strokeRect(-3, 10, 5, 7);
+    // Baum
+    ctx.fillStyle = '#2A7A2A';
+    ctx.strokeStyle = '#1A5A1A';
+    const baumX = 0, baumY = 17;
+    [[0,0,7,8],[0,5,6,7],[0,10,5,6]].forEach(([dx,dy,hw,bh]) => {
+      ctx.beginPath();
+      ctx.moveTo(baumX+dx, baumY+dy);
+      ctx.lineTo(baumX-hw, baumY+dy+bh);
+      ctx.lineTo(baumX+hw, baumY+dy+bh);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    });
+    // Stamm
+    ctx.fillStyle = '#8B5A2B';
+    ctx.fillRect(-2, baumY+18, 4, 4);
+    ctx.restore();
+
     ctx.restore();
   }
 
@@ -786,8 +843,8 @@ function starteSchneeball() {
   }
 
   function trifftKorb(o) {
-    return o.x > sp.x - 22 && o.x < sp.x + 22 &&
-           o.y > sp.y + 8  && o.y < sp.y + 30;
+    return o.x > sp.x - 50 && o.x < sp.x + 50 &&
+           o.y > sp.y - 14  && o.y < sp.y + 46;
   }
 
   function zeigeOverlay(gewonnen) {
