@@ -258,10 +258,10 @@ function inhaltRendern(data) {
             display: flex; justify-content: space-between; padding: 0 14px; pointer-events: none;">
             <span id="ak-hud-punkte" style="background: rgba(0,0,0,0.55); color: #fff;
               padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 700;
-              backdrop-filter: blur(6px);">\u26aa 0 / 8</span>
+              backdrop-filter: blur(6px);">⚪ 0 / 8</span>
             <span id="ak-hud-kohle" style="background: rgba(0,0,0,0.55); color: #fff;
               padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 700;
-              backdrop-filter: blur(6px);">\U0001fab8 0 / 3</span>
+              backdrop-filter: blur(6px);">🪨 0 / 3</span>
           </div>
 
           <div style="position: absolute; bottom: 14px; left: 0; right: 0;
@@ -289,7 +289,7 @@ function inhaltRendern(data) {
               background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff;
               border: none; border-radius: 30px; padding: 12px 32px;
               font-size: 1rem; font-weight: 700; cursor: pointer;
-              box-shadow: 0 4px 18px rgba(200,50,50,0.45);">\U0001f504 Nochmal spielen</button>
+              box-shadow: 0 4px 18px rgba(200,50,50,0.45);">🔄 Nochmal spielen</button>
           </div>
         </div>
       `;
@@ -781,8 +781,8 @@ function starteSchneeball() {
   function aktualisiereHUD() {
     const elP = document.getElementById('ak-hud-punkte');
     const elK = document.getElementById('ak-hud-kohle');
-    if (elP) elP.textContent = '\u26aa ' + z.punkte + ' / 8';
-    if (elK) elK.textContent = '\U0001fab8 ' + z.kohle + ' / 3';
+    if (elP) elP.textContent = '⚪ ' + z.punkte + ' / 8';
+    if (elK) elK.textContent = '🪨 ' + z.kohle + ' / 3';
   }
 
   function trifftKorb(o) {
@@ -795,7 +795,7 @@ function starteSchneeball() {
     if (!overlay) return;
     overlay.style.display = 'flex';
     overlay.querySelector('.ak-overlay-titel').textContent =
-      gewonnen ? '\U0001f389 Gewonnen!' : '\U0001f4a8 Verloren!';
+      gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
     overlay.querySelector('.ak-overlay-text').textContent = gewonnen
       ? 'Du hast 8 \u00dcberraschungen gefangen!'
       : 'Zu viel Kohle erwischt \u2013 das war nichts!';
