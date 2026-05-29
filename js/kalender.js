@@ -351,13 +351,13 @@ function tuercheoeffnen(nummer, karte) {
   if (geschenkAnimationLaeuft) return;
   geschenkAnimationLaeuft = true;
 
-  starteGeschenkRevealAnimation()
+  starteGeschenkRevealAnimation(karte)
     .then(function() {
       alsGeoeffnetSpeichern(nummer);
 
       karte.classList.remove('verfuegbar', 'heute', 'gesperrt');
       karte.classList.add('geoeffnet');
-      karte.querySelector('.tuerchen-label').textContent = '\u2713';
+      karte.querySelector('.tuerchen-nummer').textContent = '\u2713';
 
       inhaltAnzeigen(nummer);
     })
@@ -367,65 +367,98 @@ function tuercheoeffnen(nummer, karte) {
 }
 
 /**
- * Cinematic Reveal: Geschenk gross im Vordergrund, wackeln, oeffnen, Inhalt andeuten.
+ * Reveal: Das echte SVG-Geschenk-Icon der Karte fliegt zur Mitte,
+ * der Deckel klappt auf, Lichtblitz und Konfetti.
+ * @param {HTMLElement} karte
  * @returns {Promise<void>}
  */
-function starteGeschenkRevealAnimation() {
+function starteGeschenkRevealAnimation(karte) {
   return new Promise(function(resolve) {
-    const overlay = document.createElement('div');
-    overlay.className = 'geschenk-reveal-overlay';
-    overlay.innerHTML = `
-      <div class="geschenk-reveal-buehne" role="status" aria-live="polite">
-        <div class="geschenk-reveal-box" aria-hidden="true">
-          <div class="geschenk-deckel"></div>
-          <div class="geschenk-koerper"></div>
-          <div class="geschenk-schleife-vertikal"></div>
-          <div class="geschenk-schleife-horizontal"></div>
-          <div class="geschenk-schleife-knoten"></div>
-        </div>
+    var ikonEl = karte ? karte.querySelector('.geschenk-icon') : null;
+    var startRect = ikonEl ? ikonEl.getBoundingClientRect() : null;
 
-        <div class="geschenk-konfetti" aria-hidden="true">
-          <span class="partikel">&#10052;</span>
-          <span class="partikel">&#10024;</span>
-          <span class="partikel">&#9733;</span>
-          <span class="partikel">&#10052;</span>
-          <span class="partikel">&#10024;</span>
-          <span class="partikel">&#9733;</span>
-          <span class="partikel">&#10052;</span>
-          <span class="partikel">&#10024;</span>
-          <span class="partikel">&#9733;</span>
-          <span class="partikel">&#10052;</span>
-          <span class="partikel">&#10024;</span>
-          <span class="partikel">&#9733;</span>
-        </div>
-      </div>
-    `;
+    // SVG klonen und CSS-Variable --icon-farbe sichern
+    var ikonHtml = '';
+    if (ikonEl) {
+      var klon = ikonEl.cloneNode(true);
+      var farbe = getComputedStyle(ikonEl).getPropertyValue('--icon-farbe').trim();
+      if (farbe) klon.style.setProperty('--icon-farbe', farbe);
+      ikonHtml = klon.outerHTML;
+    }
+
+    var overlay = document.createElement('div');
+    overlay.className = 'geschenk-reveal-overlay';
+    overlay.innerHTML =
+      '<div class="geschenk-reveal-buehne" role="status" aria-live="polite">' +
+        '<div class="geschenk-reveal-ikon-wrap" aria-hidden="true">' +
+          ikonHtml +
+        '</div>' +
+        '<div class="geschenk-konfetti" aria-hidden="true">' +
+          '<span class="partikel">&#10052;</span>' +
+          '<span class="partikel">&#10024;</span>' +
+          '<span class="partikel">&#9733;</span>' +
+          '<span class="partikel">&#10052;</span>' +
+          '<span class="partikel">&#10024;</span>' +
+          '<span class="partikel">&#9733;</span>' +
+          '<span class="partikel">&#10052;</span>' +
+          '<span class="partikel">&#10024;</span>' +
+          '<span class="partikel">&#9733;</span>' +
+          '<span class="partikel">&#10052;</span>' +
+          '<span class="partikel">&#10024;</span>' +
+          '<span class="partikel">&#9733;</span>' +
+        '</div>' +
+      '</div>';
 
     document.body.appendChild(overlay);
     document.body.classList.add('geschenk-reveal-aktiv');
 
+    var ikonWrap = overlay.querySelector('.geschenk-reveal-ikon-wrap');
+    var ikonKlon = ikonWrap ? ikonWrap.querySelector('.geschenk-icon') : null;
+
+    // FLIP: Icon startet an Kartenposition und fliegt zur Bildschirmmitte
+    if (ikonWrap && startRect) {
+      var endRect = ikonWrap.getBoundingClientRect();
+      var scale = startRect.width / Math.max(endRect.width, 1);
+      var tx = (startRect.left + startRect.width / 2) - (endRect.left + endRect.width / 2);
+      var ty = (startRect.top + startRect.height / 2) - (endRect.top + endRect.height / 2);
+
+      ikonWrap.style.transition = 'none';
+      ikonWrap.style.opacity = '0';
+      ikonWrap.style.transform = 'translate(' + tx + 'px, ' + ty + 'px) scale(' + scale + ')';
+      ikonWrap.getBoundingClientRect(); // Reflow erzwingen
+      ikonWrap.style.transition = 'transform 0.48s cubic-bezier(0.34, 1.15, 0.64, 1), opacity 0.22s ease';
+    }
+
     requestAnimationFrame(function() {
       overlay.classList.add('sichtbar');
+      if (ikonWrap) {
+        ikonWrap.style.transform = '';
+        ikonWrap.style.opacity = '1';
+      }
     });
 
+    // Deckel aufklappen
     setTimeout(function() {
-      overlay.querySelector('.geschenk-reveal-box').classList.add('wackeln');
-    }, 220);
-
-    setTimeout(function() {
-      overlay.querySelector('.geschenk-reveal-box').classList.add('oeffnen');
+      if (ikonKlon) {
+        var deckel = ikonKlon.querySelector('.gk-deckel');
+        if (deckel) {
+          deckel.style.transition = 'transform 0.52s cubic-bezier(0.22, 1, 0.36, 1)';
+          deckel.style.transform = 'rotate(-95deg)';
+        }
+      }
+      if (ikonWrap) ikonWrap.classList.add('aufgeklappt');
       overlay.classList.add('inhalt-erscheint');
-    }, 1350);
+    }, 580);
 
     setTimeout(function() {
       overlay.classList.add('ausblenden');
-    }, 2750);
+    }, 1150);
 
     setTimeout(function() {
       document.body.classList.remove('geschenk-reveal-aktiv');
       overlay.remove();
       resolve();
-    }, 3200);
+    }, 1600);
   });
 }
 

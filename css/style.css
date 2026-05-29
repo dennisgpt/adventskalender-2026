@@ -2385,6 +2385,30 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   color: #fff;
 }
 
+.geschenk-reveal-ikon-wrap {
+  width: min(55vw, 280px);
+  aspect-ratio: 1 / 1;
+  margin: 0 auto 1.2rem;
+  position: relative;
+  transform-origin: center center;
+  filter: drop-shadow(0 24px 48px rgba(0, 0, 0, 0.6));
+}
+
+.geschenk-reveal-ikon-wrap .geschenk-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.geschenk-reveal-ikon-wrap.aufgeklappt::after {
+  content: '';
+  position: absolute;
+  inset: -38%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 210, 0.92) 0%, rgba(255, 220, 80, 0.48) 36%, transparent 64%);
+  pointer-events: none;
+  animation: geschenk-flash 0.58s ease-out forwards;
+}
+
 .geschenk-reveal-box {
   width: min(38vw, 240px);
   height: min(34vw, 210px);
@@ -2454,15 +2478,35 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
 }
 
 .geschenk-reveal-box.wackeln {
-  animation: geschenk-wackeln 0.12s linear 9;
+  animation: geschenk-wackeln 0.08s linear 5;
 }
 
 .geschenk-reveal-box.oeffnen .geschenk-deckel {
-  animation: geschenk-deckel-auf 0.75s ease forwards;
+  animation: geschenk-deckel-auf 0.38s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 .geschenk-reveal-box.oeffnen .geschenk-koerper {
-  animation: geschenk-koerper-glow 0.75s ease forwards;
+  animation: geschenk-koerper-glow 0.38s ease forwards;
+}
+
+.geschenk-flash {
+  position: absolute;
+  inset: -40%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 220, 0.95) 0%, rgba(255, 235, 100, 0.55) 38%, transparent 68%);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.geschenk-reveal-box.oeffnen .geschenk-flash {
+  animation: geschenk-flash 0.5s ease-out forwards;
+}
+
+@keyframes geschenk-flash {
+  0%   { opacity: 0;  transform: scale(0.6); }
+  18%  { opacity: 1;  transform: scale(1.1); }
+  100% { opacity: 0;  transform: scale(1.4); }
 }
 
 .geschenk-konfetti {
