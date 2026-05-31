@@ -7,6 +7,7 @@ let moodFadeInterval = null;
 let aktivesMoodFrame = null;
 let quizInstanzZaehler = 0;
 let quizZustaende = {};
+let aktivesSpiel = null;
 
 // ============================================================
 // MODAL-STATES
@@ -54,6 +55,7 @@ function inhaltAnzeigen(nummer) {
 
   modalElement.addEventListener('hidden.bs.modal', function() {
     stoppeMoodMusik(modalElement);
+    stoppeAktivesSpiel();
     quizZustaende = {};
   }, { once: true });
 
@@ -76,6 +78,12 @@ function inhaltAnzeigen(nummer) {
         setTimeout(function() {
           starteMoodMusik(modalElement);
         }, 350);
+      }
+
+      if (data.typ === 'game') {
+        setTimeout(function() {
+          starteSpiel(data.spielId);
+        }, 150);
       }
     })
     .catch(function(error) {
@@ -144,9 +152,9 @@ function backendItemNormalisieren(nummer, item) {
 
     case 'game':
       return {
-        typ: 'karte',
+        typ: 'game',
         titel: titel,
-        nachricht: item.body || 'Dieses Spiel ist vorbereitet.'
+        spielId: item.body || ''
       };
 
     case 'quiz':
@@ -235,6 +243,56 @@ function inhaltRendern(data) {
 
     case 'quiz':
       return quizRendern(data);
+
+    case 'game':
+      return `
+        <div id="ak-spiel-wrapper" style="
+          position: relative; width: 100%;
+          border-radius: 12px; overflow: hidden;
+          background: #0a1628;
+          user-select: none; touch-action: none;
+        ">
+          <canvas id="ak-spiel-canvas" style="display: block; width: 100%; height: 420px;"></canvas>
+
+          <div style="position: absolute; top: 12px; left: 0; right: 0;
+            display: flex; justify-content: space-between; padding: 0 14px; pointer-events: none;">
+            <span id="ak-hud-punkte" style="background: rgba(0,0,0,0.55); color: #fff;
+              padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 700;
+              backdrop-filter: blur(6px);">⚪ 0 / 8</span>
+            <span id="ak-hud-kohle" style="background: rgba(0,0,0,0.55); color: #fff;
+              padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 700;
+              backdrop-filter: blur(6px);">🪨 0 / 3</span>
+          </div>
+
+          <div style="position: absolute; bottom: 14px; left: 0; right: 0;
+            display: flex; justify-content: space-between; padding: 0 18px; pointer-events: none;">
+            <button id="ak-btn-links" style="pointer-events: all;
+              background: rgba(0,0,0,0.5); color: #fff;
+              border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
+              backdrop-filter: blur(4px);">\u25c4</button>
+            <button id="ak-btn-rechts" style="pointer-events: all;
+              background: rgba(0,0,0,0.5); color: #fff;
+              border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
+              backdrop-filter: blur(4px);">\u25ba</button>
+          </div>
+
+          <div id="ak-spiel-overlay" style="display: none; position: absolute; inset: 0;
+            background: rgba(5,12,35,0.82); backdrop-filter: blur(6px);
+            flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 24px;">
+            <div class="ak-overlay-titel" style="font-size: 2.6rem; margin-bottom: 8px;"></div>
+            <div class="ak-overlay-text" style="color: rgba(255,255,255,0.75);
+              font-size: 1.05rem; margin-bottom: 28px;"></div>
+            <button id="ak-btn-neustart" style="
+              background: linear-gradient(135deg, #c0392b, #e74c3c); color: #fff;
+              border: none; border-radius: 30px; padding: 12px 32px;
+              font-size: 1rem; font-weight: 700; cursor: pointer;
+              box-shadow: 0 4px 18px rgba(200,50,50,0.45);">🔄 Nochmal spielen</button>
+          </div>
+        </div>
+      `;
 
     case 'karte':
       return `
@@ -546,4 +604,369 @@ function quizErgebnisHtml(zustand) {
       </ol>
     </div>
   `;
+}
+
+
+// ============================================================
+// SPIEL: SCHNEEBALL-FANG (Tuerchen 7)
+// ============================================================
+
+function stoppeAktivesSpiel() {
+  if (aktivesSpiel && typeof aktivesSpiel.stop === 'function') {
+    aktivesSpiel.stop();
+  }
+  aktivesSpiel = null;
+}
+
+function starteSpiel(spielId) {
+  stoppeAktivesSpiel();
+  if (spielId === 'tuerchen7-schneeball') {
+    starteSchneeball();
+  }
+}
+
+function starteSchneeball() {
+  const canvas = document.getElementById('ak-spiel-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const breite = canvas.clientWidth || 600;
+  const hoehe = 420;
+  canvas.width = breite;
+  canvas.height = hoehe;
+
+  const hintergrund = new Image();
+  hintergrund.src = 'img/thws-hof-winter.jpg';
+
+  const z = { laeuft: true, punkte: 0, kohle: 0, frameId: null };
+
+  const sp = { x: breite / 2, y: hoehe - 56, speed: 5, links: false, rechts: false };
+
+  const objekte = [];
+  let letzterSpawn = 0;
+  const SPAWN_MS = 1100;
+
+  const TYPEN = [
+    { typ: 'schneeball', w: 4 },
+    { typ: 'zuckerstange', w: 3 },
+    { typ: 'kohle', w: 2 }
+  ];
+
+  function zufallTyp() {
+    const gesamt = TYPEN.reduce(function(s, t) { return s + t.w; }, 0);
+    let r = Math.random() * gesamt;
+    for (let i = 0; i < TYPEN.length; i++) {
+      r -= TYPEN[i].w;
+      if (r <= 0) return TYPEN[i].typ;
+    }
+    return 'schneeball';
+  }
+
+  function spawne() {
+    objekte.push({
+      typ: zufallTyp(),
+      x: 28 + Math.random() * (breite - 56),
+      y: -24,
+      vy: 2.2 + Math.random() * 1.6,
+      rot: 0,
+      rotV: (Math.random() - 0.5) * 0.08
+    });
+  }
+
+  function zeichneSchneeball(o) {
+    ctx.save();
+    ctx.translate(o.x, o.y);
+    ctx.shadowColor = 'rgba(180,220,255,0.9)';
+    ctx.shadowBlur = 14;
+    ctx.beginPath();
+    ctx.arc(0, 0, 13, 0, Math.PI * 2);
+    ctx.fillStyle = '#dff0fb';
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(120,190,240,0.5)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(-4, -4, 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.7)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function zeichneZuckerstange(o) {
+    ctx.save();
+    ctx.translate(o.x, o.y);
+    ctx.rotate(o.rot);
+    ctx.lineWidth = 6;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = '#fff';
+    ctx.beginPath();
+    ctx.moveTo(0, 13);
+    ctx.lineTo(0, -7);
+    ctx.arc(0, -7, 6, Math.PI, 0, false);
+    ctx.stroke();
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = '#e63946';
+    for (let i = -6; i <= 12; i += 6) {
+      ctx.beginPath();
+      ctx.moveTo(-3, i);
+      ctx.lineTo(3, i + 5);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  function zeichneKohle(o) {
+    ctx.save();
+    ctx.translate(o.x, o.y);
+    ctx.shadowColor = 'rgba(0,0,0,0.6)';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 13, 10, 0.3, 0, Math.PI * 2);
+    ctx.fillStyle = '#181824';
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(-4, -3, 4, 2.5, -0.4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(110,110,150,0.45)';
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function zeichneSpieler() {
+    const x = sp.x;
+    const y = sp.y;
+    ctx.save();
+    ctx.translate(x, y);
+
+    // --- Grüner Weidenkorb (Option A) ---
+    const kW = 52; // halbe Breite
+    const kT = 32; // Tiefe
+    const rimH = 13; // Rand-Höhe
+
+    // Korb-Körper (geflochtenes Grün)
+    ctx.beginPath();
+    ctx.moveTo(-kW, 0);
+    ctx.bezierCurveTo(-kW, kT + 8, -kW * 0.3, kT + 14, 0, kT + 14);
+    ctx.bezierCurveTo(kW * 0.3, kT + 14, kW, kT + 8, kW, 0);
+    ctx.closePath();
+    ctx.fillStyle = '#2A6B2A';
+    ctx.fill();
+
+    // Flechtmuster vertikal
+    ctx.strokeStyle = '#1E5020';
+    ctx.lineWidth = 1.5;
+    for (let i = -3; i <= 3; i++) {
+      const lx = i * (kW / 3.5);
+      ctx.beginPath();
+      ctx.moveTo(lx, 1);
+      ctx.lineTo(lx * 0.6, kT + 12);
+      ctx.stroke();
+    }
+    // Flechtmuster horizontal
+    ctx.lineWidth = 1.2;
+    for (let row = 0; row < 4; row++) {
+      const t = (row + 1) / 5;
+      const ry = kT * t + t * 5;
+      const rw = kW * (1 - t * 0.25);
+      ctx.beginPath();
+      ctx.ellipse(0, ry, rw, rimH * 0.35, 0, 0, Math.PI);
+      ctx.stroke();
+    }
+
+    // Heller Naturholz-Rand oben
+    ctx.beginPath();
+    ctx.ellipse(0, 0, kW, rimH, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#D4B87A';
+    ctx.fill();
+    ctx.strokeStyle = '#B89A50';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    // Innere Ellipse (Tiefe andeuten)
+    ctx.beginPath();
+    ctx.ellipse(0, -3, kW - 8, rimH - 3, 0, 0, Math.PI * 2);
+    ctx.fillStyle = '#C4A860';
+    ctx.fill();
+    ctx.strokeStyle = '#B89A50';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    // Schleife vorne (Naturseil)
+    ctx.save();
+    ctx.translate(0, rimH - 2);
+    // linke Schlaufe
+    ctx.beginPath();
+    ctx.ellipse(-11, 5, 10, 5, -0.45, 0, Math.PI * 2);
+    ctx.fillStyle = '#D4B87A';
+    ctx.strokeStyle = '#A08030';
+    ctx.lineWidth = 1;
+    ctx.fill(); ctx.stroke();
+    // rechte Schlaufe
+    ctx.beginPath();
+    ctx.ellipse(11, 5, 10, 5, 0.45, 0, Math.PI * 2);
+    ctx.fill(); ctx.stroke();
+    // Knoten
+    ctx.beginPath();
+    ctx.arc(0, 5, 5, 0, Math.PI * 2);
+    ctx.fillStyle = '#C4A860';
+    ctx.fill(); ctx.stroke();
+
+    // Weihnachtsbaum-Anhänger
+    ctx.fillStyle = '#D4B87A';
+    ctx.strokeStyle = '#A08030';
+    ctx.lineWidth = 0.8;
+    ctx.fillRect(-3, 10, 5, 7);
+    ctx.strokeRect(-3, 10, 5, 7);
+    // Baum
+    ctx.fillStyle = '#2A7A2A';
+    ctx.strokeStyle = '#1A5A1A';
+    const baumX = 0, baumY = 17;
+    [[0,0,7,8],[0,5,6,7],[0,10,5,6]].forEach(([dx,dy,hw,bh]) => {
+      ctx.beginPath();
+      ctx.moveTo(baumX+dx, baumY+dy);
+      ctx.lineTo(baumX-hw, baumY+dy+bh);
+      ctx.lineTo(baumX+hw, baumY+dy+bh);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+    });
+    // Stamm
+    ctx.fillStyle = '#8B5A2B';
+    ctx.fillRect(-2, baumY+18, 4, 4);
+    ctx.restore();
+
+    ctx.restore();
+  }
+
+  function aktualisiereHUD() {
+    const elP = document.getElementById('ak-hud-punkte');
+    const elK = document.getElementById('ak-hud-kohle');
+    if (elP) elP.textContent = '⚪ ' + z.punkte + ' / 8';
+    if (elK) elK.textContent = '🪨 ' + z.kohle + ' / 3';
+  }
+
+  function trifftKorb(o) {
+    return o.x > sp.x - 50 && o.x < sp.x + 50 &&
+           o.y > sp.y - 14  && o.y < sp.y + 46;
+  }
+
+  function zeigeOverlay(gewonnen) {
+    const overlay = document.getElementById('ak-spiel-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    overlay.querySelector('.ak-overlay-titel').textContent =
+      gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
+    overlay.querySelector('.ak-overlay-text').textContent = gewonnen
+      ? 'Du hast 8 \u00dcberraschungen gefangen!'
+      : 'Zu viel Kohle erwischt \u2013 das war nichts!';
+  }
+
+  function schritt(ts) {
+    if (!z.laeuft) return;
+
+    if (hintergrund.complete && hintergrund.naturalWidth > 0) {
+      ctx.drawImage(hintergrund, 0, 0, breite, hoehe);
+      ctx.fillStyle = 'rgba(5,15,40,0.28)';
+      ctx.fillRect(0, 0, breite, hoehe);
+    } else {
+      ctx.fillStyle = '#0a1628';
+      ctx.fillRect(0, 0, breite, hoehe);
+    }
+
+    if (sp.links)  sp.x = Math.max(28, sp.x - sp.speed);
+    if (sp.rechts) sp.x = Math.min(breite - 28, sp.x + sp.speed);
+
+    if (ts - letzterSpawn > SPAWN_MS) {
+      spawne();
+      letzterSpawn = ts;
+    }
+
+    for (let i = objekte.length - 1; i >= 0; i--) {
+      const o = objekte[i];
+      o.y  += o.vy;
+      o.rot += o.rotV;
+
+      if (trifftKorb(o)) {
+        objekte.splice(i, 1);
+        if (o.typ === 'kohle') {
+          z.kohle++;
+          aktualisiereHUD();
+          if (z.kohle >= 3) {
+            z.laeuft = false;
+            zeichneSpieler();
+            zeigeOverlay(false);
+            return;
+          }
+        } else {
+          z.punkte++;
+          aktualisiereHUD();
+          if (z.punkte >= 8) {
+            z.laeuft = false;
+            zeichneSpieler();
+            zeigeOverlay(true);
+            return;
+          }
+        }
+        continue;
+      }
+
+      if (o.y > hoehe + 30) { objekte.splice(i, 1); continue; }
+
+      if      (o.typ === 'schneeball')    zeichneSchneeball(o);
+      else if (o.typ === 'zuckerstange')  zeichneZuckerstange(o);
+      else                                zeichneKohle(o);
+    }
+
+    zeichneSpieler();
+    z.frameId = requestAnimationFrame(schritt);
+  }
+
+  // Tastatur
+  function onKeyDown(e) {
+    if (e.key === 'ArrowLeft')  sp.links  = true;
+    if (e.key === 'ArrowRight') sp.rechts = true;
+  }
+  function onKeyUp(e) {
+    if (e.key === 'ArrowLeft')  sp.links  = false;
+    if (e.key === 'ArrowRight') sp.rechts = false;
+  }
+  document.addEventListener('keydown', onKeyDown);
+  document.addEventListener('keyup',   onKeyUp);
+
+  // Touch-Buttons
+  function bindBtn(id, richtung) {
+    const btn = document.getElementById(id);
+    if (!btn) return;
+    btn.addEventListener('pointerdown',  function() { sp[richtung] = true;  });
+    btn.addEventListener('pointerup',    function() { sp[richtung] = false; });
+    btn.addEventListener('pointerleave', function() { sp[richtung] = false; });
+  }
+  bindBtn('ak-btn-links',  'links');
+  bindBtn('ak-btn-rechts', 'rechts');
+
+  // Neustart
+  const btnNeustart = document.getElementById('ak-btn-neustart');
+  if (btnNeustart) {
+    btnNeustart.addEventListener('click', function() {
+      z.laeuft = true;
+      z.punkte = 0;
+      z.kohle  = 0;
+      objekte.length = 0;
+      sp.x = breite / 2;
+      letzterSpawn = 0;
+      const overlay = document.getElementById('ak-spiel-overlay');
+      if (overlay) overlay.style.display = 'none';
+      aktualisiereHUD();
+      z.frameId = requestAnimationFrame(schritt);
+    });
+  }
+
+  aktualisiereHUD();
+  z.frameId = requestAnimationFrame(schritt);
+
+  aktivesSpiel = {
+    stop: function() {
+      z.laeuft = false;
+      if (z.frameId) cancelAnimationFrame(z.frameId);
+      document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('keyup',   onKeyUp);
+    }
+  };
 }
