@@ -244,7 +244,8 @@ function inhaltRendern(data) {
     case 'quiz':
       return quizRendern(data);
 
-    case 'game':
+    case 'game': {
+      const istSchneeball = data.spielId === 'tuerchen7-schneeball';
       return `
         <div id="ak-spiel-wrapper" style="
           position: relative; width: 100%;
@@ -254,6 +255,7 @@ function inhaltRendern(data) {
         ">
           <canvas id="ak-spiel-canvas" style="display: block; width: 100%; height: 420px;"></canvas>
 
+          ${istSchneeball ? `
           <div style="position: absolute; top: 12px; left: 0; right: 0;
             display: flex; justify-content: space-between; padding: 0 14px; pointer-events: none;">
             <span id="ak-hud-punkte" style="background: rgba(0,0,0,0.55); color: #fff;
@@ -263,7 +265,6 @@ function inhaltRendern(data) {
               padding: 5px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 700;
               backdrop-filter: blur(6px);">🪨 0 / 3</span>
           </div>
-
           <div style="position: absolute; bottom: 14px; left: 0; right: 0;
             display: flex; justify-content: space-between; padding: 0 18px; pointer-events: none;">
             <button id="ak-btn-links" style="pointer-events: all;
@@ -277,6 +278,7 @@ function inhaltRendern(data) {
               width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
               backdrop-filter: blur(4px);">\u25ba</button>
           </div>
+          ` : ''}
 
           <div id="ak-spiel-overlay" style="display: none; position: absolute; inset: 0;
             background: rgba(5,12,35,0.82); backdrop-filter: blur(6px);
@@ -293,6 +295,7 @@ function inhaltRendern(data) {
           </div>
         </div>
       `;
+    }
 
     case 'karte':
       return `
@@ -622,6 +625,8 @@ function starteSpiel(spielId) {
   stoppeAktivesSpiel();
   if (spielId === 'tuerchen7-schneeball') {
     starteSchneeball();
+  } else if (spielId === 'tuerchen-huetchenspiel') {
+    starteHuetchenspiel();
   }
 }
 
@@ -969,4 +974,305 @@ function starteSchneeball() {
       document.removeEventListener('keyup',   onKeyUp);
     }
   };
+
 }
+function starteHuetchenspiel() {
+  const canvas = document.getElementById('ak-spiel-canvas');
+  if (!canvas) return;
+
+  const ctx = canvas.getContext('2d');
+  const breite = canvas.clientWidth || 600;
+  const hoehe = 420;
+  canvas.width = breite;
+  canvas.height = hoehe;
+
+  let aktiv = true;
+  let phase = 'zeige'; // zeige | mische | rate | ergebnis
+  let geschenkIdx = Math.floor(Math.random() * 3);
+  let positionen = [0, 1, 2]; // logischer Index an visueller Position
+  let runde = 1;
+  let animFrame = null;
+
+  const hutX = [breite * 0.25, breite * 0.5, breite * 0.75];
+  const hutY = hoehe * 0.55;
+  const huts = hutX.map((x, i) => ({ x, y: hutY, vi: i }));
+
+  function zeigeOverlay(gewonnen) {
+    const overlay = document.getElementById('ak-spiel-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    overlay.querySelector('.ak-overlay-titel').textContent =
+      gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
+    overlay.querySelector('.ak-overlay-text').textContent = gewonnen
+      ? 'Du hast das Geschenk gefunden!'
+      : 'Das Geschenk war woanders!';
+  }
+
+  function zeichneHintergrund() {
+    ctx.fillStyle = '#1a3a5c';
+    ctx.fillRect(0, 0, breite, hoehe);
+    // Sterne
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    for (let i = 0; i < 40; i++) {
+      const sx = (i * 137 + 50) % breite;
+      const sy = (i * 89 + 20) % (hoehe * 0.6);
+      ctx.beginPath();
+      ctx.arc(sx, sy, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // Schneeflaeche
+    ctx.fillStyle = 'rgba(200,230,255,0.15)';
+    ctx.fillRect(0, hoehe * 0.78, breite, hoehe * 0.22);
+  }
+
+  function zeichneGeschenk(x, y) {
+    ctx.fillStyle = '#d4a017';
+    ctx.fillRect(x - 18, y + 8, 36, 28);
+    ctx.fillStyle = '#a07810';
+    ctx.fillRect(x - 2, y + 8, 5, 28);
+    ctx.fillRect(x - 18, y + 18, 36, 5);
+    ctx.fillStyle = '#d4a017';
+    ctx.beginPath();
+    ctx.ellipse(x, y + 7, 10, 6, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#a07810';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+  }
+
+  function zeichneHut(x, y, gehoben, zeigGeschenk) {
+    const ly = gehoben ? y - 70 : y;
+    if (zeigGeschenk) zeichneGeschenk(x, y);
+    // Krempe
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.ellipse(x, ly + 52, 46, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    // Koerper
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.moveTo(x - 32, ly + 52);
+    ctx.quadraticCurveTo(x - 28, ly - 5, x, ly - 18);
+    ctx.quadraticCurveTo(x + 28, ly - 5, x + 32, ly + 52);
+    ctx.closePath();
+    ctx.fill();
+    // Weisser Rand
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(x - 32, ly + 40, 64, 12);
+    // Bommel
+    ctx.fillStyle = '#f0f0f0';
+    ctx.beginPath();
+    ctx.arc(x, ly - 20, 8, 0, Math.PI * 2);
+    ctx.fill();
+    // Krempe-Umriss
+    ctx.strokeStyle = '#8b1a1a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(x, ly + 52, 46, 12, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  function render(gehobenIdx) {
+    zeichneHintergrund();
+    for (let vi = 0; vi < 3; vi++) {
+      const logIdx = positionen[vi];
+      const istGeschenk = logIdx === geschenkIdx;
+      const gehoben = gehobenIdx === vi;
+      const zeig = gehoben && istGeschenk && (phase === 'zeige' || phase === 'ergebnis');
+      zeichneHut(huts[vi].x, huts[vi].y, gehoben, istGeschenk && (phase === 'zeige' || (phase === 'ergebnis')));
+    }
+    // HUD
+    ctx.fillStyle = 'rgba(255,255,255,0.85)';
+    ctx.font = 'bold 16px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText('Runde ' + runde, 16, 28);
+    if (phase === 'rate') {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText('Wo ist das Geschenk?', breite / 2, 36);
+    }
+    if (phase === 'zeige') {
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#FFD700';
+      ctx.font = 'bold 18px sans-serif';
+      ctx.fillText('Merke dir den Hut!', breite / 2, 36);
+    }
+  }
+
+  // Hut sanft senken (animiert)
+  function senkeHut(vi, callback) {
+    const startY = huts[vi].y - 70;
+    const endY   = huts[vi].y;
+    const dauer  = 420;
+    const start  = performance.now();
+    function anim(now) {
+      if (!aktiv) return;
+      const t = Math.min((now - start) / dauer, 1);
+      const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+      const offsetY = startY + (endY - startY) * e;
+      // render mit interpoliertem Offset
+      zeichneHintergrund();
+      for (let i = 0; i < 3; i++) {
+        const logIdx = positionen[i];
+        const istG = logIdx === geschenkIdx;
+        const ly = i === vi ? offsetY - huts[i].y : 0;
+        zeichneHutMitOffset(huts[i].x, huts[i].y, ly, istG && i === vi);
+      }
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('Runde ' + runde, 16, 28);
+      if (t < 1) {
+        animFrame = requestAnimationFrame(anim);
+      } else {
+        render(-1);
+        if (callback) callback();
+      }
+    }
+    animFrame = requestAnimationFrame(anim);
+  }
+
+  // Hut zeichnen mit Y-Offset (für Animation)
+  function zeichneHutMitOffset(x, y, offsetY, zeigGeschenk) {
+    const ly = y + offsetY;
+    if (zeigGeschenk) zeichneGeschenk(x, y);
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.ellipse(x, ly + 52, 46, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#c0392b';
+    ctx.beginPath();
+    ctx.moveTo(x - 32, ly + 52);
+    ctx.quadraticCurveTo(x - 28, ly - 5, x, ly - 18);
+    ctx.quadraticCurveTo(x + 28, ly - 5, x + 32, ly + 52);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#f0f0f0';
+    ctx.fillRect(x - 32, ly + 40, 64, 12);
+    ctx.fillStyle = '#f0f0f0';
+    ctx.beginPath();
+    ctx.arc(x, ly - 20, 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#8b1a1a';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.ellipse(x, ly + 52, 46, 12, 0, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // Zeige-Phase: Geschenk enthüllen
+  function zeigePhase() {
+    phase = 'zeige';
+    const vi = positionen.indexOf(geschenkIdx);
+    render(vi);
+    setTimeout(() => {
+      if (!aktiv) return;
+      senkeHut(vi, () => {
+        setTimeout(() => {
+          if (!aktiv) return;
+          mischPhase();
+        }, 200);
+      });
+    }, 2200);
+  }
+
+  // Misch-Animation
+  function mischPhase() {
+    phase = 'mische';
+    render(-1);
+    const anzahlTausche = 4 + runde * 2;
+    let schritt = 0;
+
+    function naechsterTausch() {
+      if (!aktiv) return;
+      if (schritt >= anzahlTausche) {
+        phase = 'rate';
+        render(-1);
+        canvas.style.cursor = 'pointer';
+        return;
+      }
+      let vi1 = Math.floor(Math.random() * 3);
+      let vi2;
+      do { vi2 = Math.floor(Math.random() * 3); } while (vi2 === vi1);
+
+      const x1 = huts[vi1].x, x2 = huts[vi2].x;
+      const dauer = Math.max(250, 450 - runde * 30);
+      const start = performance.now();
+
+      function animTausch(now) {
+        if (!aktiv) return;
+        const t = Math.min((now - start) / dauer, 1);
+        const e = t < 0.5 ? 2*t*t : -1+(4-2*t)*t;
+        huts[vi1].x = x1 + (x2 - x1) * e;
+        huts[vi2].x = x2 + (x1 - x2) * e;
+        render(-1);
+        if (t < 1) {
+          animFrame = requestAnimationFrame(animTausch);
+        } else {
+          huts[vi1].x = x2; huts[vi2].x = x1;
+          const tmp = positionen[vi1];
+          positionen[vi1] = positionen[vi2];
+          positionen[vi2] = tmp;
+          schritt++;
+          setTimeout(naechsterTausch, 80);
+        }
+      }
+      animFrame = requestAnimationFrame(animTausch);
+    }
+    naechsterTausch();
+  }
+
+  // Klick-Handler
+  function onKlick(e) {
+    if (phase !== 'rate') return;
+    const rect = canvas.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (breite / rect.width);
+    const my = (e.clientY - rect.top) * (hoehe / rect.height);
+
+    for (let vi = 0; vi < 3; vi++) {
+      const hx = huts[vi].x;
+      const hy = huts[vi].y;
+      if (Math.abs(mx - hx) < 50 && my > hy - 20 && my < hy + 65) {
+        canvas.style.cursor = 'default';
+        phase = 'ergebnis';
+        const logIdx = positionen[vi];
+        const gewonnen = logIdx === geschenkIdx;
+        render(-1);
+        setTimeout(() => {
+          if (!aktiv) return;
+          zeigeOverlay(gewonnen);
+        }, 600);
+        break;
+      }
+    }
+  }
+
+  canvas.addEventListener('click', onKlick);
+
+  // Neustart-Button
+  const btnNeustart = document.getElementById('ak-btn-neustart');
+  if (btnNeustart) {
+    btnNeustart.addEventListener('click', function() {
+      const overlay = document.getElementById('ak-spiel-overlay');
+      if (overlay) overlay.style.display = 'none';
+      geschenkIdx = Math.floor(Math.random() * 3);
+      positionen = [0, 1, 2];
+      huts[0].x = hutX[0]; huts[1].x = hutX[1]; huts[2].x = hutX[2];
+      runde++;
+      canvas.style.cursor = 'default';
+      zeigePhase();
+    });
+  }
+
+  zeigePhase();
+
+  aktivesSpiel = {
+    stop: function() {
+      aktiv = false;
+      if (animFrame) cancelAnimationFrame(animFrame);
+      canvas.removeEventListener('click', onKlick);
+    }
+  };
+}
+
