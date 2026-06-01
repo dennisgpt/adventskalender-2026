@@ -159,6 +159,44 @@ function aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage) {
   }
 }
 
+function anzahlSichtbareKalenderSpalten(grid) {
+  const karten = Array.from(grid.querySelectorAll('.tuerchen-karte'));
+
+  if (karten.length < 2) {
+    return 1;
+  }
+
+  const ersteZeile = Math.round(karten[0].getBoundingClientRect().top);
+  const spalten = karten.filter(function(karte) {
+    return Math.abs(Math.round(karte.getBoundingClientRect().top) - ersteZeile) <= 1;
+  }).length;
+
+  return Math.max(spalten, 1);
+}
+
+function fokussiereBenachbartesTuerchen(event, karte, grid) {
+  const richtung = {
+    ArrowLeft: -1,
+    ArrowRight: 1,
+    ArrowUp: -anzahlSichtbareKalenderSpalten(grid),
+    ArrowDown: anzahlSichtbareKalenderSpalten(grid)
+  }[event.key];
+
+  if (!richtung) {
+    return;
+  }
+
+  const karten = Array.from(grid.querySelectorAll('.tuerchen-karte'));
+  const index = karten.indexOf(karte);
+  const zielIndex = index + richtung;
+
+  event.preventDefault();
+
+  if (zielIndex >= 0 && zielIndex < karten.length) {
+    karten[zielIndex].focus();
+  }
+}
+
 /**
  * Bestimmt den Zustand eines Tuerchens.
  * @param {number} nummer
@@ -340,6 +378,9 @@ function kalenderGridAufbauen(apiTage) {
     karte.className = 'tuerchen-karte tuerchen-farbe-' + farbeIndex + ' ' + zustand;
     karte.setAttribute('data-nummer', nummer);
     aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage);
+    karte.addEventListener('keydown', function(event) {
+      fokussiereBenachbartesTuerchen(event, karte, grid);
+    });
 
     karte.innerHTML = `
       <div class="geschenk-icon">${geschenkIconHTML(nummer)}</div>
