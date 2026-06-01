@@ -73,6 +73,7 @@ function inhaltAnzeigen(nummer) {
 
       modalTitel.textContent = data.titel;
       modalInhalt.innerHTML = inhaltRendern(data);
+      fokussiereErsteQuizAntwort(modalInhalt);
 
       if (data.typ === 'mood') {
         setTimeout(function() {
@@ -427,12 +428,15 @@ function quizFrageHtml(quizId) {
   }
 
   const frage = zustand.fragen[zustand.aktuelleFrage];
+  const frageId = `${quizId}-frage-${zustand.aktuelleFrage}`;
   const antwortButtons = frage.antworten.map(function(antwort, index) {
     return `
       <button
         class="btn btn-outline-warning quiz-antwort"
         data-index="${index}"
         data-quiz-answer
+        aria-describedby="${frageId}"
+        onkeydown="quizAntwortNavigation(event, this)"
         onclick="quizAntwortPruefen(this)">
         <span class="quiz-antwort-text">${antwort}</span>
       </button>
@@ -440,12 +444,12 @@ function quizFrageHtml(quizId) {
   }).join('');
 
   return `
-    <div class="quiz-fortschritt">Frage ${zustand.aktuelleFrage + 1} von ${zustand.fragen.length}</div>
-    <p class="quiz-frage">${frage.frage}</p>
+    <div class="quiz-fortschritt" aria-live="polite">Frage ${zustand.aktuelleFrage + 1} von ${zustand.fragen.length}</div>
+    <p class="quiz-frage" id="${frageId}" data-quiz-question-title tabindex="-1">${frage.frage}</p>
     <div class="quiz-antworten">
       ${antwortButtons}
     </div>
-    <div class="quiz-feedback" data-quiz-feedback style="display:none;"></div>
+    <div class="quiz-feedback" data-quiz-feedback role="status" aria-live="polite" aria-atomic="true" style="display:none;"></div>
   `;
 }
 
@@ -492,6 +496,7 @@ function quizIntroBeendet(intro) {
   if (frageBereich) {
     frageBereich.classList.remove('ist-versteckt');
     frageBereich.classList.add('ist-sichtbar');
+    fokussiereErsteQuizAntwort(frageBereich);
   }
 
   if (intro) {
@@ -554,6 +559,7 @@ function quizAntwortPruefen(button) {
   }
 
   feedback.style.display = 'flex';
+  fokussiereQuizElement(feedback.querySelector('.quiz-naechste-frage'));
 }
 
 function quizNaechsteFrage(button) {
@@ -568,11 +574,56 @@ function quizNaechsteFrage(button) {
 
   if (zustand.aktuelleFrage >= zustand.fragen.length - 1) {
     frageBereich.innerHTML = quizErgebnisHtml(zustand);
+    fokussiereQuizElement(frageBereich.querySelector('[data-quiz-result]'));
     return;
   }
 
   zustand.aktuelleFrage += 1;
   frageBereich.innerHTML = quizFrageHtml(quizId);
+  fokussiereErsteQuizAntwort(frageBereich);
+}
+
+function fokussiereQuizElement(element) {
+  if (element && typeof element.focus === 'function') {
+    element.focus();
+  }
+}
+
+function fokussiereErsteQuizAntwort(container) {
+  if (!container) {
+    return;
+  }
+
+  const frageBereiche = container.matches('[data-quiz-question-area]')
+    ? [container]
+    : Array.from(container.querySelectorAll('[data-quiz-question-area]'));
+  const sichtbarerBereich = frageBereiche.find(function(bereich) {
+    return !bereich.classList.contains('ist-versteckt');
+  });
+
+  fokussiereQuizElement(
+    sichtbarerBereich && sichtbarerBereich.querySelector('[data-quiz-answer]:not(:disabled)')
+  );
+}
+
+function quizAntwortNavigation(event, button) {
+  const schritt = {
+    ArrowLeft: -1,
+    ArrowUp: -1,
+    ArrowRight: 1,
+    ArrowDown: 1
+  }[event.key];
+  const antworten = button && button.parentElement
+    ? Array.from(button.parentElement.querySelectorAll('[data-quiz-answer]:not(:disabled)'))
+    : [];
+  const index = antworten.indexOf(button);
+
+  if (!schritt || index < 0 || antworten.length < 2) {
+    return;
+  }
+
+  event.preventDefault();
+  antworten[(index + schritt + antworten.length) % antworten.length].focus();
 }
 
 function quizErgebnisHtml(zustand) {
@@ -586,7 +637,7 @@ function quizErgebnisHtml(zustand) {
 
     return `
       <li class="quiz-ergebnis-eintrag ${antwort.istRichtig ? 'ist-richtig' : 'ist-falsch'}">
-        <span class="quiz-ergebnis-status">${antwort.istRichtig ? '\u2713' : '\u00d7'}</span>
+        <span class="quiz-ergebnis-status" aria-hidden="true">${antwort.istRichtig ? '\u2713' : '\u00d7'}</span>
         <div>
           <strong>Frage ${index + 1}</strong>
           <span class="quiz-ergebnis-frage">${antwort.frage}</span>
@@ -597,7 +648,7 @@ function quizErgebnisHtml(zustand) {
   }).join('');
 
   return `
-    <div class="quiz-ergebnis">
+    <div class="quiz-ergebnis" data-quiz-result tabindex="-1" role="status" aria-live="polite" aria-atomic="true">
       <div class="quiz-ergebnis-kopf">
         <span>Ergebnis</span>
         <strong>${richtigeAntworten} von ${zustand.fragen.length} richtig</strong>

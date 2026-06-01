@@ -1958,6 +1958,12 @@ small span:hover {
   text-align: left;
 }
 
+.quiz-frage:focus-visible,
+.quiz-ergebnis:focus-visible {
+  outline: 3px solid #e8c84a;
+  outline-offset: 4px;
+}
+
 .quiz-antworten {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
