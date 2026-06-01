@@ -129,6 +129,36 @@ function textFuerGesperrtesTuerchen(nummer, apiTage) {
   return 'Dieses Türchen ist noch gesperrt!';
 }
 
+function ariaLabelFuerTuerchen(nummer, zustand, apiTage) {
+  if (zustand === 'gesperrt') {
+    return 'Türchen ' + nummer + ', gesperrt. ' + textFuerGesperrtesTuerchen(nummer, apiTage);
+  }
+
+  if (zustand === 'heute') {
+    return 'Türchen ' + nummer + ', heute verfügbar. Öffnen.';
+  }
+
+  if (zustand === 'verfuegbar') {
+    return 'Türchen ' + nummer + ', verfügbar. Öffnen.';
+  }
+
+  if (darfWiederholtGeoeffnetWerden(nummer)) {
+    return 'Türchen ' + nummer + ', bereits geöffnet. Erneut öffnen.';
+  }
+
+  return 'Türchen ' + nummer + ', bereits geöffnet.';
+}
+
+function aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage) {
+  karte.setAttribute('aria-label', ariaLabelFuerTuerchen(nummer, zustand, apiTage));
+
+  if (zustand === 'geoeffnet' && !darfWiederholtGeoeffnetWerden(nummer)) {
+    karte.setAttribute('aria-disabled', 'true');
+  } else {
+    karte.removeAttribute('aria-disabled');
+  }
+}
+
 /**
  * Bestimmt den Zustand eines Tuerchens.
  * @param {number} nummer
@@ -304,11 +334,12 @@ function kalenderGridAufbauen(apiTage) {
     const spalte = document.createElement('div');
     spalte.className = 'col-4 col-sm-3 col-md-2';
 
-    const karte = document.createElement('div');
+    const karte = document.createElement('button');
     const farbeIndex = ((nummer - 1) % 7) + 1;
+    karte.type = 'button';
     karte.className = 'tuerchen-karte tuerchen-farbe-' + farbeIndex + ' ' + zustand;
     karte.setAttribute('data-nummer', nummer);
-    karte.setAttribute('aria-label', 'Tuerchen ' + nummer);
+    aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage);
 
     karte.innerHTML = `
       <div class="geschenk-icon">${geschenkIconHTML(nummer)}</div>
@@ -317,7 +348,7 @@ function kalenderGridAufbauen(apiTage) {
 
     if (zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer))) {
       karte.addEventListener('click', function() {
-        if (geschenkAnimationLaeuft) return;
+        if (geschenkAnimationLaeuft || (karte.classList.contains('geoeffnet') && !darfWiederholtGeoeffnetWerden(nummer))) return;
 
         karte.style.transform = 'scale(0.95)';
 
@@ -358,6 +389,7 @@ function tuercheoeffnen(nummer, karte) {
       karte.classList.remove('verfuegbar', 'heute', 'gesperrt');
       karte.classList.add('geoeffnet');
       karte.querySelector('.tuerchen-label').textContent = '\u2713';
+      aktualisiereTuerchenBarrierefreiheit(karte, nummer, 'geoeffnet');
 
       inhaltAnzeigen(nummer);
     })

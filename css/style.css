@@ -1528,10 +1528,14 @@ small span:hover {
 /* ---- Geschenkbox-Karten ---- */
 
 .tuerchen-karte {
+  width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 8px;
   background: linear-gradient(145deg, #1a1025, #0f0d1a);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  padding: 0;
+  color: inherit;
+  appearance: none;
   cursor: pointer;
   display: flex;
   flex-direction: column;
@@ -1687,8 +1691,7 @@ small span:hover {
   50%       { opacity: 1;    filter: blur(4px); transform: translateX(-50%) rotate(28deg) scaleY(1.08); }
 }
 
-.tuerchen-karte.verfuegbar:focus-visible,
-.tuerchen-karte.heute:focus-visible {
+.tuerchen-karte:focus-visible {
   outline: 3px solid #e8c84a;
   outline-offset: 3px;
 }
