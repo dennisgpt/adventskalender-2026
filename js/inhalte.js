@@ -460,7 +460,8 @@ function quizFrageHtml(quizId) {
  */
 function quizRendern(data) {
   const quizId = `quiz-${quizInstanzZaehler}`;
-  const hatIntroBild = Boolean(data.bild);
+  const reduzierteBewegung = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hatIntroBild = Boolean(data.bild) && !reduzierteBewegung;
   quizInstanzZaehler += 1;
   quizZustaende[quizId] = {
     fragen: Array.isArray(data.fragen) && data.fragen.length > 0

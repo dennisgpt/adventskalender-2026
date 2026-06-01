@@ -446,6 +446,10 @@ function tuercheoeffnen(nummer, karte) {
  * @returns {Promise<void>}
  */
 function starteGeschenkRevealAnimation(karte) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return Promise.resolve();
+  }
+
   return new Promise(function(resolve) {
     var ikonEl = karte ? karte.querySelector('.geschenk-icon') : null;
     var startRect = ikonEl ? ikonEl.getBoundingClientRect() : null;
