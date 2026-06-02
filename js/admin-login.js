@@ -15,7 +15,7 @@
     submitButton.disabled = laedt;
     submitButton.innerHTML = laedt
       ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Einloggen...'
-      : '<i class="bi bi-box-arrow-in-right me-1"></i>Einloggen';
+      : '<i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>Einloggen';
   }
 
   function setzeAdminLogoutLaedt(logoutButton, laedt) {

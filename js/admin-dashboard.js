@@ -69,7 +69,7 @@
     refreshButton.disabled = laedt;
     refreshButton.innerHTML = laedt
       ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Laden...'
-      : '<i class="bi bi-arrow-clockwise"></i> Aktualisieren';
+      : '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Aktualisieren';
   }
 
   function formatiereAdminDatum(datumWert) {
