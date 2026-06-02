@@ -248,15 +248,15 @@ function inhaltRendern(data) {
     case 'game': {
       const istSchneeball = data.spielId === 'tuerchen7-schneeball';
       return `
-        <div id="ak-spiel-wrapper" role="group" aria-describedby="ak-spiel-status" tabindex="-1" style="
+        <div id="ak-spiel-wrapper" ${istSchneeball ? 'role="group" aria-describedby="ak-spiel-status" tabindex="-1"' : ''} style="
           position: relative; width: 100%;
           border-radius: 12px; overflow: hidden;
           background: #0a1628;
           user-select: none; touch-action: none;
         ">
-          <canvas id="ak-spiel-canvas" aria-hidden="true" style="display: block; width: 100%; height: 420px;"></canvas>
+          <canvas id="ak-spiel-canvas" ${istSchneeball ? 'aria-hidden="true"' : ''} style="display: block; width: 100%; height: 420px;"></canvas>
 
-          <p class="visually-hidden" id="ak-spiel-status" role="status" aria-live="polite" aria-atomic="true"></p>
+          ${istSchneeball ? '<p class="visually-hidden" id="ak-spiel-status" role="status" aria-live="polite" aria-atomic="true"></p>' : ''}
 
           ${istSchneeball ? `
           <div style="position: absolute; top: 12px; left: 0; right: 0;
@@ -281,13 +281,7 @@ function inhaltRendern(data) {
               width: 54px; height: 54px; display: grid; place-items: center;
               font-size: 1.4rem; cursor: pointer; backdrop-filter: blur(4px);">\u25ba</span>
           </div>
-          ` : `
-          <div class="ak-hut-auswahl" role="group" aria-label="Hut auswählen">
-            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="0" aria-label="Linken Hut auswählen" disabled></button>
-            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="1" aria-label="Mittleren Hut auswählen" disabled></button>
-            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="2" aria-label="Rechten Hut auswählen" disabled></button>
-          </div>
-          `}
+          ` : ''}
 
           <div id="ak-spiel-overlay" style="display: none; position: absolute; inset: 0;
             background: rgba(5,12,35,0.82); backdrop-filter: blur(6px);
@@ -1106,33 +1100,16 @@ function starteHuetchenspiel() {
   const hutX = [breite * 0.25, breite * 0.5, breite * 0.75];
   const hutY = hoehe * 0.55;
   const huts = hutX.map((x, i) => ({ x, y: hutY, vi: i }));
-  const auswahlButtons = Array.from(document.querySelectorAll('[data-ak-hut-position]'));
-
-  function setzeSpielStatus(text) {
-    const status = document.getElementById('ak-spiel-status');
-    if (status) status.textContent = text;
-  }
-
-  function setzeHutAuswahlAktiv(aktiviert) {
-    auswahlButtons.forEach(function(button) {
-      button.disabled = !aktiviert;
-      button.classList.toggle('ist-sichtbar', aktiviert);
-    });
-  }
 
   function zeigeOverlay(gewonnen) {
     const overlay = document.getElementById('ak-spiel-overlay');
-    const btnNeustart = document.getElementById('ak-btn-neustart');
     if (!overlay) return;
-    setzeHutAuswahlAktiv(false);
     overlay.style.display = 'flex';
     overlay.querySelector('.ak-overlay-titel').textContent =
       gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
     overlay.querySelector('.ak-overlay-text').textContent = gewonnen
       ? 'Du hast das Geschenk gefunden!'
       : 'Das Geschenk war woanders!';
-    setzeSpielStatus(gewonnen ? 'Gewonnen. Du hast das Geschenk gefunden.' : 'Verloren. Das Geschenk war woanders.');
-    if (btnNeustart) btnNeustart.focus();
   }
 
   function zeichneHintergrund() {
@@ -1291,8 +1268,6 @@ function starteHuetchenspiel() {
   // Zeige-Phase: Geschenk enthüllen
   function zeigePhase() {
     phase = 'zeige';
-    setzeHutAuswahlAktiv(false);
-    setzeSpielStatus('Merke dir den Hut mit dem Geschenk.');
     const vi = positionen.indexOf(geschenkIdx);
     render(vi);
     setTimeout(() => {
@@ -1319,9 +1294,6 @@ function starteHuetchenspiel() {
         phase = 'rate';
         render(-1);
         canvas.style.cursor = 'pointer';
-        setzeHutAuswahlAktiv(true);
-        setzeSpielStatus('Wo ist das Geschenk? Wähle den linken, mittleren oder rechten Hut aus.');
-        if (auswahlButtons[0]) auswahlButtons[0].focus();
         return;
       }
       let vi1 = Math.floor(Math.random() * 3);
@@ -1355,20 +1327,6 @@ function starteHuetchenspiel() {
     naechsterTausch();
   }
 
-  function werteHutAus(vi) {
-    if (phase !== 'rate') return;
-    setzeHutAuswahlAktiv(false);
-    canvas.style.cursor = 'default';
-    phase = 'ergebnis';
-    const logIdx = positionen[vi];
-    const gewonnen = logIdx === geschenkIdx;
-    render(-1);
-    setTimeout(() => {
-      if (!aktiv) return;
-      zeigeOverlay(gewonnen);
-    }, 600);
-  }
-
   // Klick-Handler
   function onKlick(e) {
     if (phase !== 'rate') return;
@@ -1380,24 +1338,21 @@ function starteHuetchenspiel() {
       const hx = huts[vi].x;
       const hy = huts[vi].y;
       if (Math.abs(mx - hx) < 50 && my > hy - 20 && my < hy + 65) {
-        werteHutAus(vi);
+        canvas.style.cursor = 'default';
+        phase = 'ergebnis';
+        const logIdx = positionen[vi];
+        const gewonnen = logIdx === geschenkIdx;
+        render(-1);
+        setTimeout(() => {
+          if (!aktiv) return;
+          zeigeOverlay(gewonnen);
+        }, 600);
         break;
       }
     }
   }
 
   canvas.addEventListener('click', onKlick);
-  auswahlButtons.forEach(function(button) {
-    button.addEventListener('click', function() {
-      const position = Number.parseInt(button.getAttribute('data-ak-hut-position'), 10);
-      const vi = huts.reduce(function(besterIndex, hut, index) {
-        return Math.abs(hut.x - hutX[position]) < Math.abs(huts[besterIndex].x - hutX[position])
-          ? index
-          : besterIndex;
-      }, 0);
-      werteHutAus(vi);
-    });
-  });
 
   // Neustart-Button
   const btnNeustart = document.getElementById('ak-btn-neustart');
