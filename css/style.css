@@ -1296,6 +1296,23 @@ small span:hover {
   gap: 0.42rem;
 }
 
+.admin-tag-content-eintrag {
+  display: inline-flex;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: 0.36rem;
+}
+
+.admin-tag-content-vorschau {
+  display: block;
+  width: 112px;
+  height: 72px;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 8px;
+  background: rgba(3, 10, 28, 0.58);
+  object-fit: cover;
+}
+
 .admin-tag-content-badge {
   display: inline-flex;
   align-items: center;

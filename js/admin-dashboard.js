@@ -141,6 +141,40 @@
     }
   }
 
+  function baueContentMediaUrl(mediaUrl) {
+    if (!mediaUrl) {
+      return '';
+    }
+
+    try {
+      const url = new URL(mediaUrl, window.AdventskalenderApi.API_BASE_URL || window.location.href);
+      return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function renderContentBildVorschau(inhalt) {
+    if (inhalt.type !== 'image') {
+      return '';
+    }
+
+    const mediaUrl = baueContentMediaUrl(inhalt.media_url);
+
+    if (!mediaUrl) {
+      return '';
+    }
+
+    return `
+      <img
+        class="admin-tag-content-vorschau"
+        src="${mediaUrl}"
+        alt="Vorschau von Bild #${inhalt.id}"
+        loading="lazy"
+      >
+    `;
+  }
+
   function renderContentBadges(inhalte) {
     if (inhalte.length === 0) {
       return '<p class="admin-tag-content-leer">Keine Inhalte zugewiesen</p>';
@@ -150,16 +184,19 @@
       <div class="admin-tag-content-badges">
         ${inhalte.map(function(inhalt) {
           return `
-            <button
-              class="admin-tag-content-badge admin-tag-content-remove"
-              type="button"
-              data-admin-tag-remove-content="${inhalt.id}"
-              aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
-            >
-              <span>${contentTypLabel(inhalt.type)}</span>
-              <small>#${inhalt.id}</small>
-              <i class="bi bi-x-lg" aria-hidden="true"></i>
-            </button>
+            <div class="admin-tag-content-eintrag">
+              ${renderContentBildVorschau(inhalt)}
+              <button
+                class="admin-tag-content-badge admin-tag-content-remove"
+                type="button"
+                data-admin-tag-remove-content="${inhalt.id}"
+                aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
+              >
+                <span>${contentTypLabel(inhalt.type)}</span>
+                <small>#${inhalt.id}</small>
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
           `;
         }).join('')}
       </div>
