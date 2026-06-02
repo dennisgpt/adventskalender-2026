@@ -19,6 +19,8 @@
 </head>
 <body>
 
+  <a class="sprunglink" href="#kalender">Direkt zum Kalender</a>
+
   <!-- ===== HEADER / NAVIGATION ===== -->
   <header class="thws-header py-3">
     <div class="container-fluid px-2 thws-header-inner">
@@ -40,7 +42,7 @@
         data-bs-target="#meinInhaltHinweis"
         aria-controls="meinInhaltHinweis"
       >
-        <i class="bi bi-gift"></i>
+        <i class="bi bi-gift" aria-hidden="true"></i>
         Mein Inhalt
       </button>
 
@@ -54,7 +56,7 @@
         data-login-text="Admin-Login"
         data-admin-text="Admin"
       >
-        <i class="bi bi-person-gear" id="admin-login-button-icon"></i>
+        <i class="bi bi-person-gear" id="admin-login-button-icon" aria-hidden="true"></i>
         <span id="admin-login-button-text">Admin-Login</span>
       </button>
 
@@ -75,7 +77,7 @@
   <div class="offcanvas offcanvas-end login-hinweis-offcanvas" tabindex="-1" id="meinInhaltHinweis" aria-labelledby="meinInhaltHinweisLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="meinInhaltHinweisLabel">
-        <i class="bi bi-lock-fill me-2"></i>Mein Inhalt
+        <i class="bi bi-lock-fill me-2" aria-hidden="true"></i>Mein Inhalt
       </h5>
       <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Schließen"></button>
     </div>
@@ -94,7 +96,7 @@
 
         <div class="modal-header">
           <h5 class="modal-title" id="login-modal-titel">
-            <i class="bi bi-shield-lock-fill me-2"></i>Admin Login
+            <i class="bi bi-shield-lock-fill me-2" aria-hidden="true"></i>Admin Login
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
         </div>
@@ -131,7 +133,7 @@
           <div class="modal-footer">
             <button type="button" class="btn admin-login-secondary-btn" data-bs-dismiss="modal">Abbrechen</button>
             <button type="submit" class="btn admin-login-submit-btn" id="admin-login-submit">
-              <i class="bi bi-box-arrow-in-right me-1"></i>
+              <i class="bi bi-box-arrow-in-right me-1" aria-hidden="true"></i>
               Einloggen
             </button>
           </div>
@@ -147,7 +149,7 @@
       <div class="modal-content admin-login-modal admin-delete-modal">
         <div class="modal-header">
           <h5 class="modal-title" id="admin-content-delete-modal-titel">
-            <i class="bi bi-trash3-fill me-2"></i>Content löschen
+            <i class="bi bi-trash3-fill me-2" aria-hidden="true"></i>Content löschen
           </h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
         </div>
@@ -224,16 +226,16 @@
       <h1 class="display-4 fw-bold">🎄 FIW Adventskalender</h1>
       <p class="lead text-muted">Jeden Tag ein neues Türchen – viel Spaß!</p>
       <div class="hero-info-row">
-        <span class="hero-info-pill"><i class="bi bi-calendar-check"></i> 24 Tage</span>
-        <span class="hero-info-pill"><i class="bi bi-stars"></i> Täglich neue Inhalte</span>
-        <span class="hero-info-pill"><i class="bi bi-gift-fill"></i> Campus-Highlights</span>
+        <span class="hero-info-pill"><i class="bi bi-calendar-check" aria-hidden="true"></i> 24 Tage</span>
+        <span class="hero-info-pill"><i class="bi bi-stars" aria-hidden="true"></i> Täglich neue Inhalte</span>
+        <span class="hero-info-pill"><i class="bi bi-gift-fill" aria-hidden="true"></i> Campus-Highlights</span>
       </div>
     </div>
   </section>
 
   <!-- ===== KALENDER GRID (24 Türchen) ===== -->
   <!-- Zuständig: Dennis (Logik in js/kalender.js) -->
-  <main class="container my-5">
+  <main class="container my-5" id="kalender" tabindex="-1">
     <div class="row g-3" id="kalender-grid">
       <!-- Die 24 Türchen werden per JavaScript eingefügt (siehe js/kalender.js) -->
     </div>
@@ -247,7 +249,7 @@
         <h2 id="admin-dashboard-titel" class="admin-dashboard-titel">Türchen-Übersicht</h2>
       </div>
       <button class="admin-dashboard-refresh-btn" id="admin-dashboard-refresh" type="button">
-        <i class="bi bi-arrow-clockwise"></i>
+        <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
         Aktualisieren
       </button>
     </div>
@@ -343,7 +345,7 @@
         <h2 id="admin-content-titel" class="admin-dashboard-titel">Content-Verwaltung</h2>
       </div>
       <button class="admin-dashboard-refresh-btn" id="admin-content-create" type="button" disabled>
-        <i class="bi bi-plus-lg"></i>
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
         Content erstellen
       </button>
     </div>
@@ -448,11 +450,11 @@
       </div>
       <div class="admin-years-actions">
         <button class="admin-dashboard-refresh-btn" id="admin-years-create-toggle" type="button">
-          <i class="bi bi-plus-lg"></i>
+          <i class="bi bi-plus-lg" aria-hidden="true"></i>
           Jahr erstellen
         </button>
         <button class="admin-dashboard-refresh-btn" id="admin-years-refresh" type="button">
-          <i class="bi bi-arrow-clockwise"></i>
+          <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
           Aktualisieren
         </button>
       </div>

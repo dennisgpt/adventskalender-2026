@@ -73,6 +73,7 @@ function inhaltAnzeigen(nummer) {
 
       modalTitel.textContent = data.titel;
       modalInhalt.innerHTML = inhaltRendern(data);
+      fokussiereErsteQuizAntwort(modalInhalt);
 
       if (data.typ === 'mood') {
         setTimeout(function() {
@@ -247,13 +248,15 @@ function inhaltRendern(data) {
     case 'game': {
       const istSchneeball = data.spielId === 'tuerchen7-schneeball';
       return `
-        <div id="ak-spiel-wrapper" style="
+        <div id="ak-spiel-wrapper" ${istSchneeball ? 'role="group" aria-describedby="ak-spiel-status" tabindex="-1"' : ''} style="
           position: relative; width: 100%;
           border-radius: 12px; overflow: hidden;
           background: #0a1628;
           user-select: none; touch-action: none;
         ">
-          <canvas id="ak-spiel-canvas" style="display: block; width: 100%; height: 420px;"></canvas>
+          <canvas id="ak-spiel-canvas" ${istSchneeball ? 'aria-hidden="true"' : ''} style="display: block; width: 100%; height: 420px;"></canvas>
+
+          ${istSchneeball ? '<p class="visually-hidden" id="ak-spiel-status" role="status" aria-live="polite" aria-atomic="true"></p>' : ''}
 
           ${istSchneeball ? `
           <div style="position: absolute; top: 12px; left: 0; right: 0;
@@ -267,16 +270,16 @@ function inhaltRendern(data) {
           </div>
           <div style="position: absolute; bottom: 14px; left: 0; right: 0;
             display: flex; justify-content: space-between; padding: 0 18px; pointer-events: none;">
-            <button id="ak-btn-links" style="pointer-events: all;
+            <span id="ak-btn-links" class="ak-spiel-richtung" aria-hidden="true" style="pointer-events: all;
               background: rgba(0,0,0,0.5); color: #fff;
               border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
-              backdrop-filter: blur(4px);">\u25c4</button>
-            <button id="ak-btn-rechts" style="pointer-events: all;
+              width: 54px; height: 54px; display: grid; place-items: center;
+              font-size: 1.4rem; cursor: pointer; backdrop-filter: blur(4px);">\u25c4</span>
+            <span id="ak-btn-rechts" class="ak-spiel-richtung" aria-hidden="true" style="pointer-events: all;
               background: rgba(0,0,0,0.5); color: #fff;
               border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
-              backdrop-filter: blur(4px);">\u25ba</button>
+              width: 54px; height: 54px; display: grid; place-items: center;
+              font-size: 1.4rem; cursor: pointer; backdrop-filter: blur(4px);">\u25ba</span>
           </div>
           ` : ''}
 
@@ -427,12 +430,15 @@ function quizFrageHtml(quizId) {
   }
 
   const frage = zustand.fragen[zustand.aktuelleFrage];
+  const frageId = `${quizId}-frage-${zustand.aktuelleFrage}`;
   const antwortButtons = frage.antworten.map(function(antwort, index) {
     return `
       <button
         class="btn btn-outline-warning quiz-antwort"
         data-index="${index}"
         data-quiz-answer
+        aria-describedby="${frageId}"
+        onkeydown="quizAntwortNavigation(event, this)"
         onclick="quizAntwortPruefen(this)">
         <span class="quiz-antwort-text">${antwort}</span>
       </button>
@@ -440,12 +446,12 @@ function quizFrageHtml(quizId) {
   }).join('');
 
   return `
-    <div class="quiz-fortschritt">Frage ${zustand.aktuelleFrage + 1} von ${zustand.fragen.length}</div>
-    <p class="quiz-frage">${frage.frage}</p>
+    <div class="quiz-fortschritt" aria-live="polite">Frage ${zustand.aktuelleFrage + 1} von ${zustand.fragen.length}</div>
+    <p class="quiz-frage" id="${frageId}" data-quiz-question-title tabindex="-1">${frage.frage}</p>
     <div class="quiz-antworten">
       ${antwortButtons}
     </div>
-    <div class="quiz-feedback" data-quiz-feedback style="display:none;"></div>
+    <div class="quiz-feedback" data-quiz-feedback role="status" aria-live="polite" aria-atomic="true" style="display:none;"></div>
   `;
 }
 
@@ -456,7 +462,8 @@ function quizFrageHtml(quizId) {
  */
 function quizRendern(data) {
   const quizId = `quiz-${quizInstanzZaehler}`;
-  const hatIntroBild = Boolean(data.bild);
+  const reduzierteBewegung = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hatIntroBild = Boolean(data.bild) && !reduzierteBewegung;
   quizInstanzZaehler += 1;
   quizZustaende[quizId] = {
     fragen: Array.isArray(data.fragen) && data.fragen.length > 0
@@ -492,6 +499,7 @@ function quizIntroBeendet(intro) {
   if (frageBereich) {
     frageBereich.classList.remove('ist-versteckt');
     frageBereich.classList.add('ist-sichtbar');
+    fokussiereErsteQuizAntwort(frageBereich);
   }
 
   if (intro) {
@@ -554,6 +562,7 @@ function quizAntwortPruefen(button) {
   }
 
   feedback.style.display = 'flex';
+  fokussiereQuizElement(feedback.querySelector('.quiz-naechste-frage'));
 }
 
 function quizNaechsteFrage(button) {
@@ -568,11 +577,56 @@ function quizNaechsteFrage(button) {
 
   if (zustand.aktuelleFrage >= zustand.fragen.length - 1) {
     frageBereich.innerHTML = quizErgebnisHtml(zustand);
+    fokussiereQuizElement(frageBereich.querySelector('[data-quiz-result]'));
     return;
   }
 
   zustand.aktuelleFrage += 1;
   frageBereich.innerHTML = quizFrageHtml(quizId);
+  fokussiereErsteQuizAntwort(frageBereich);
+}
+
+function fokussiereQuizElement(element) {
+  if (element && typeof element.focus === 'function') {
+    element.focus();
+  }
+}
+
+function fokussiereErsteQuizAntwort(container) {
+  if (!container) {
+    return;
+  }
+
+  const frageBereiche = container.matches('[data-quiz-question-area]')
+    ? [container]
+    : Array.from(container.querySelectorAll('[data-quiz-question-area]'));
+  const sichtbarerBereich = frageBereiche.find(function(bereich) {
+    return !bereich.classList.contains('ist-versteckt');
+  });
+
+  fokussiereQuizElement(
+    sichtbarerBereich && sichtbarerBereich.querySelector('[data-quiz-answer]:not(:disabled)')
+  );
+}
+
+function quizAntwortNavigation(event, button) {
+  const schritt = {
+    ArrowLeft: -1,
+    ArrowUp: -1,
+    ArrowRight: 1,
+    ArrowDown: 1
+  }[event.key];
+  const antworten = button && button.parentElement
+    ? Array.from(button.parentElement.querySelectorAll('[data-quiz-answer]:not(:disabled)'))
+    : [];
+  const index = antworten.indexOf(button);
+
+  if (!schritt || index < 0 || antworten.length < 2) {
+    return;
+  }
+
+  event.preventDefault();
+  antworten[(index + schritt + antworten.length) % antworten.length].focus();
 }
 
 function quizErgebnisHtml(zustand) {
@@ -586,7 +640,7 @@ function quizErgebnisHtml(zustand) {
 
     return `
       <li class="quiz-ergebnis-eintrag ${antwort.istRichtig ? 'ist-richtig' : 'ist-falsch'}">
-        <span class="quiz-ergebnis-status">${antwort.istRichtig ? '\u2713' : '\u00d7'}</span>
+        <span class="quiz-ergebnis-status" aria-hidden="true">${antwort.istRichtig ? '\u2713' : '\u00d7'}</span>
         <div>
           <strong>Frage ${index + 1}</strong>
           <span class="quiz-ergebnis-frage">${antwort.frage}</span>
@@ -597,7 +651,7 @@ function quizErgebnisHtml(zustand) {
   }).join('');
 
   return `
-    <div class="quiz-ergebnis">
+    <div class="quiz-ergebnis" data-quiz-result tabindex="-1" role="status" aria-live="polite" aria-atomic="true">
       <div class="quiz-ergebnis-kopf">
         <span>Ergebnis</span>
         <strong>${richtigeAntworten} von ${zustand.fragen.length} richtig</strong>
@@ -632,6 +686,7 @@ function starteSpiel(spielId) {
 
 function starteSchneeball() {
   const canvas = document.getElementById('ak-spiel-canvas');
+  const spielWrapper = document.getElementById('ak-spiel-wrapper');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
@@ -843,8 +898,27 @@ function starteSchneeball() {
   function aktualisiereHUD() {
     const elP = document.getElementById('ak-hud-punkte');
     const elK = document.getElementById('ak-hud-kohle');
+    const status = document.getElementById('ak-spiel-status');
     if (elP) elP.textContent = '⚪ ' + z.punkte + ' / 8';
     if (elK) elK.textContent = '🪨 ' + z.kohle + ' / 3';
+    if (status) status.textContent = z.punkte + ' von 8 Überraschungen und ' + z.kohle + ' von 3 Kohlen gefangen.';
+  }
+
+  function setzeRichtungAktiv(richtung, aktiv) {
+    const button = document.getElementById(richtung === 'links' ? 'ak-btn-links' : 'ak-btn-rechts');
+    sp[richtung] = aktiv;
+    if (button) button.classList.toggle('ist-aktiv', aktiv);
+  }
+
+  function stoppeBewegung() {
+    setzeRichtungAktiv('links', false);
+    setzeRichtungAktiv('rechts', false);
+  }
+
+  function fokussiereSpiel() {
+    if (spielWrapper && typeof spielWrapper.focus === 'function') {
+      spielWrapper.focus();
+    }
   }
 
   function trifftKorb(o) {
@@ -854,13 +928,16 @@ function starteSchneeball() {
 
   function zeigeOverlay(gewonnen) {
     const overlay = document.getElementById('ak-spiel-overlay');
+    const btnNeustart = document.getElementById('ak-btn-neustart');
     if (!overlay) return;
+    stoppeBewegung();
     overlay.style.display = 'flex';
     overlay.querySelector('.ak-overlay-titel').textContent =
       gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
     overlay.querySelector('.ak-overlay-text').textContent = gewonnen
       ? 'Du hast 8 \u00dcberraschungen gefangen!'
       : 'Zu viel Kohle erwischt \u2013 das war nichts!';
+    if (btnNeustart) btnNeustart.focus();
   }
 
   function schritt(ts) {
@@ -925,12 +1002,30 @@ function starteSchneeball() {
 
   // Tastatur
   function onKeyDown(e) {
-    if (e.key === 'ArrowLeft')  sp.links  = true;
-    if (e.key === 'ArrowRight') sp.rechts = true;
+    if (!z.laeuft) return;
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      fokussiereSpiel();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setzeRichtungAktiv('links', true);
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setzeRichtungAktiv('rechts', true);
+    }
   }
   function onKeyUp(e) {
-    if (e.key === 'ArrowLeft')  sp.links  = false;
-    if (e.key === 'ArrowRight') sp.rechts = false;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setzeRichtungAktiv('links', false);
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setzeRichtungAktiv('rechts', false);
+    }
   }
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup',   onKeyUp);
@@ -939,9 +1034,10 @@ function starteSchneeball() {
   function bindBtn(id, richtung) {
     const btn = document.getElementById(id);
     if (!btn) return;
-    btn.addEventListener('pointerdown',  function() { sp[richtung] = true;  });
-    btn.addEventListener('pointerup',    function() { sp[richtung] = false; });
-    btn.addEventListener('pointerleave', function() { sp[richtung] = false; });
+    btn.addEventListener('pointerdown',  function() { setzeRichtungAktiv(richtung, true);  });
+    btn.addEventListener('pointerup',    function() { setzeRichtungAktiv(richtung, false); });
+    btn.addEventListener('pointerleave', function() { setzeRichtungAktiv(richtung, false); });
+    btn.addEventListener('pointercancel', function() { setzeRichtungAktiv(richtung, false); });
   }
   bindBtn('ak-btn-links',  'links');
   bindBtn('ak-btn-rechts', 'rechts');
@@ -955,23 +1051,31 @@ function starteSchneeball() {
       z.kohle  = 0;
       objekte.length = 0;
       sp.x = breite / 2;
+      stoppeBewegung();
       letzterSpawn = 0;
       const overlay = document.getElementById('ak-spiel-overlay');
       if (overlay) overlay.style.display = 'none';
       aktualisiereHUD();
+      fokussiereSpiel();
       z.frameId = requestAnimationFrame(schritt);
     });
   }
 
   aktualisiereHUD();
+  const status = document.getElementById('ak-spiel-status');
+  if (status) status.textContent = 'Schneeball-Fangspiel gestartet. Steuere den Korb mit der linken und rechten Pfeiltaste. Drücke Escape, um das Spiel zu schließen.';
+  fokussiereSpiel();
   z.frameId = requestAnimationFrame(schritt);
+  window.addEventListener('blur', stoppeBewegung);
 
   aktivesSpiel = {
     stop: function() {
       z.laeuft = false;
+      stoppeBewegung();
       if (z.frameId) cancelAnimationFrame(z.frameId);
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('keyup',   onKeyUp);
+      window.removeEventListener('blur', stoppeBewegung);
     }
   };
 

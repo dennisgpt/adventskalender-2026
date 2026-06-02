@@ -129,6 +129,85 @@ function textFuerGesperrtesTuerchen(nummer, apiTage) {
   return 'Dieses Türchen ist noch gesperrt!';
 }
 
+function ariaLabelFuerTuerchen(nummer, zustand, apiTage) {
+  if (zustand === 'gesperrt') {
+    return 'Türchen ' + nummer + ', gesperrt. ' + textFuerGesperrtesTuerchen(nummer, apiTage);
+  }
+
+  if (zustand === 'heute') {
+    return 'Türchen ' + nummer + ', heute verfügbar. Öffnen.';
+  }
+
+  if (zustand === 'verfuegbar') {
+    return 'Türchen ' + nummer + ', verfügbar. Öffnen.';
+  }
+
+  if (darfWiederholtGeoeffnetWerden(nummer)) {
+    return 'Türchen ' + nummer + ', bereits geöffnet. Erneut öffnen.';
+  }
+
+  return 'Türchen ' + nummer + ', bereits geöffnet.';
+}
+
+function aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage) {
+  karte.setAttribute('aria-label', ariaLabelFuerTuerchen(nummer, zustand, apiTage));
+
+  if (zustand === 'geoeffnet' && !darfWiederholtGeoeffnetWerden(nummer)) {
+    karte.setAttribute('aria-disabled', 'true');
+  } else {
+    karte.removeAttribute('aria-disabled');
+  }
+}
+
+function anzahlSichtbareKalenderSpalten(grid) {
+  const karten = Array.from(grid.querySelectorAll('.tuerchen-karte'));
+
+  if (karten.length < 2) {
+    return 1;
+  }
+
+  const ersteZeile = Math.round(karten[0].getBoundingClientRect().top);
+  const spalten = karten.filter(function(karte) {
+    return Math.abs(Math.round(karte.getBoundingClientRect().top) - ersteZeile) <= 1;
+  }).length;
+
+  return Math.max(spalten, 1);
+}
+
+function fokussiereBenachbartesTuerchen(event, karte, grid) {
+  const richtung = {
+    ArrowLeft: -1,
+    ArrowRight: 1,
+    ArrowUp: -anzahlSichtbareKalenderSpalten(grid),
+    ArrowDown: anzahlSichtbareKalenderSpalten(grid)
+  }[event.key];
+
+  if (!richtung) {
+    return;
+  }
+
+  const karten = Array.from(grid.querySelectorAll('.tuerchen-karte'));
+  const index = karten.indexOf(karte);
+  const zielIndex = index + richtung;
+
+  event.preventDefault();
+
+  if (zielIndex >= 0 && zielIndex < karten.length) {
+    karten[zielIndex].focus();
+  }
+}
+
+function fokussiereErstesTuerchen(grid) {
+  const ersteKarte = grid ? grid.querySelector('.tuerchen-karte') : null;
+
+  if (ersteKarte) {
+    ersteKarte.focus();
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * Bestimmt den Zustand eines Tuerchens.
  * @param {number} nummer
@@ -304,11 +383,15 @@ function kalenderGridAufbauen(apiTage) {
     const spalte = document.createElement('div');
     spalte.className = 'col-4 col-sm-3 col-md-2';
 
-    const karte = document.createElement('div');
+    const karte = document.createElement('button');
     const farbeIndex = ((nummer - 1) % 7) + 1;
+    karte.type = 'button';
     karte.className = 'tuerchen-karte tuerchen-farbe-' + farbeIndex + ' ' + zustand;
     karte.setAttribute('data-nummer', nummer);
-    karte.setAttribute('aria-label', 'Tuerchen ' + nummer);
+    aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage);
+    karte.addEventListener('keydown', function(event) {
+      fokussiereBenachbartesTuerchen(event, karte, grid);
+    });
 
     karte.innerHTML = `
       <div class="geschenk-icon">${geschenkIconHTML(nummer)}</div>
@@ -317,7 +400,7 @@ function kalenderGridAufbauen(apiTage) {
 
     if (zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer))) {
       karte.addEventListener('click', function() {
-        if (geschenkAnimationLaeuft) return;
+        if (geschenkAnimationLaeuft || (karte.classList.contains('geoeffnet') && !darfWiederholtGeoeffnetWerden(nummer))) return;
 
         karte.style.transform = 'scale(0.95)';
 
@@ -358,6 +441,7 @@ function tuercheoeffnen(nummer, karte) {
       karte.classList.remove('verfuegbar', 'heute', 'gesperrt');
       karte.classList.add('geoeffnet');
       karte.querySelector('.tuerchen-label').textContent = '\u2713';
+      aktualisiereTuerchenBarrierefreiheit(karte, nummer, 'geoeffnet');
 
       inhaltAnzeigen(nummer);
     })
@@ -373,6 +457,10 @@ function tuercheoeffnen(nummer, karte) {
  * @returns {Promise<void>}
  */
 function starteGeschenkRevealAnimation(karte) {
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    return Promise.resolve();
+  }
+
   return new Promise(function(resolve) {
     var ikonEl = karte ? karte.querySelector('.geschenk-icon') : null;
     var startRect = ikonEl ? ikonEl.getBoundingClientRect() : null;
@@ -511,7 +599,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   const grid = document.getElementById('kalender-grid');
+  const kalender = document.getElementById('kalender');
+  const sprunglink = document.querySelector('.sprunglink');
   grid.innerHTML = '<p class="kalender-laden text-center text-muted py-5">Kalender wird geladen\u2026</p>';
+
+  if (sprunglink) {
+    sprunglink.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      if (kalender) {
+        kalender.scrollIntoView();
+      }
+
+      if (fokussiereErstesTuerchen(grid)) {
+        return;
+      }
+
+      const observer = new MutationObserver(function() {
+        if (fokussiereErstesTuerchen(grid)) {
+          observer.disconnect();
+        }
+      });
+      observer.observe(grid, { childList: true });
+      setTimeout(function() {
+        observer.disconnect();
+      }, 5000);
+    });
+  }
 
   window.AdventskalenderApi.ladeTage()
     .then(function(tage) {

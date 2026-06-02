@@ -52,7 +52,7 @@
     refreshButton.disabled = laedt;
     refreshButton.innerHTML = laedt
       ? '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Laden...'
-      : '<i class="bi bi-arrow-clockwise"></i> Aktualisieren';
+      : '<i class="bi bi-arrow-clockwise" aria-hidden="true"></i> Aktualisieren';
   }
 
   function formatiereStartDatum(datumWert) {
@@ -136,8 +136,8 @@
     elemente.form.classList.toggle('d-none', !sichtbar);
     elemente.createToggleButton.setAttribute('aria-expanded', String(sichtbar));
     elemente.createToggleButton.innerHTML = sichtbar
-      ? '<i class="bi bi-x-lg"></i> Formular schliessen'
-      : '<i class="bi bi-plus-lg"></i> Jahr erstellen';
+      ? '<i class="bi bi-x-lg" aria-hidden="true"></i> Formular schliessen'
+      : '<i class="bi bi-plus-lg" aria-hidden="true"></i> Jahr erstellen';
 
     if (sichtbar && elemente.yearFeld) {
       aktualisiereYearFormValiditaet();

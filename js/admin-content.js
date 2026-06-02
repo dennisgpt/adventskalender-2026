@@ -467,8 +467,8 @@
     elemente.form.classList.toggle('d-none', !sichtbar);
     elemente.createButton.setAttribute('aria-expanded', String(sichtbar));
     elemente.createButton.innerHTML = sichtbar
-      ? '<i class="bi bi-x-lg"></i> Formular schließen'
-      : '<i class="bi bi-plus-lg"></i> Content erstellen';
+      ? '<i class="bi bi-x-lg" aria-hidden="true"></i> Formular schließen'
+      : '<i class="bi bi-plus-lg" aria-hidden="true"></i> Content erstellen';
 
     if (sichtbar && elemente.typeFeld) {
       aktualisiereContentFormValiditaet();
