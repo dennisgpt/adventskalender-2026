@@ -11,6 +11,7 @@
   --ice-white: #f8fbff;
   --glass-border: rgba(255, 255, 255, 0.28);
   --glass-fill: rgba(11, 24, 51, 0.52);
+  --focus-ring: #ffd166;
 }
 
 body {
@@ -25,6 +26,12 @@ body {
     position: relative;
     z-index: 0;
 }
+
+:where(a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 3px solid var(--focus-ring) !important;
+  outline-offset: 3px;
+}
+
 body::before {
     content: "";
     position: fixed;
