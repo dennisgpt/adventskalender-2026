@@ -1244,7 +1244,8 @@ small span:hover {
 
 @media (prefers-reduced-motion: reduce) {
   .admin-tag-karte-pfeil,
-  .admin-tag-karte-inhalt {
+  .admin-tag-karte-inhalt,
+  .admin-tag-content-vorschau {
     transition: none;
   }
 }
@@ -1303,14 +1304,33 @@ small span:hover {
   gap: 0.36rem;
 }
 
+.admin-tag-content-vorschau-button {
+  overflow: hidden;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(3, 10, 28, 0.58);
+  cursor: zoom-in;
+}
+
+.admin-tag-content-vorschau-button:hover,
+.admin-tag-content-vorschau-button:focus-visible {
+  border-color: rgba(255, 209, 102, 0.72);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
 .admin-tag-content-vorschau {
   display: block;
   width: 112px;
   height: 72px;
-  border: 1px solid rgba(142, 201, 255, 0.24);
-  border-radius: 8px;
-  background: rgba(3, 10, 28, 0.58);
   object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.admin-tag-content-vorschau-button:hover .admin-tag-content-vorschau,
+.admin-tag-content-vorschau-button:focus-visible .admin-tag-content-vorschau {
+  transform: scale(1.06);
 }
 
 .admin-tag-content-badge {

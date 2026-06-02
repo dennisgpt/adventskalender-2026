@@ -166,13 +166,39 @@
     }
 
     return `
-      <img
-        class="admin-tag-content-vorschau"
-        src="${mediaUrl}"
-        alt="Vorschau von Bild #${inhalt.id}"
-        loading="lazy"
+      <button
+        class="admin-tag-content-vorschau-button"
+        type="button"
+        data-admin-tag-image-preview="${mediaUrl}"
+        data-admin-tag-image-preview-id="${inhalt.id}"
+        aria-label="Bild #${inhalt.id} vergrößern"
       >
+        <img
+          class="admin-tag-content-vorschau"
+          src="${mediaUrl}"
+          alt="Vorschau von Bild #${inhalt.id}"
+          loading="lazy"
+        >
+      </button>
     `;
+  }
+
+  function zeigeContentBildVorschauGross(mediaUrl, contentId) {
+    const modal = document.getElementById('admin-content-upload-preview-modal');
+    const modalTitel = document.getElementById('admin-content-upload-preview-modal-titel');
+    const modalBild = document.getElementById('admin-content-upload-preview-modal-bild');
+
+    if (!mediaUrl || !modal || !modalBild || !window.bootstrap) {
+      return;
+    }
+
+    if (modalTitel) {
+      modalTitel.textContent = `Bild #${contentId}`;
+    }
+
+    modalBild.src = mediaUrl;
+    modalBild.alt = `Vergrößerte Vorschau von Bild #${contentId}`;
+    window.bootstrap.Modal.getOrCreateInstance(modal).show();
   }
 
   function renderContentBadges(inhalte) {
@@ -755,6 +781,15 @@
       button.addEventListener('click', function() {
         const contentId = button.getAttribute('data-admin-tag-remove-content');
         entferneZugewiesenenContent(tag, contentId, button);
+      });
+    });
+
+    karte.querySelectorAll('[data-admin-tag-image-preview]').forEach(function(button) {
+      button.addEventListener('click', function() {
+        zeigeContentBildVorschauGross(
+          button.getAttribute('data-admin-tag-image-preview'),
+          button.getAttribute('data-admin-tag-image-preview-id')
+        );
       });
     });
 
