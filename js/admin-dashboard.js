@@ -614,70 +614,99 @@
     const unlockInputId = `admin-tag-${tag.id}-unlock-date`;
     const randomInputId = `admin-tag-${tag.id}-randomized`;
     const einstellungenId = `admin-tag-${tag.id}-einstellungen`;
+    const inhaltId = `admin-tag-${tag.id}-inhalt`;
     karte.className = 'admin-tag-karte';
     karte.setAttribute('data-day-id', tag.id);
 
     karte.innerHTML = `
       <div class="admin-tag-karte-kopf">
-        <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
-        <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}" data-admin-tag-random-badge>
-          ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
-        </span>
-      </div>
-      <dl class="admin-tag-details">
-        <div>
-          <dt>Freischaltung</dt>
-          <dd data-admin-tag-unlock-display>${formatiereAdminDatum(tag.unlock_date)}</dd>
-        </div>
-        <div>
-          <dt>Inhalte</dt>
-          <dd>${inhalte.length}</dd>
-        </div>
-      </dl>
-      <div class="admin-tag-content">
-        <span class="admin-tag-content-label">Zugewiesen</span>
-        ${renderContentBadges(inhalte)}
-      </div>
-      <button
-        class="admin-tag-edit-btn"
-        type="button"
-        data-admin-tag-edit
-        aria-expanded="false"
-        aria-controls="${einstellungenId}"
-      >
-        <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
-      </button>
-      <button class="admin-tag-assign-btn" type="button" data-admin-tag-assign>
-        <i class="bi bi-plus-square" aria-hidden="true"></i> Content zuweisen
-      </button>
-      <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
-        <label class="admin-tag-feld" for="${unlockInputId}">
-          <span>Freischaltung bearbeiten</span>
-          <input
-            id="${unlockInputId}"
-            name="unlock_date"
-            type="datetime-local"
-            value="${formatiereAdminDatumInput(tag.unlock_date)}"
-          >
-        </label>
-        <label class="admin-tag-toggle" for="${randomInputId}">
-          <input
-            id="${randomInputId}"
-            name="is_randomized"
-            type="checkbox"
-            ${tag.is_randomized ? 'checked' : ''}
-          >
-          <span>Content zufällig ausspielen</span>
-        </label>
-        <button class="admin-tag-save-btn" type="button" data-admin-tag-save disabled>
-          Speichern
+        <button
+          class="admin-tag-karte-toggle"
+          type="button"
+          data-admin-tag-collapse
+          aria-expanded="false"
+          aria-controls="${inhaltId}"
+        >
+          <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
+          <span class="admin-tag-karte-toggle-rechts">
+            <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}" data-admin-tag-random-badge>
+              ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
+            </span>
+            <i class="bi bi-chevron-down admin-tag-karte-pfeil" aria-hidden="true"></i>
+          </span>
         </button>
-        <p class="admin-tag-form-status" data-admin-tag-form-status aria-live="polite"></p>
-      </form>
+      </div>
+      <div class="admin-tag-karte-inhalt" id="${inhaltId}" data-admin-tag-content aria-hidden="true" inert>
+        <div class="admin-tag-karte-inhalt-inner">
+          <dl class="admin-tag-details">
+            <div>
+              <dt>Freischaltung</dt>
+              <dd data-admin-tag-unlock-display>${formatiereAdminDatum(tag.unlock_date)}</dd>
+            </div>
+            <div>
+              <dt>Inhalte</dt>
+              <dd>${inhalte.length}</dd>
+            </div>
+          </dl>
+          <div class="admin-tag-content">
+            <span class="admin-tag-content-label">Zugewiesen</span>
+            ${renderContentBadges(inhalte)}
+          </div>
+          <button
+            class="admin-tag-edit-btn"
+            type="button"
+            data-admin-tag-edit
+            aria-expanded="false"
+            aria-controls="${einstellungenId}"
+          >
+            <i class="bi bi-pencil-square" aria-hidden="true"></i> Bearbeiten
+          </button>
+          <button class="admin-tag-assign-btn" type="button" data-admin-tag-assign>
+            <i class="bi bi-plus-square" aria-hidden="true"></i> Content zuweisen
+          </button>
+          <form class="admin-tag-einstellungen d-none" id="${einstellungenId}" data-admin-tag-form>
+            <label class="admin-tag-feld" for="${unlockInputId}">
+              <span>Freischaltung bearbeiten</span>
+              <input
+                id="${unlockInputId}"
+                name="unlock_date"
+                type="datetime-local"
+                value="${formatiereAdminDatumInput(tag.unlock_date)}"
+              >
+            </label>
+            <label class="admin-tag-toggle" for="${randomInputId}">
+              <input
+                id="${randomInputId}"
+                name="is_randomized"
+                type="checkbox"
+                ${tag.is_randomized ? 'checked' : ''}
+              >
+              <span>Content zufällig ausspielen</span>
+            </label>
+            <button class="admin-tag-save-btn" type="button" data-admin-tag-save disabled>
+              Speichern
+            </button>
+            <p class="admin-tag-form-status" data-admin-tag-form-status aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
     `;
 
     initialisiereAdminTagForm(karte, tag);
+    const einklappenButton = karte.querySelector('[data-admin-tag-collapse]');
+    const inhalt = karte.querySelector('[data-admin-tag-content]');
     const zuweisenButton = karte.querySelector('[data-admin-tag-assign]');
+
+    if (einklappenButton && inhalt) {
+      einklappenButton.addEventListener('click', function() {
+        const wirdGeoeffnet = !karte.classList.contains('ist-aufgeklappt');
+
+        karte.classList.toggle('ist-aufgeklappt', wirdGeoeffnet);
+        einklappenButton.setAttribute('aria-expanded', String(wirdGeoeffnet));
+        inhalt.setAttribute('aria-hidden', String(!wirdGeoeffnet));
+        inhalt.toggleAttribute('inert', !wirdGeoeffnet);
+      });
+    }
 
     if (zuweisenButton) {
       zuweisenButton.addEventListener('click', function() {
