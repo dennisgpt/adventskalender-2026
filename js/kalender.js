@@ -197,6 +197,17 @@ function fokussiereBenachbartesTuerchen(event, karte, grid) {
   }
 }
 
+function fokussiereErstesTuerchen(grid) {
+  const ersteKarte = grid ? grid.querySelector('.tuerchen-karte') : null;
+
+  if (ersteKarte) {
+    ersteKarte.focus();
+    return true;
+  }
+
+  return false;
+}
+
 /**
  * Bestimmt den Zustand eines Tuerchens.
  * @param {number} nummer
@@ -588,7 +599,33 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   const grid = document.getElementById('kalender-grid');
+  const kalender = document.getElementById('kalender');
+  const sprunglink = document.querySelector('.sprunglink');
   grid.innerHTML = '<p class="kalender-laden text-center text-muted py-5">Kalender wird geladen\u2026</p>';
+
+  if (sprunglink) {
+    sprunglink.addEventListener('click', function(event) {
+      event.preventDefault();
+
+      if (kalender) {
+        kalender.scrollIntoView();
+      }
+
+      if (fokussiereErstesTuerchen(grid)) {
+        return;
+      }
+
+      const observer = new MutationObserver(function() {
+        if (fokussiereErstesTuerchen(grid)) {
+          observer.disconnect();
+        }
+      });
+      observer.observe(grid, { childList: true });
+      setTimeout(function() {
+        observer.disconnect();
+      }, 5000);
+    });
+  }
 
   window.AdventskalenderApi.ladeTage()
     .then(function(tage) {
