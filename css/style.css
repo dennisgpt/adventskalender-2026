@@ -2102,6 +2102,60 @@ small span:hover {
   box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.16);
 }
 
+.ak-spiel-richtung {
+  transition: border-color 0.14s ease, background 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease;
+}
+
+.ak-spiel-richtung.ist-aktiv {
+  border-color: rgba(255, 220, 112, 0.96) !important;
+  background: rgba(255, 209, 102, 0.34) !important;
+  box-shadow: 0 0 0 4px rgba(255, 209, 102, 0.18), 0 0 22px rgba(255, 209, 102, 0.56);
+  transform: scale(1.08);
+}
+
+.ak-hut-auswahl {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.ak-hut-auswahl-btn {
+  position: absolute;
+  top: 55%;
+  width: 100px;
+  height: 100px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: transparent;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.ak-hut-auswahl-btn:nth-child(1) {
+  left: 25%;
+}
+
+.ak-hut-auswahl-btn:nth-child(2) {
+  left: 50%;
+}
+
+.ak-hut-auswahl-btn:nth-child(3) {
+  left: 75%;
+}
+
+.ak-hut-auswahl-btn.ist-sichtbar {
+  opacity: 1;
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+.ak-hut-auswahl-btn.ist-sichtbar:hover,
+.ak-hut-auswahl-btn.ist-sichtbar:focus-visible {
+  border-color: rgba(255, 209, 102, 0.88);
+  background: rgba(255, 209, 102, 0.1);
+}
+
 .quiz-feedback::before {
   display: grid;
   place-items: center;

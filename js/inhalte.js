@@ -248,13 +248,15 @@ function inhaltRendern(data) {
     case 'game': {
       const istSchneeball = data.spielId === 'tuerchen7-schneeball';
       return `
-        <div id="ak-spiel-wrapper" style="
+        <div id="ak-spiel-wrapper" role="group" aria-describedby="ak-spiel-status" tabindex="-1" style="
           position: relative; width: 100%;
           border-radius: 12px; overflow: hidden;
           background: #0a1628;
           user-select: none; touch-action: none;
         ">
-          <canvas id="ak-spiel-canvas" style="display: block; width: 100%; height: 420px;"></canvas>
+          <canvas id="ak-spiel-canvas" aria-hidden="true" style="display: block; width: 100%; height: 420px;"></canvas>
+
+          <p class="visually-hidden" id="ak-spiel-status" role="status" aria-live="polite" aria-atomic="true"></p>
 
           ${istSchneeball ? `
           <div style="position: absolute; top: 12px; left: 0; right: 0;
@@ -268,18 +270,24 @@ function inhaltRendern(data) {
           </div>
           <div style="position: absolute; bottom: 14px; left: 0; right: 0;
             display: flex; justify-content: space-between; padding: 0 18px; pointer-events: none;">
-            <button id="ak-btn-links" style="pointer-events: all;
+            <span id="ak-btn-links" class="ak-spiel-richtung" aria-hidden="true" style="pointer-events: all;
               background: rgba(0,0,0,0.5); color: #fff;
               border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
-              backdrop-filter: blur(4px);">\u25c4</button>
-            <button id="ak-btn-rechts" style="pointer-events: all;
+              width: 54px; height: 54px; display: grid; place-items: center;
+              font-size: 1.4rem; cursor: pointer; backdrop-filter: blur(4px);">\u25c4</span>
+            <span id="ak-btn-rechts" class="ak-spiel-richtung" aria-hidden="true" style="pointer-events: all;
               background: rgba(0,0,0,0.5); color: #fff;
               border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
-              width: 54px; height: 54px; font-size: 1.4rem; cursor: pointer;
-              backdrop-filter: blur(4px);">\u25ba</button>
+              width: 54px; height: 54px; display: grid; place-items: center;
+              font-size: 1.4rem; cursor: pointer; backdrop-filter: blur(4px);">\u25ba</span>
           </div>
-          ` : ''}
+          ` : `
+          <div class="ak-hut-auswahl" role="group" aria-label="Hut auswählen">
+            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="0" aria-label="Linken Hut auswählen" disabled></button>
+            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="1" aria-label="Mittleren Hut auswählen" disabled></button>
+            <button class="ak-hut-auswahl-btn" type="button" data-ak-hut-position="2" aria-label="Rechten Hut auswählen" disabled></button>
+          </div>
+          `}
 
           <div id="ak-spiel-overlay" style="display: none; position: absolute; inset: 0;
             background: rgba(5,12,35,0.82); backdrop-filter: blur(6px);
@@ -684,6 +692,7 @@ function starteSpiel(spielId) {
 
 function starteSchneeball() {
   const canvas = document.getElementById('ak-spiel-canvas');
+  const spielWrapper = document.getElementById('ak-spiel-wrapper');
   if (!canvas) return;
 
   const ctx = canvas.getContext('2d');
@@ -895,8 +904,27 @@ function starteSchneeball() {
   function aktualisiereHUD() {
     const elP = document.getElementById('ak-hud-punkte');
     const elK = document.getElementById('ak-hud-kohle');
+    const status = document.getElementById('ak-spiel-status');
     if (elP) elP.textContent = '⚪ ' + z.punkte + ' / 8';
     if (elK) elK.textContent = '🪨 ' + z.kohle + ' / 3';
+    if (status) status.textContent = z.punkte + ' von 8 Überraschungen und ' + z.kohle + ' von 3 Kohlen gefangen.';
+  }
+
+  function setzeRichtungAktiv(richtung, aktiv) {
+    const button = document.getElementById(richtung === 'links' ? 'ak-btn-links' : 'ak-btn-rechts');
+    sp[richtung] = aktiv;
+    if (button) button.classList.toggle('ist-aktiv', aktiv);
+  }
+
+  function stoppeBewegung() {
+    setzeRichtungAktiv('links', false);
+    setzeRichtungAktiv('rechts', false);
+  }
+
+  function fokussiereSpiel() {
+    if (spielWrapper && typeof spielWrapper.focus === 'function') {
+      spielWrapper.focus();
+    }
   }
 
   function trifftKorb(o) {
@@ -906,13 +934,16 @@ function starteSchneeball() {
 
   function zeigeOverlay(gewonnen) {
     const overlay = document.getElementById('ak-spiel-overlay');
+    const btnNeustart = document.getElementById('ak-btn-neustart');
     if (!overlay) return;
+    stoppeBewegung();
     overlay.style.display = 'flex';
     overlay.querySelector('.ak-overlay-titel').textContent =
       gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
     overlay.querySelector('.ak-overlay-text').textContent = gewonnen
       ? 'Du hast 8 \u00dcberraschungen gefangen!'
       : 'Zu viel Kohle erwischt \u2013 das war nichts!';
+    if (btnNeustart) btnNeustart.focus();
   }
 
   function schritt(ts) {
@@ -977,12 +1008,30 @@ function starteSchneeball() {
 
   // Tastatur
   function onKeyDown(e) {
-    if (e.key === 'ArrowLeft')  sp.links  = true;
-    if (e.key === 'ArrowRight') sp.rechts = true;
+    if (!z.laeuft) return;
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      fokussiereSpiel();
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setzeRichtungAktiv('links', true);
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setzeRichtungAktiv('rechts', true);
+    }
   }
   function onKeyUp(e) {
-    if (e.key === 'ArrowLeft')  sp.links  = false;
-    if (e.key === 'ArrowRight') sp.rechts = false;
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      setzeRichtungAktiv('links', false);
+    }
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      setzeRichtungAktiv('rechts', false);
+    }
   }
   document.addEventListener('keydown', onKeyDown);
   document.addEventListener('keyup',   onKeyUp);
@@ -991,9 +1040,10 @@ function starteSchneeball() {
   function bindBtn(id, richtung) {
     const btn = document.getElementById(id);
     if (!btn) return;
-    btn.addEventListener('pointerdown',  function() { sp[richtung] = true;  });
-    btn.addEventListener('pointerup',    function() { sp[richtung] = false; });
-    btn.addEventListener('pointerleave', function() { sp[richtung] = false; });
+    btn.addEventListener('pointerdown',  function() { setzeRichtungAktiv(richtung, true);  });
+    btn.addEventListener('pointerup',    function() { setzeRichtungAktiv(richtung, false); });
+    btn.addEventListener('pointerleave', function() { setzeRichtungAktiv(richtung, false); });
+    btn.addEventListener('pointercancel', function() { setzeRichtungAktiv(richtung, false); });
   }
   bindBtn('ak-btn-links',  'links');
   bindBtn('ak-btn-rechts', 'rechts');
@@ -1007,23 +1057,31 @@ function starteSchneeball() {
       z.kohle  = 0;
       objekte.length = 0;
       sp.x = breite / 2;
+      stoppeBewegung();
       letzterSpawn = 0;
       const overlay = document.getElementById('ak-spiel-overlay');
       if (overlay) overlay.style.display = 'none';
       aktualisiereHUD();
+      fokussiereSpiel();
       z.frameId = requestAnimationFrame(schritt);
     });
   }
 
   aktualisiereHUD();
+  const status = document.getElementById('ak-spiel-status');
+  if (status) status.textContent = 'Schneeball-Fangspiel gestartet. Steuere den Korb mit der linken und rechten Pfeiltaste. Drücke Escape, um das Spiel zu schließen.';
+  fokussiereSpiel();
   z.frameId = requestAnimationFrame(schritt);
+  window.addEventListener('blur', stoppeBewegung);
 
   aktivesSpiel = {
     stop: function() {
       z.laeuft = false;
+      stoppeBewegung();
       if (z.frameId) cancelAnimationFrame(z.frameId);
       document.removeEventListener('keydown', onKeyDown);
       document.removeEventListener('keyup',   onKeyUp);
+      window.removeEventListener('blur', stoppeBewegung);
     }
   };
 
@@ -1048,16 +1106,33 @@ function starteHuetchenspiel() {
   const hutX = [breite * 0.25, breite * 0.5, breite * 0.75];
   const hutY = hoehe * 0.55;
   const huts = hutX.map((x, i) => ({ x, y: hutY, vi: i }));
+  const auswahlButtons = Array.from(document.querySelectorAll('[data-ak-hut-position]'));
+
+  function setzeSpielStatus(text) {
+    const status = document.getElementById('ak-spiel-status');
+    if (status) status.textContent = text;
+  }
+
+  function setzeHutAuswahlAktiv(aktiviert) {
+    auswahlButtons.forEach(function(button) {
+      button.disabled = !aktiviert;
+      button.classList.toggle('ist-sichtbar', aktiviert);
+    });
+  }
 
   function zeigeOverlay(gewonnen) {
     const overlay = document.getElementById('ak-spiel-overlay');
+    const btnNeustart = document.getElementById('ak-btn-neustart');
     if (!overlay) return;
+    setzeHutAuswahlAktiv(false);
     overlay.style.display = 'flex';
     overlay.querySelector('.ak-overlay-titel').textContent =
       gewonnen ? '🎉 Gewonnen!' : '💨 Verloren!';
     overlay.querySelector('.ak-overlay-text').textContent = gewonnen
       ? 'Du hast das Geschenk gefunden!'
       : 'Das Geschenk war woanders!';
+    setzeSpielStatus(gewonnen ? 'Gewonnen. Du hast das Geschenk gefunden.' : 'Verloren. Das Geschenk war woanders.');
+    if (btnNeustart) btnNeustart.focus();
   }
 
   function zeichneHintergrund() {
@@ -1216,6 +1291,8 @@ function starteHuetchenspiel() {
   // Zeige-Phase: Geschenk enthüllen
   function zeigePhase() {
     phase = 'zeige';
+    setzeHutAuswahlAktiv(false);
+    setzeSpielStatus('Merke dir den Hut mit dem Geschenk.');
     const vi = positionen.indexOf(geschenkIdx);
     render(vi);
     setTimeout(() => {
@@ -1242,6 +1319,9 @@ function starteHuetchenspiel() {
         phase = 'rate';
         render(-1);
         canvas.style.cursor = 'pointer';
+        setzeHutAuswahlAktiv(true);
+        setzeSpielStatus('Wo ist das Geschenk? Wähle den linken, mittleren oder rechten Hut aus.');
+        if (auswahlButtons[0]) auswahlButtons[0].focus();
         return;
       }
       let vi1 = Math.floor(Math.random() * 3);
@@ -1275,6 +1355,20 @@ function starteHuetchenspiel() {
     naechsterTausch();
   }
 
+  function werteHutAus(vi) {
+    if (phase !== 'rate') return;
+    setzeHutAuswahlAktiv(false);
+    canvas.style.cursor = 'default';
+    phase = 'ergebnis';
+    const logIdx = positionen[vi];
+    const gewonnen = logIdx === geschenkIdx;
+    render(-1);
+    setTimeout(() => {
+      if (!aktiv) return;
+      zeigeOverlay(gewonnen);
+    }, 600);
+  }
+
   // Klick-Handler
   function onKlick(e) {
     if (phase !== 'rate') return;
@@ -1286,21 +1380,24 @@ function starteHuetchenspiel() {
       const hx = huts[vi].x;
       const hy = huts[vi].y;
       if (Math.abs(mx - hx) < 50 && my > hy - 20 && my < hy + 65) {
-        canvas.style.cursor = 'default';
-        phase = 'ergebnis';
-        const logIdx = positionen[vi];
-        const gewonnen = logIdx === geschenkIdx;
-        render(-1);
-        setTimeout(() => {
-          if (!aktiv) return;
-          zeigeOverlay(gewonnen);
-        }, 600);
+        werteHutAus(vi);
         break;
       }
     }
   }
 
   canvas.addEventListener('click', onKlick);
+  auswahlButtons.forEach(function(button) {
+    button.addEventListener('click', function() {
+      const position = Number.parseInt(button.getAttribute('data-ak-hut-position'), 10);
+      const vi = huts.reduce(function(besterIndex, hut, index) {
+        return Math.abs(hut.x - hutX[position]) < Math.abs(huts[besterIndex].x - hutX[position])
+          ? index
+          : besterIndex;
+      }, 0);
+      werteHutAus(vi);
+    });
+  });
 
   // Neustart-Button
   const btnNeustart = document.getElementById('ak-btn-neustart');
