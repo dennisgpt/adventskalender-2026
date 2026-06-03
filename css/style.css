@@ -709,6 +709,8 @@ small span:hover {
 .admin-year-card-actions {
   display: flex;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   margin-top: 0.95rem;
 }
 

@@ -336,6 +336,26 @@
     });
   }
 
+  // DELETE /api/admin/years/:id
+  // Loescht ein Kalenderjahr. Einige Backends erwarten statt der ID die Jahreszahl,
+  // deshalb probieren wir bei 404 genau diesen Fallback.
+  function loescheAdminJahr(jahr) {
+    const id = jahr && typeof jahr === 'object' ? jahr.id : jahr;
+    const jahrZahl = jahr && typeof jahr === 'object' ? jahr.year : null;
+
+    return adminFetch(`/api/admin/years/${encodeURIComponent(id)}`, {
+      method: 'DELETE'
+    }).catch(function(error) {
+      if (!jahrZahl || error.status !== 404 || String(jahrZahl) === String(id)) {
+        throw error;
+      }
+
+      return adminFetch(`/api/admin/years/${encodeURIComponent(jahrZahl)}`, {
+        method: 'DELETE'
+      });
+    });
+  }
+
   // GET /api/health
   // Erfolgsantwort: Backend-Health-Status
   function getHealth() {
@@ -408,6 +428,7 @@
     ladeAdminJahre,
     erstelleAdminJahr,
     aktualisiereAdminJahr,
+    loescheAdminJahr,
     getHealth,
     ladeAktuellesJahr,
     ladeTage,

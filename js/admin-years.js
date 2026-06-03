@@ -1,6 +1,9 @@
 (function(window, document) {
   'use strict';
 
+  let zuLoeschendesJahr = null;
+  let zuLoeschenderYearButton = null;
+
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
   }
@@ -21,7 +24,10 @@
       currentFeld: document.getElementById('admin-year-current'),
       cancelButton: document.getElementById('admin-year-cancel'),
       submitButton: document.getElementById('admin-year-submit'),
-      formStatus: document.getElementById('admin-year-form-status')
+      formStatus: document.getElementById('admin-year-form-status'),
+      deleteModal: document.getElementById('admin-year-delete-modal'),
+      deleteModalText: document.getElementById('admin-year-delete-modal-text'),
+      deleteConfirmButton: document.getElementById('admin-year-delete-confirm')
     };
   }
 
@@ -169,7 +175,7 @@
     return window.AdventskalenderApi.fehlertextFuerApiFehler(error, fallback);
   }
 
-  function setzeYearButtonLaedt(button, laedt) {
+  function setzeYearButtonLaedt(button, laedt, ladeText) {
     if (!button) {
       return;
     }
@@ -180,7 +186,24 @@
 
     button.disabled = laedt;
     button.innerHTML = laedt
-      ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Setzen...'
+      ? `<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>${ladeText || 'Setzen...'}`
+      : button.dataset.originalHtml;
+  }
+
+  function setzeYearDeleteConfirmLaedt(laedt) {
+    const button = yearsElemente().deleteConfirmButton;
+
+    if (!button) {
+      return;
+    }
+
+    if (!button.dataset.originalHtml) {
+      button.dataset.originalHtml = button.innerHTML;
+    }
+
+    button.disabled = laedt;
+    button.innerHTML = laedt
+      ? '<span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>Löschen...'
       : button.dataset.originalHtml;
   }
 
@@ -202,6 +225,54 @@
           fehlertextFuerYearAktion(
             error,
             'Kalenderjahr konnte nicht als aktuell gesetzt werden.'
+          ),
+          'fehler'
+        );
+      });
+  }
+
+  function oeffneYearLoeschDialog(jahr, button) {
+    const elemente = yearsElemente();
+
+    zuLoeschendesJahr = jahr;
+    zuLoeschenderYearButton = button;
+
+    if (elemente.deleteModalText) {
+      elemente.deleteModalText.textContent = `Soll das Kalenderjahr ${jahr.year} wirklich gelöscht werden?`;
+    }
+
+    if (elemente.deleteModal && window.bootstrap) {
+      window.bootstrap.Modal.getOrCreateInstance(elemente.deleteModal).show();
+    }
+  }
+
+  function loescheAdminJahr(jahr, button) {
+    if (!jahr || !jahr.id || !window.AdventskalenderApi.loescheAdminJahr) {
+      zeigeYearsToast('Kalenderjahr kann nicht gelöscht werden, weil der API-Endpunkt fehlt.', 'fehler');
+      return;
+    }
+
+    setzeYearDeleteConfirmLaedt(true);
+    setzeYearButtonLaedt(button, true, 'Löschen...');
+
+    window.AdventskalenderApi.loescheAdminJahr(jahr)
+      .then(function() {
+        const elemente = yearsElemente();
+
+        if (elemente.deleteModal && window.bootstrap) {
+          window.bootstrap.Modal.getOrCreateInstance(elemente.deleteModal).hide();
+        }
+
+        zeigeYearsToast('Kalenderjahr wurde gelöscht.', 'erfolg');
+        return ladeAdminJahresliste();
+      })
+      .catch(function(error) {
+        setzeYearDeleteConfirmLaedt(false);
+        setzeYearButtonLaedt(button, false);
+        zeigeYearsToast(
+          window.AdventskalenderApi.fehlertextFuerApiFehler(
+            error,
+            'Kalenderjahr konnte nicht gelöscht werden.'
           ),
           'fehler'
         );
@@ -231,21 +302,30 @@
           <dd>${formatiereStartDatum(jahr.start_date)}</dd>
         </div>
       </dl>
-      ${jahr.is_current ? '' : `
-        <div class="admin-year-card-actions">
-          <button class="admin-content-action-btn" type="button" data-admin-year-current>
-            <i class="bi bi-check-circle" aria-hidden="true"></i>
-            Als aktuell setzen
-          </button>
-        </div>
-      `}
+      <div class="admin-year-card-actions">
+        <button class="admin-content-action-btn" type="button" data-admin-year-current>
+          <i class="bi bi-check-circle" aria-hidden="true"></i>
+          Als aktuell setzen
+        </button>
+        <button class="admin-content-action-btn ist-warnung" type="button" data-admin-year-delete>
+          <i class="bi bi-trash" aria-hidden="true"></i>
+          Löschen
+        </button>
+      </div>
     `;
 
     const currentButton = karte.querySelector('[data-admin-year-current]');
+    const deleteButton = karte.querySelector('[data-admin-year-delete]');
 
     if (currentButton) {
       currentButton.addEventListener('click', function() {
         setzeAdminJahrAktuell(jahr, currentButton);
+      });
+    }
+
+    if (deleteButton) {
+      deleteButton.addEventListener('click', function() {
+        oeffneYearLoeschDialog(jahr, deleteButton);
       });
     }
 
@@ -356,6 +436,24 @@
       elemente.cancelButton.addEventListener('click', function() {
         resetYearForm();
         setzeYearFormSichtbar(false);
+      });
+    }
+
+    if (elemente.deleteConfirmButton) {
+      elemente.deleteConfirmButton.addEventListener('click', function() {
+        if (!zuLoeschendesJahr) {
+          return;
+        }
+
+        loescheAdminJahr(zuLoeschendesJahr, zuLoeschenderYearButton);
+      });
+    }
+
+    if (elemente.deleteModal) {
+      elemente.deleteModal.addEventListener('hidden.bs.modal', function() {
+        zuLoeschendesJahr = null;
+        zuLoeschenderYearButton = null;
+        setzeYearDeleteConfirmLaedt(false);
       });
     }
 
