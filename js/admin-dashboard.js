@@ -17,7 +17,12 @@
       fehlerText: document.getElementById('admin-dashboard-fehler-text'),
       leer: document.getElementById('admin-dashboard-leer'),
       grid: document.getElementById('admin-dashboard-grid'),
-      refreshButton: document.getElementById('admin-dashboard-refresh')
+      refreshButton: document.getElementById('admin-dashboard-refresh'),
+      stats: document.getElementById('admin-dashboard-stats'),
+      statBefuellt: document.getElementById('admin-stat-befuellt'),
+      statLeer: document.getElementById('admin-stat-leer'),
+      statWarnungen: document.getElementById('admin-stat-warnungen'),
+      statAktiveInhalte: document.getElementById('admin-stat-aktive-inhalte')
     };
   }
 
@@ -53,6 +58,10 @@
     elemente.fehler.classList.toggle('d-none', status !== 'fehler');
     elemente.leer.classList.toggle('d-none', status !== 'leer');
     elemente.grid.classList.toggle('d-none', status !== 'bereit');
+
+    if (elemente.stats) {
+      elemente.stats.classList.toggle('d-none', status !== 'bereit');
+    }
 
     if (elemente.fehlerText && meldung) {
       elemente.fehlerText.textContent = meldung;
@@ -249,6 +258,54 @@
     }
 
     return '';
+  }
+
+  function setzeAdminStat(element, wert) {
+    if (element) {
+      element.textContent = String(wert);
+    }
+  }
+
+  function renderAdminKennzahlen(tage, aktiveInhalte) {
+    const elemente = dashboardElemente();
+    const tageListe = Array.isArray(tage) ? tage : [];
+    const befuellt = tageListe.filter(function(tag) {
+      return Array.isArray(tag.contents) && tag.contents.length > 0;
+    }).length;
+    const warnungen = tageListe.filter(function(tag) {
+      const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
+      return Boolean(adminTagWarnung(tag, inhalte));
+    }).length;
+
+    setzeAdminStat(elemente.statBefuellt, befuellt + ' / ' + tageListe.length);
+    setzeAdminStat(elemente.statLeer, Math.max(tageListe.length - befuellt, 0));
+    setzeAdminStat(elemente.statWarnungen, warnungen);
+    setzeAdminStat(
+      elemente.statAktiveInhalte,
+      typeof aktiveInhalte === 'number' ? aktiveInhalte : '...'
+    );
+  }
+
+  function ladeAktiveContentKennzahl(tage) {
+    const elemente = dashboardElemente();
+
+    if (!elemente.statAktiveInhalte || !window.AdventskalenderApi.ladeAdminContent) {
+      return;
+    }
+
+    window.AdventskalenderApi.ladeAdminContent()
+      .then(function(contentEintraege) {
+        const aktiveInhalte = Array.isArray(contentEintraege)
+          ? contentEintraege.filter(function(content) {
+            return content.is_active !== false;
+          }).length
+          : 0;
+
+        renderAdminKennzahlen(tage, aktiveInhalte);
+      })
+      .catch(function() {
+        setzeAdminStat(elemente.statAktiveInhalte, '-');
+      });
   }
 
   function setzeAdminTagFormGeaendert(formular, istGeaendert) {
@@ -873,7 +930,9 @@
         }
 
         renderAdminTage(tage);
+        renderAdminKennzahlen(tage);
         setzeDashboardStatus('bereit');
+        ladeAktiveContentKennzahl(tage);
         return tage;
       })
       .catch(function(error) {
