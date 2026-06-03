@@ -4,6 +4,7 @@
   let bearbeiteterContentId = null;
   let geladeneContentEintraege = [];
   let aktiverContentTypFilter = 'all';
+  let aktiverContentStatusFilter = 'all';
   let zuLoeschenderContent = null;
   let zuLoeschenderButton = null;
   let contentUploadLaeuft = false;
@@ -24,6 +25,7 @@
       grid: document.getElementById('admin-content-grid'),
       filter: document.getElementById('admin-content-filter'),
       filterFeld: document.getElementById('admin-content-type-filter'),
+      filterStatusFeld: document.getElementById('admin-content-state-filter'),
       filterStatus: document.getElementById('admin-content-filter-status'),
       createButton: document.getElementById('admin-content-create'),
       form: document.getElementById('admin-content-form'),
@@ -113,6 +115,10 @@
     return ['all', 'text', 'image', 'video', 'game', 'quiz'].includes(typ);
   }
 
+  function istBekannterContentStatusFilter(status) {
+    return ['all', 'active', 'inactive', 'with_media', 'without_media'].includes(status);
+  }
+
   function setzeContentFilterSichtbar(sichtbar) {
     const elemente = contentElemente();
 
@@ -126,20 +132,34 @@
   }
 
   function synchronisiereContentFilterFeld() {
-    const filterFeld = contentElemente().filterFeld;
+    const elemente = contentElemente();
 
-    if (filterFeld) {
-      filterFeld.value = aktiverContentTypFilter;
+    if (elemente.filterFeld) {
+      elemente.filterFeld.value = aktiverContentTypFilter;
+    }
+
+    if (elemente.filterStatusFeld) {
+      elemente.filterStatusFeld.value = aktiverContentStatusFilter;
     }
   }
 
   function contentEintraegeNachFilter() {
-    if (aktiverContentTypFilter === 'all') {
-      return geladeneContentEintraege;
-    }
-
     return geladeneContentEintraege.filter(function(content) {
-      return content.type === aktiverContentTypFilter;
+      const typPasst = aktiverContentTypFilter === 'all' || content.type === aktiverContentTypFilter;
+      const hatMedia = Boolean(content.media_url);
+      let statusPasst = true;
+
+      if (aktiverContentStatusFilter === 'active') {
+        statusPasst = content.is_active !== false;
+      } else if (aktiverContentStatusFilter === 'inactive') {
+        statusPasst = content.is_active === false;
+      } else if (aktiverContentStatusFilter === 'with_media') {
+        statusPasst = hatMedia;
+      } else if (aktiverContentStatusFilter === 'without_media') {
+        statusPasst = !hatMedia;
+      }
+
+      return typPasst && statusPasst;
     });
   }
 
@@ -148,10 +168,18 @@
     const typText = aktiverContentTypFilter === 'all'
       ? 'alle Typen'
       : contentTypLabel(aktiverContentTypFilter);
+    const statusLabels = {
+      all: 'alle Status',
+      active: 'aktive Inhalte',
+      inactive: 'inaktive Inhalte',
+      with_media: 'mit Media',
+      without_media: 'ohne Media'
+    };
+    const statusText = statusLabels[aktiverContentStatusFilter] || 'alle Status';
     const eintragText = anzahl === 1 ? 'Eintrag' : 'Einträge';
 
     if (filterStatus) {
-      filterStatus.textContent = `${anzahl} ${eintragText} für ${typText}`;
+      filterStatus.textContent = `${anzahl} ${eintragText} für ${typText}, ${statusText}`;
     }
   }
 
@@ -525,6 +553,7 @@
 
     if (filterZuruecksetzen) {
       aktiverContentTypFilter = 'all';
+      aktiverContentStatusFilter = 'all';
     }
 
     synchronisiereContentFilterFeld();
@@ -550,7 +579,7 @@
 
     if (gefilterteEintraege.length === 0) {
       setzeContentLeerFehler(true);
-      setzeAdminContentStatus('leer', 'Keine Content-Einträge für diesen Typ gefunden.');
+      setzeAdminContentStatus('leer', 'Keine Content-Einträge für diese Filter gefunden.');
       return;
     }
 
@@ -567,6 +596,12 @@
 
   function waehleContentTypFilter(typ) {
     aktiverContentTypFilter = istBekannterContentTyp(typ) ? typ : 'all';
+    synchronisiereContentFilterFeld();
+    renderGefilterteAdminContentListe();
+  }
+
+  function waehleContentStatusFilter(status) {
+    aktiverContentStatusFilter = istBekannterContentStatusFilter(status) ? status : 'all';
     synchronisiereContentFilterFeld();
     renderGefilterteAdminContentListe();
   }
@@ -1213,6 +1248,12 @@
     if (elemente.filterFeld) {
       elemente.filterFeld.addEventListener('change', function(event) {
         waehleContentTypFilter(event.target.value);
+      });
+    }
+
+    if (elemente.filterStatusFeld) {
+      elemente.filterStatusFeld.addEventListener('change', function(event) {
+        waehleContentStatusFilter(event.target.value);
       });
     }
 
