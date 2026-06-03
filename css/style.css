@@ -1058,13 +1058,18 @@ small span:hover {
 }
 
 .admin-content-body {
-  min-height: 2.6rem;
   margin: 0 0 0.82rem;
   color: #f5f8ff;
   font-size: 0.92rem;
   font-weight: 800;
+  line-height: 1.45;
+  max-height: calc(1.45em * 3);
+  display: -webkit-box;
   overflow-wrap: anywhere;
+  overflow: hidden;
   word-break: break-word;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
 }
 
 .admin-content-image-preview-button {
