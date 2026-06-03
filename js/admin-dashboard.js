@@ -249,11 +249,13 @@
     }
 
     if (unlockDatum.getMonth() !== 11) {
-      return 'Nicht Dezember';
+      return tag.is_randomized && inhalte.length < 2
+        ? 'Nicht Dezember; Zufallsmodus aktiv, aber nur 1 Inhalt'
+        : 'Nicht Dezember';
     }
 
     if (tag.is_randomized && inhalte.length < 2) {
-      return 'Zufall mit 1 Inhalt';
+      return 'Zufallsmodus aktiv, aber nur 1 Inhalt';
     }
 
     return '';
