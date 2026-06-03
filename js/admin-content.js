@@ -179,6 +179,47 @@
     return content.body;
   }
 
+  function baueContentMediaUrl(mediaUrl) {
+    if (!mediaUrl) {
+      return '';
+    }
+
+    try {
+      const url = new URL(mediaUrl, window.AdventskalenderApi.API_BASE_URL || window.location.href);
+      return url.protocol === 'http:' || url.protocol === 'https:' ? url.href : '';
+    } catch (error) {
+      return '';
+    }
+  }
+
+  function renderAdminContentBildVorschau(content) {
+    if (content.type !== 'image') {
+      return '';
+    }
+
+    const mediaUrl = baueContentMediaUrl(content.media_url);
+
+    if (!mediaUrl) {
+      return '';
+    }
+
+    return `
+      <button
+        class="admin-content-image-preview-button"
+        type="button"
+        data-admin-content-image-preview
+        aria-label="Bild #${content.id} vergrößern"
+      >
+        <img
+          class="admin-content-image-preview"
+          src="${mediaUrl}"
+          alt="Vorschau von Bild #${content.id}"
+          loading="lazy"
+        >
+      </button>
+    `;
+  }
+
   function renderAdminContentKarte(content) {
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
@@ -194,6 +235,7 @@
         </span>
       </div>
       <p class="admin-content-body">${contentBodyVorschau(content)}</p>
+      ${renderAdminContentBildVorschau(content)}
       <dl class="admin-content-details">
         <div>
           <dt>ID</dt>
@@ -227,6 +269,7 @@
     const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
     const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');
     const loeschButton = karte.querySelector('[data-admin-content-delete]');
+    const bildPreviewButton = karte.querySelector('[data-admin-content-image-preview]');
 
     if (bearbeitenButton) {
       bearbeitenButton.addEventListener('click', function() {
@@ -243,6 +286,15 @@
     if (loeschButton) {
       loeschButton.addEventListener('click', function() {
         oeffneContentLoeschDialog(content, loeschButton);
+      });
+    }
+
+    if (bildPreviewButton) {
+      bildPreviewButton.addEventListener('click', function() {
+        oeffneContentBildVorschauGross(
+          baueContentMediaUrl(content.media_url),
+          `Bild #${content.id}`
+        );
       });
     }
 
@@ -708,6 +760,23 @@
     if (elemente.fileName) {
       elemente.fileName.textContent = dateiname || 'Keine Datei ausgewählt';
     }
+  }
+
+  function oeffneContentBildVorschauGross(mediaUrl, titel) {
+    const elemente = contentElemente();
+
+    if (!mediaUrl || !elemente.uploadPreviewModal || !elemente.uploadPreviewModalBild || !window.bootstrap) {
+      return;
+    }
+
+    if (elemente.uploadPreviewModalTitel) {
+      elemente.uploadPreviewModalTitel.textContent = titel || 'Bildvorschau';
+    }
+
+    elemente.uploadPreviewModalBild.src = mediaUrl;
+    elemente.uploadPreviewModalBild.alt = titel ? `Vergroesserte Vorschau von ${titel}` : 'Vergroesserte Bildvorschau';
+
+    window.bootstrap.Modal.getOrCreateInstance(elemente.uploadPreviewModal).show();
   }
 
   function zeigeContentUploadVorschauGross() {

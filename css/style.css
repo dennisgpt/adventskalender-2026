@@ -1065,6 +1065,38 @@ small span:hover {
   word-break: break-word;
 }
 
+.admin-content-image-preview-button {
+  display: block;
+  overflow: hidden;
+  width: 112px;
+  margin: 0 0 0.82rem;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 8px;
+  padding: 0;
+  background: rgba(3, 10, 28, 0.58);
+  cursor: zoom-in;
+}
+
+.admin-content-image-preview-button:hover,
+.admin-content-image-preview-button:focus-visible {
+  border-color: rgba(255, 209, 102, 0.72);
+  outline: none;
+  box-shadow: 0 0 0 0.18rem rgba(255, 209, 102, 0.14);
+}
+
+.admin-content-image-preview {
+  display: block;
+  width: 112px;
+  height: 72px;
+  object-fit: cover;
+  transition: transform 180ms ease;
+}
+
+.admin-content-image-preview-button:hover .admin-content-image-preview,
+.admin-content-image-preview-button:focus-visible .admin-content-image-preview {
+  transform: scale(1.06);
+}
+
 .admin-content-details {
   display: grid;
   gap: 0.52rem;
@@ -1245,6 +1277,7 @@ small span:hover {
 @media (prefers-reduced-motion: reduce) {
   .admin-tag-karte-pfeil,
   .admin-tag-karte-inhalt,
+  .admin-content-image-preview,
   .admin-tag-content-vorschau {
     transition: none;
   }
