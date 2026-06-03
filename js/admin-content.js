@@ -23,6 +23,12 @@
       leer: document.getElementById('admin-content-leer'),
       leerText: document.getElementById('admin-content-leer-text'),
       grid: document.getElementById('admin-content-grid'),
+      stats: document.getElementById('admin-content-stats'),
+      statGesamt: document.getElementById('admin-content-stat-gesamt'),
+      statAktiv: document.getElementById('admin-content-stat-aktiv'),
+      statInaktiv: document.getElementById('admin-content-stat-inaktiv'),
+      statMedia: document.getElementById('admin-content-stat-media'),
+      statOhneMedia: document.getElementById('admin-content-stat-ohne-media'),
       filter: document.getElementById('admin-content-filter'),
       filterFeld: document.getElementById('admin-content-type-filter'),
       filterStatusFeld: document.getElementById('admin-content-state-filter'),
@@ -189,6 +195,33 @@
     if (leer) {
       leer.classList.toggle('admin-content-leer-fehler', istFehler);
     }
+  }
+
+  function setzeContentStat(element, wert) {
+    if (element) {
+      element.textContent = String(wert);
+    }
+  }
+
+  function renderContentKennzahlen(contentEintraege) {
+    const elemente = contentElemente();
+    const eintraege = Array.isArray(contentEintraege) ? contentEintraege : [];
+    const aktiv = eintraege.filter(function(content) {
+      return content.is_active !== false;
+    }).length;
+    const mitMedia = eintraege.filter(function(content) {
+      return Boolean(content.media_url);
+    }).length;
+
+    if (elemente.stats) {
+      elemente.stats.classList.toggle('d-none', eintraege.length === 0);
+    }
+
+    setzeContentStat(elemente.statGesamt, eintraege.length);
+    setzeContentStat(elemente.statAktiv, aktiv);
+    setzeContentStat(elemente.statInaktiv, Math.max(eintraege.length - aktiv, 0));
+    setzeContentStat(elemente.statMedia, mitMedia);
+    setzeContentStat(elemente.statOhneMedia, Math.max(eintraege.length - mitMedia, 0));
   }
 
   function contentBodyVorschau(content) {
@@ -579,6 +612,7 @@
     }
 
     synchronisiereContentFilterFeld();
+    renderContentKennzahlen(geladeneContentEintraege);
     renderAdminContentListe([]);
     setzeContentFilterSichtbar(false);
     setzeContentLeerFehler(false);
@@ -612,6 +646,7 @@
   function setzeAdminContentListe(contentEintraege) {
     geladeneContentEintraege = Array.isArray(contentEintraege) ? contentEintraege : [];
     synchronisiereContentFilterFeld();
+    renderContentKennzahlen(geladeneContentEintraege);
     renderGefilterteAdminContentListe();
     return geladeneContentEintraege;
   }

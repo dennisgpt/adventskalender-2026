@@ -21,8 +21,7 @@
       stats: document.getElementById('admin-dashboard-stats'),
       statBefuellt: document.getElementById('admin-stat-befuellt'),
       statLeer: document.getElementById('admin-stat-leer'),
-      statWarnungen: document.getElementById('admin-stat-warnungen'),
-      statAktiveInhalte: document.getElementById('admin-stat-aktive-inhalte')
+      statWarnungen: document.getElementById('admin-stat-warnungen')
     };
   }
 
@@ -266,7 +265,7 @@
     }
   }
 
-  function renderAdminKennzahlen(tage, aktiveInhalte) {
+  function renderAdminKennzahlen(tage) {
     const elemente = dashboardElemente();
     const tageListe = Array.isArray(tage) ? tage : [];
     const befuellt = tageListe.filter(function(tag) {
@@ -280,32 +279,6 @@
     setzeAdminStat(elemente.statBefuellt, befuellt + ' / ' + tageListe.length);
     setzeAdminStat(elemente.statLeer, Math.max(tageListe.length - befuellt, 0));
     setzeAdminStat(elemente.statWarnungen, warnungen);
-    setzeAdminStat(
-      elemente.statAktiveInhalte,
-      typeof aktiveInhalte === 'number' ? aktiveInhalte : '...'
-    );
-  }
-
-  function ladeAktiveContentKennzahl(tage) {
-    const elemente = dashboardElemente();
-
-    if (!elemente.statAktiveInhalte || !window.AdventskalenderApi.ladeAdminContent) {
-      return;
-    }
-
-    window.AdventskalenderApi.ladeAdminContent()
-      .then(function(contentEintraege) {
-        const aktiveInhalte = Array.isArray(contentEintraege)
-          ? contentEintraege.filter(function(content) {
-            return content.is_active !== false;
-          }).length
-          : 0;
-
-        renderAdminKennzahlen(tage, aktiveInhalte);
-      })
-      .catch(function() {
-        setzeAdminStat(elemente.statAktiveInhalte, '-');
-      });
   }
 
   function setzeAdminTagFormGeaendert(formular, istGeaendert) {
@@ -932,7 +905,6 @@
         renderAdminTage(tage);
         renderAdminKennzahlen(tage);
         setzeDashboardStatus('bereit');
-        ladeAktiveContentKennzahl(tage);
         return tage;
       })
       .catch(function(error) {
