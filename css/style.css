@@ -1170,6 +1170,12 @@ small span:hover {
   box-shadow: 0 0 0 0.16rem rgba(255, 209, 102, 0.12);
 }
 
+.admin-content-media-copy.ist-kopiert {
+  color: #8de3b0;
+  border-color: rgba(141, 227, 176, 0.34);
+  background: rgba(33, 181, 112, 0.12);
+}
+
 .admin-content-card-actions {
   display: flex;
   justify-content: flex-end;

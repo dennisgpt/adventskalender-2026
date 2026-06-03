@@ -292,6 +292,27 @@
     }
   }
 
+  function zeigeMediaCopyFeedback(button) {
+    if (!button) {
+      return;
+    }
+
+    if (button.dataset.feedbackTimeout) {
+      clearTimeout(Number(button.dataset.feedbackTimeout));
+    }
+
+    button.classList.add('ist-kopiert');
+    button.innerHTML = '<i class="bi bi-check-lg" aria-hidden="true"></i> Kopiert';
+
+    const timeout = window.setTimeout(function() {
+      button.classList.remove('ist-kopiert');
+      button.innerHTML = '<i class="bi bi-clipboard" aria-hidden="true"></i> Kopieren';
+      delete button.dataset.feedbackTimeout;
+    }, 1400);
+
+    button.dataset.feedbackTimeout = String(timeout);
+  }
+
   function renderAdminContentKarte(content) {
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
@@ -380,6 +401,7 @@
       mediaCopyButton.addEventListener('click', function() {
         kopiereTextInZwischenablage(content.media_url)
           .then(function() {
+            zeigeMediaCopyFeedback(mediaCopyButton);
             zeigeContentToast('Media-URL wurde kopiert.', 'erfolg');
           })
           .catch(function() {
