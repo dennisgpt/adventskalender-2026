@@ -229,6 +229,28 @@
     `;
   }
 
+  function adminTagWarnung(tag, inhalte) {
+    const unlockDatum = tag.unlock_date ? new Date(tag.unlock_date) : null;
+
+    if (inhalte.length === 0) {
+      return 'Kein Content';
+    }
+
+    if (!unlockDatum || Number.isNaN(unlockDatum.getTime())) {
+      return 'Datum prüfen';
+    }
+
+    if (unlockDatum.getMonth() !== 11) {
+      return 'Nicht Dezember';
+    }
+
+    if (tag.is_randomized && inhalte.length < 2) {
+      return 'Zufall mit 1 Inhalt';
+    }
+
+    return '';
+  }
+
   function setzeAdminTagFormGeaendert(formular, istGeaendert) {
     const speichernButton = formular.querySelector('[data-admin-tag-save]');
 
@@ -674,11 +696,14 @@
   function renderAdminTagKarte(tag) {
     const inhalte = Array.isArray(tag.contents) ? tag.contents : [];
     const karte = document.createElement('article');
+    const warnung = adminTagWarnung(tag, inhalte);
     const unlockInputId = `admin-tag-${tag.id}-unlock-date`;
     const randomInputId = `admin-tag-${tag.id}-randomized`;
     const einstellungenId = `admin-tag-${tag.id}-einstellungen`;
     const inhaltId = `admin-tag-${tag.id}-inhalt`;
     karte.className = 'admin-tag-karte';
+    karte.classList.toggle('hat-admin-warnung', Boolean(warnung));
+    karte.classList.toggle('ist-leer', inhalte.length === 0);
     karte.setAttribute('data-day-id', tag.id);
 
     karte.innerHTML = `
@@ -692,6 +717,11 @@
         >
           <span class="admin-tag-nummer">Türchen ${tag.day_number}</span>
           <span class="admin-tag-karte-toggle-rechts">
+            ${warnung ? `
+              <span class="admin-tag-warnung" title="${warnung}" aria-label="${warnung}">
+                <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+              </span>
+            ` : ''}
             <span class="admin-tag-badge ${tag.is_randomized ? 'ist-randomisiert' : ''}" data-admin-tag-random-badge>
               ${tag.is_randomized ? 'Zufällig' : 'Sortiert'}
             </span>
