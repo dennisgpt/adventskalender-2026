@@ -1127,6 +1127,44 @@ small span:hover {
   text-align: right;
 }
 
+.admin-content-details dd.admin-content-media-kompakt {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.38rem;
+}
+
+.admin-content-media-status {
+  color: #dff0ff;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.admin-content-media-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.28rem;
+  min-height: 28px;
+  border: 1px solid rgba(142, 201, 255, 0.24);
+  border-radius: 999px;
+  padding: 0.22rem 0.54rem;
+  color: #dff0ff;
+  background: rgba(82, 158, 222, 0.12);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.admin-content-media-copy:hover,
+.admin-content-media-copy:focus-visible {
+  color: #ffffff;
+  border-color: rgba(255, 209, 102, 0.72);
+  outline: none;
+  background: rgba(82, 158, 222, 0.2);
+  box-shadow: 0 0 0 0.16rem rgba(255, 209, 102, 0.12);
+}
+
 .admin-content-card-actions {
   display: flex;
   justify-content: flex-end;

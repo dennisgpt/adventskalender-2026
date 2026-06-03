@@ -220,6 +220,50 @@
     `;
   }
 
+  function renderAdminContentMediaUrl(content) {
+    if (!content.media_url) {
+      return '<dd>-</dd>';
+    }
+
+    return `
+      <dd class="admin-content-media-kompakt">
+        <span class="admin-content-media-status" data-admin-content-media-label>Vorhanden</span>
+        <button
+          class="admin-content-media-copy"
+          type="button"
+          data-admin-content-copy-media
+          aria-label="Media-URL von Content #${content.id} kopieren"
+        >
+          <i class="bi bi-clipboard" aria-hidden="true"></i>
+          Kopieren
+        </button>
+      </dd>
+    `;
+  }
+
+  function kopiereTextInZwischenablage(text) {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      return navigator.clipboard.writeText(text);
+    }
+
+    const textfeld = document.createElement('textarea');
+    textfeld.value = text;
+    textfeld.setAttribute('readonly', '');
+    textfeld.style.position = 'fixed';
+    textfeld.style.opacity = '0';
+    document.body.appendChild(textfeld);
+    textfeld.select();
+
+    try {
+      document.execCommand('copy');
+      return Promise.resolve();
+    } catch (error) {
+      return Promise.reject(error);
+    } finally {
+      document.body.removeChild(textfeld);
+    }
+  }
+
   function renderAdminContentKarte(content) {
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
@@ -243,7 +287,7 @@
         </div>
         <div>
           <dt>Media-URL</dt>
-          <dd>${content.media_url || '-'}</dd>
+          ${renderAdminContentMediaUrl(content)}
         </div>
         <div>
           <dt>Erstellt</dt>
@@ -270,6 +314,12 @@
     const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');
     const loeschButton = karte.querySelector('[data-admin-content-delete]');
     const bildPreviewButton = karte.querySelector('[data-admin-content-image-preview]');
+    const mediaLabel = karte.querySelector('[data-admin-content-media-label]');
+    const mediaCopyButton = karte.querySelector('[data-admin-content-copy-media]');
+
+    if (mediaLabel && content.media_url) {
+      mediaLabel.title = content.media_url;
+    }
 
     if (bearbeitenButton) {
       bearbeitenButton.addEventListener('click', function() {
@@ -295,6 +345,18 @@
           baueContentMediaUrl(content.media_url),
           `Bild #${content.id}`
         );
+      });
+    }
+
+    if (mediaCopyButton && content.media_url) {
+      mediaCopyButton.addEventListener('click', function() {
+        kopiereTextInZwischenablage(content.media_url)
+          .then(function() {
+            zeigeContentToast('Media-URL wurde kopiert.', 'erfolg');
+          })
+          .catch(function() {
+            zeigeContentToast('Media-URL konnte nicht kopiert werden.', 'fehler');
+          });
       });
     }
 
