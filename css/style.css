@@ -1837,8 +1837,8 @@ small span:hover {
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 8px;
-  background: linear-gradient(145deg, #1a1025, #0f0d1a);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(145deg, #11284b, #0a1e40);
+  border: 1px solid rgba(255, 106, 0, 0.15);
   padding: 0;
   color: inherit;
   appearance: none;
@@ -1859,30 +1859,30 @@ small span:hover {
 }
 
 /* Icon-Farben per data-nummer (wirkt durch Shuffle zufällig) */
-.tuerchen-karte[data-nummer="1"]  .geschenk-icon { --icon-farbe: #8b1a2a; }
-.tuerchen-karte[data-nummer="2"]  .geschenk-icon { --icon-farbe: #1a5c2a; }
-.tuerchen-karte[data-nummer="3"]  .geschenk-icon { --icon-farbe: #c8960a; }
-.tuerchen-karte[data-nummer="4"]  .geschenk-icon { --icon-farbe: #1a3a8b; }
-.tuerchen-karte[data-nummer="5"]  .geschenk-icon { --icon-farbe: #b5651d; }
-.tuerchen-karte[data-nummer="6"]  .geschenk-icon { --icon-farbe: #2a6b8b; }
-.tuerchen-karte[data-nummer="7"]  .geschenk-icon { --icon-farbe: #c8b870; }
-.tuerchen-karte[data-nummer="8"]  .geschenk-icon { --icon-farbe: #4a1a6b; }
-.tuerchen-karte[data-nummer="9"]  .geschenk-icon { --icon-farbe: #0d6b4a; }
-.tuerchen-karte[data-nummer="10"] .geschenk-icon { --icon-farbe: #8b6914; }
-.tuerchen-karte[data-nummer="11"] .geschenk-icon { --icon-farbe: #1a5c2a; }
-.tuerchen-karte[data-nummer="12"] .geschenk-icon { --icon-farbe: #8b1a2a; }
-.tuerchen-karte[data-nummer="13"] .geschenk-icon { --icon-farbe: #2a6b8b; }
-.tuerchen-karte[data-nummer="14"] .geschenk-icon { --icon-farbe: #c8960a; }
-.tuerchen-karte[data-nummer="15"] .geschenk-icon { --icon-farbe: #4a1a6b; }
-.tuerchen-karte[data-nummer="16"] .geschenk-icon { --icon-farbe: #b5651d; }
-.tuerchen-karte[data-nummer="17"] .geschenk-icon { --icon-farbe: #1a3a8b; }
-.tuerchen-karte[data-nummer="18"] .geschenk-icon { --icon-farbe: #0d6b4a; }
-.tuerchen-karte[data-nummer="19"] .geschenk-icon { --icon-farbe: #8b6914; }
-.tuerchen-karte[data-nummer="20"] .geschenk-icon { --icon-farbe: #c8b870; }
-.tuerchen-karte[data-nummer="21"] .geschenk-icon { --icon-farbe: #8b1a2a; }
-.tuerchen-karte[data-nummer="22"] .geschenk-icon { --icon-farbe: #1a5c2a; }
-.tuerchen-karte[data-nummer="23"] .geschenk-icon { --icon-farbe: #2a6b8b; }
-.tuerchen-karte[data-nummer="24"] .geschenk-icon { --icon-farbe: #c8b870; }
+.tuerchen-karte[data-nummer="1"]  .geschenk-icon { --icon-farbe: #ff6a00; }
+.tuerchen-karte[data-nummer="2"]  .geschenk-icon { --icon-farbe: #185627; }
+.tuerchen-karte[data-nummer="3"]  .geschenk-icon { --icon-farbe: #0a498d; }
+.tuerchen-karte[data-nummer="4"]  .geschenk-icon { --icon-farbe: #362a59; }
+.tuerchen-karte[data-nummer="5"]  .geschenk-icon { --icon-farbe: #006a72; }
+.tuerchen-karte[data-nummer="6"]  .geschenk-icon { --icon-farbe: #513c89; }
+.tuerchen-karte[data-nummer="7"]  .geschenk-icon { --icon-farbe: #66962d; }
+.tuerchen-karte[data-nummer="8"]  .geschenk-icon { --icon-farbe: #11284b; }
+.tuerchen-karte[data-nummer="9"]  .geschenk-icon { --icon-farbe: #00454a; }
+.tuerchen-karte[data-nummer="10"] .geschenk-icon { --icon-farbe: #ff6a00; }
+.tuerchen-karte[data-nummer="11"] .geschenk-icon { --icon-farbe: #185627; }
+.tuerchen-karte[data-nummer="12"] .geschenk-icon { --icon-farbe: #0a498d; }
+.tuerchen-karte[data-nummer="13"] .geschenk-icon { --icon-farbe: #362a59; }
+.tuerchen-karte[data-nummer="14"] .geschenk-icon { --icon-farbe: #006a72; }
+.tuerchen-karte[data-nummer="15"] .geschenk-icon { --icon-farbe: #513c89; }
+.tuerchen-karte[data-nummer="16"] .geschenk-icon { --icon-farbe: #ff6a00; }
+.tuerchen-karte[data-nummer="17"] .geschenk-icon { --icon-farbe: #11284b; }
+.tuerchen-karte[data-nummer="18"] .geschenk-icon { --icon-farbe: #66962d; }
+.tuerchen-karte[data-nummer="19"] .geschenk-icon { --icon-farbe: #00454a; }
+.tuerchen-karte[data-nummer="20"] .geschenk-icon { --icon-farbe: #362a59; }
+.tuerchen-karte[data-nummer="21"] .geschenk-icon { --icon-farbe: #ff6a00; }
+.tuerchen-karte[data-nummer="22"] .geschenk-icon { --icon-farbe: #185627; }
+.tuerchen-karte[data-nummer="23"] .geschenk-icon { --icon-farbe: #0a498d; }
+.tuerchen-karte[data-nummer="24"] .geschenk-icon { --icon-farbe: #006a72; }
 
 /* Realistisches Geschenk-Icon (inline SVG) */
 .geschenk-icon {
@@ -2769,7 +2769,7 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
 .geschenk-schleife-vertikal,
 .geschenk-schleife-horizontal {
   position: absolute;
-  background: linear-gradient(180deg, #ffd166, #e8b923);
+  background: linear-gradient(180deg, #ff6a00, #cc4f00);
   border-radius: 20px;
   z-index: 3;
 }
@@ -2798,8 +2798,8 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   top: -3%;
   transform: translateX(-50%);
   border-radius: 50%;
-  background: radial-gradient(circle at 30% 30%, #ffe8a2, #e8b923 65%, #d69f12);
-  box-shadow: 0 0 18px rgba(255, 209, 102, 0.6);
+  background: radial-gradient(circle at 30% 30%, #ff9a4d, #ff6a00 65%, #cc4f00);
+  box-shadow: 0 0 18px rgba(255, 106, 0, 0.6);
   z-index: 4;
 }
 
