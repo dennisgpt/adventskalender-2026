@@ -6,12 +6,12 @@
 /* ---- Allgemein ---- */
 :root {
   --thws-red: #c8102e;
-  --thws-orange: #f08a24;
+  --thws-orange: #ff6a00;
   --night-blue: #0f1b34;
   --ice-white: #f8fbff;
   --glass-border: rgba(255, 255, 255, 0.28);
   --glass-fill: rgba(11, 24, 51, 0.52);
-  --focus-ring: #ffd166;
+  --focus-ring: #ff6a00;
 }
 
 body {
@@ -20,7 +20,7 @@ body {
     background-size: cover;
 
     color: var(--ice-white);
-    font-family: 'Outfit', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     min-height: 100vh;
 
     position: relative;
@@ -90,12 +90,12 @@ body::before {
 }
 
 .header-breadcrumb span:hover {
-  color: #e78500;
+  color: var(--thws-orange);
   cursor: pointer;
 }
 
 small span:hover {
-  color: #e78500;
+  color: var(--thws-orange);
   cursor: pointer;
 }
 
@@ -250,13 +250,13 @@ small span:hover {
 .admin-login-modal .form-control {
   color: #f8fbff;
   border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(4, 10, 28, 0.48);
+  background: rgba(17, 40, 75, 0.48);
 }
 
 .admin-login-modal .form-control:focus {
   color: #ffffff;
   border-color: rgba(255, 209, 102, 0.76);
-  background: rgba(4, 10, 28, 0.64);
+  background: rgba(17, 40, 75, 0.64);
   box-shadow: 0 0 0 0.22rem rgba(255, 209, 102, 0.16);
 }
 
@@ -305,7 +305,7 @@ small span:hover {
   border-radius: 10px;
   padding: 0.68rem 0.76rem;
   color: #b9c9ee;
-  background: rgba(5, 12, 30, 0.42);
+  background: rgba(17, 40, 75, 0.42);
   font-size: 0.86rem;
   font-weight: 700;
 }
@@ -387,7 +387,7 @@ small span:hover {
 
 .hero-bereich h1 {
   color: #ffffff;
-  font-family: 'Space Grotesk', 'Outfit', sans-serif;
+  font-family: 'Inter', sans-serif;
   letter-spacing: 0.3px;
   text-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 28px rgba(22, 39, 80, 0.35);
   margin-bottom: 0.8rem;
@@ -443,7 +443,7 @@ small span:hover {
   padding: 1.2rem;
   border-radius: 22px;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  background: linear-gradient(145deg, rgba(10, 26, 56, 0.54), rgba(7, 17, 38, 0.48));
+  background: linear-gradient(145deg, rgba(17, 40, 75, 0.54), rgba(17, 40, 75, 0.48));
   box-shadow: 0 24px 40px rgba(0, 0, 0, 0.32);
   backdrop-filter: blur(7px);
 }
@@ -520,7 +520,7 @@ small span:hover {
   border: 1px solid rgba(142, 201, 255, 0.18);
   border-radius: 12px;
   padding: 0.75rem 0.82rem;
-  background: rgba(5, 12, 30, 0.38);
+  background: rgba(17, 40, 75, 0.38);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
@@ -567,7 +567,7 @@ small span:hover {
   border-radius: 12px;
   padding: 0.72rem 0.9rem;
   color: #dce8ff;
-  background: rgba(5, 12, 30, 0.46);
+  background: rgba(17, 40, 75, 0.46);
   font-weight: 700;
 }
 
@@ -608,7 +608,7 @@ small span:hover {
   border: 1px solid rgba(142, 201, 255, 0.18);
   border-radius: 12px;
   padding: 0.75rem;
-  background: rgba(5, 12, 30, 0.34);
+  background: rgba(17, 40, 75, 0.34);
 }
 
 .admin-content-filter-feld {
@@ -627,7 +627,7 @@ small span:hover {
   border-radius: 9px;
   padding: 0.46rem 0.6rem;
   color: #eef4ff;
-  background: rgba(3, 10, 28, 0.58);
+  background: rgba(17, 40, 75, 0.58);
   font: inherit;
   font-weight: 800;
 }
@@ -670,7 +670,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   padding: 0.95rem;
-  background: rgba(5, 12, 30, 0.46);
+  background: rgba(17, 40, 75, 0.46);
 }
 
 .admin-year-form.hat-erfolg .admin-content-form-status {
@@ -691,7 +691,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
   padding: 0.95rem;
-  background: rgba(5, 12, 30, 0.5);
+  background: rgba(17, 40, 75, 0.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -778,7 +778,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 12px;
   padding: 0.95rem;
-  background: rgba(5, 12, 30, 0.46);
+  background: rgba(17, 40, 75, 0.46);
 }
 
 .admin-content-form-grid {
@@ -805,7 +805,7 @@ small span:hover {
   border-radius: 9px;
   padding: 0.46rem 0.6rem;
   color: #eef4ff;
-  background: rgba(3, 10, 28, 0.58);
+  background: rgba(17, 40, 75, 0.58);
   font: inherit;
   font-weight: 700;
 }
@@ -918,7 +918,7 @@ small span:hover {
   overflow: hidden;
   border: 1px solid rgba(141, 227, 176, 0.28);
   border-radius: 10px;
-  background: rgba(5, 12, 30, 0.5);
+  background: rgba(17, 40, 75, 0.5);
   padding: 0;
   text-align: left;
 }
@@ -956,7 +956,7 @@ small span:hover {
   max-height: min(76vh, 720px);
   object-fit: contain;
   border-radius: 12px;
-  background: rgba(2, 8, 24, 0.62);
+  background: rgba(17, 40, 75, 0.62);
 }
 
 .admin-content-quiz-felder {
@@ -990,7 +990,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 8px;
   padding: 0.82rem;
-  background: rgba(3, 10, 28, 0.38);
+  background: rgba(17, 40, 75, 0.38);
 }
 
 .admin-content-quiz-frage-kopf {
@@ -1067,7 +1067,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
   padding: 0.92rem;
-  background: rgba(5, 12, 30, 0.5);
+  background: rgba(17, 40, 75, 0.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -1137,7 +1137,7 @@ small span:hover {
   border: 1px solid rgba(142, 201, 255, 0.24);
   border-radius: 8px;
   padding: 0;
-  background: rgba(3, 10, 28, 0.58);
+  background: rgba(17, 40, 75, 0.58);
   cursor: zoom-in;
 }
 
@@ -1279,7 +1279,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
   padding: 0.92rem;
-  background: rgba(5, 12, 30, 0.5);
+  background: rgba(17, 40, 75, 0.5);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -1288,7 +1288,7 @@ small span:hover {
 }
 
 .admin-tag-karte.ist-leer {
-  background: rgba(5, 12, 30, 0.42);
+  background: rgba(17, 40, 75, 0.42);
 }
 
 .admin-tag-karte-kopf {
@@ -1478,7 +1478,7 @@ small span:hover {
   border: 1px solid rgba(142, 201, 255, 0.24);
   border-radius: 8px;
   padding: 0;
-  background: rgba(3, 10, 28, 0.58);
+  background: rgba(17, 40, 75, 0.58);
   cursor: zoom-in;
 }
 
@@ -1607,7 +1607,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
   padding: 1rem;
-  background: rgba(5, 12, 30, 0.45);
+  background: rgba(17, 40, 75, 0.45);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
@@ -1650,7 +1650,7 @@ small span:hover {
   padding: 0.9rem;
   color: #f5f8ff;
   text-align: left;
-  background: rgba(3, 10, 28, 0.54);
+  background: rgba(17, 40, 75, 0.54);
 }
 
 .admin-zuweisung-content .admin-content-type {
@@ -1758,7 +1758,7 @@ small span:hover {
   border-radius: 9px;
   padding: 0.42rem 0.58rem;
   color: #eef4ff;
-  background: rgba(3, 10, 28, 0.58);
+  background: rgba(17, 40, 75, 0.58);
   font: inherit;
   font-weight: 700;
 }
@@ -2182,7 +2182,7 @@ small span:hover {
   border-radius: 999px;
   padding: 0.42rem 1.1rem;
   color: #ffd97f;
-  background: rgba(5, 12, 30, 0.36);
+  background: rgba(17, 40, 75, 0.36);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
   font-size: 0.92rem;
   font-weight: 900;
@@ -2207,7 +2207,7 @@ small span:hover {
   min-height: min(44vh, 340px);
   overflow: hidden;
   border-radius: 18px;
-  background: radial-gradient(circle at center, rgba(255, 209, 102, 0.18), rgba(5, 12, 30, 0.3) 62%);
+  background: radial-gradient(circle at center, rgba(255, 209, 102, 0.18), rgba(17, 40, 75, 0.3) 62%);
   animation: quiz-intro-sequenz 3s ease forwards;
 }
 
@@ -2250,7 +2250,7 @@ small span:hover {
   border-radius: 999px;
   padding: 0.28rem 0.72rem;
   color: #ffd97f;
-  background: rgba(5, 12, 30, 0.28);
+  background: rgba(17, 40, 75, 0.28);
   font-size: 0.78rem;
   font-weight: 900;
 }
@@ -2459,7 +2459,7 @@ small span:hover {
   border: 1px solid rgba(255, 209, 102, 0.24);
   border-radius: 14px;
   padding: 0.95rem 1rem;
-  background: rgba(5, 12, 30, 0.32);
+  background: rgba(17, 40, 75, 0.32);
 }
 
 .quiz-ergebnis-kopf span {
@@ -2491,7 +2491,7 @@ small span:hover {
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   padding: 0.85rem;
-  background: rgba(5, 12, 30, 0.28);
+  background: rgba(17, 40, 75, 0.28);
 }
 
 .quiz-ergebnis-eintrag.ist-richtig {
@@ -2998,7 +2998,7 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
 
 /* ---- Footer ---- */
 footer {
-  background: linear-gradient(180deg, rgba(3, 10, 26, 0), rgba(3, 10, 26, 0.65)) !important;
+  background: linear-gradient(180deg, rgba(17, 40, 75, 0), rgba(17, 40, 75, 0.65)) !important;
   border-top: none !important;
   backdrop-filter: blur(2px);
 }
