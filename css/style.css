@@ -1904,7 +1904,8 @@ small span:hover {
 
 /* Hover */
 .tuerchen-karte.verfuegbar:hover,
-.tuerchen-karte.heute:hover {
+.tuerchen-karte.heute:hover,
+.tuerchen-karte.geoeffnet:hover {
   transform: translateY(-6px);
   box-shadow:
     6px 14px 0 rgba(0, 0, 0, 0.4),
@@ -1920,13 +1921,15 @@ small span:hover {
 }
 
 .tuerchen-karte.verfuegbar:hover .gk-deckel,
-.tuerchen-karte.heute:hover .gk-deckel {
+.tuerchen-karte.heute:hover .gk-deckel,
+.tuerchen-karte.geoeffnet:hover .gk-deckel {
   transform: rotate(-38deg);
 }
 
 @media (hover: none) {
   .tuerchen-karte.verfuegbar:hover .gk-deckel,
-  .tuerchen-karte.heute:hover .gk-deckel {
+  .tuerchen-karte.heute:hover .gk-deckel,
+  .tuerchen-karte.geoeffnet:hover .gk-deckel {
     transform: none;
   }
 }
@@ -1958,7 +1961,8 @@ small span:hover {
 }
 
 .tuerchen-karte.verfuegbar:hover .geschenk-icon::before,
-.tuerchen-karte.heute:hover .geschenk-icon::before {
+.tuerchen-karte.heute:hover .geschenk-icon::before,
+.tuerchen-karte.geoeffnet:hover .geschenk-icon::before {
   opacity: 1;
   transform: translateX(-50%) scaleY(1);
 }
@@ -1986,7 +1990,8 @@ small span:hover {
 }
 
 .tuerchen-karte.verfuegbar:hover .geschenk-icon::after,
-.tuerchen-karte.heute:hover .geschenk-icon::after {
+.tuerchen-karte.heute:hover .geschenk-icon::after,
+.tuerchen-karte.geoeffnet:hover .geschenk-icon::after {
   opacity: 1;
   transform: translateX(-50%) rotate(28deg) scaleY(1);
   animation: strahl-pulsieren 1.2s ease-in-out infinite;
@@ -2009,16 +2014,28 @@ small span:hover {
 
 /* Bereits geöffnet */
 .tuerchen-karte.geoeffnet {
-  cursor: default;
-  filter: brightness(0.52) saturate(0.35);
-  border-color: rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  filter: brightness(0.82) saturate(0.78);
+  border-color: rgba(232, 200, 74, 0.32);
   box-shadow:
     3px 5px 0 rgba(0, 0, 0, 0.3),
     0 8px 18px rgba(0, 0, 0, 0.4);
 }
 
 .tuerchen-karte.geoeffnet .tuerchen-label {
-  display: none;
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.65rem;
+  height: 1.65rem;
+  border-radius: 999px;
+  background: #e8c84a;
+  color: #11284b;
+  font-size: 1rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
 }
 
 /* Gesperrt */
@@ -2036,7 +2053,7 @@ small span:hover {
 }
 
 .tuerchen-karte.geoeffnet .geschenk-icon {
-  opacity: 0.5;
+  opacity: 0.82;
 }
 
 .tuerchen-karte.schuetteln {
@@ -2128,10 +2145,6 @@ small span:hover {
   letter-spacing: -0.02em;
   line-height: 1;
   text-shadow: 0 1px 5px rgba(0, 0, 0, 0.8);
-}
-
-.tuerchen-karte.geoeffnet .tuerchen-label {
-  display: none;
 }
 
 .tuerchen-karte.gesperrt .tuerchen-label {

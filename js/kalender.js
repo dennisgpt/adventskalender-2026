@@ -10,7 +10,6 @@
 const ADVENTSSTART_MONAT = 11; // Monate in JavaScript: 0 = Januar, 11 = Dezember
 const ADVENTSSTART_TAG = 1;
 const TESTMODUS_TUERCHEN_NUMMER = null; // null fuer echten Kalenderbetrieb, 1 simuliert den 1. Dezember
-const WIEDERHOLBAR_OEFFENBARE_TUERCHEN = [1, 2, 3, 4, 5];
 
 let geschenkAnimationLaeuft = false;
 let gesperrtHinweisTimeout = null;
@@ -49,7 +48,11 @@ function istGeoeffnet(nummer) {
 }
 
 function darfWiederholtGeoeffnetWerden(nummer) {
-  return WIEDERHOLBAR_OEFFENBARE_TUERCHEN.includes(nummer);
+  return nummer >= 1 && nummer <= 24;
+}
+
+function istTuerchenOeffenbar(zustand, nummer) {
+  return zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer));
 }
 
 function alsGeoeffnetSpeichern(nummer) {
@@ -142,21 +145,15 @@ function ariaLabelFuerTuerchen(nummer, zustand, apiTage) {
     return 'Türchen ' + nummer + ', verfügbar. Öffnen.';
   }
 
-  if (darfWiederholtGeoeffnetWerden(nummer)) {
+  if (zustand === 'geoeffnet') {
     return 'Türchen ' + nummer + ', bereits geöffnet. Erneut öffnen.';
   }
 
-  return 'Türchen ' + nummer + ', bereits geöffnet.';
+  return 'Türchen ' + nummer + '.';
 }
 
 function aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage) {
   karte.setAttribute('aria-label', ariaLabelFuerTuerchen(nummer, zustand, apiTage));
-
-  if (zustand === 'geoeffnet' && !darfWiederholtGeoeffnetWerden(nummer)) {
-    karte.setAttribute('aria-disabled', 'true');
-  } else {
-    karte.removeAttribute('aria-disabled');
-  }
 }
 
 function anzahlSichtbareKalenderSpalten(grid) {
@@ -398,9 +395,9 @@ function kalenderGridAufbauen(apiTage) {
       <span class="tuerchen-label">${nummer}</span>
     `;
 
-    if (zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer))) {
+    if (istTuerchenOeffenbar(zustand, nummer)) {
       karte.addEventListener('click', function() {
-        if (geschenkAnimationLaeuft || (karte.classList.contains('geoeffnet') && !darfWiederholtGeoeffnetWerden(nummer))) return;
+        if (geschenkAnimationLaeuft) return;
 
         karte.style.transform = 'scale(0.95)';
 
