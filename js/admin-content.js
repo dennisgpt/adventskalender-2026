@@ -3,6 +3,7 @@
 
   let bearbeiteterContentId = null;
   let geladeneContentEintraege = [];
+  let adminTageFuerContent = [];
   let aktiverContentTypFilter = 'all';
   let aktiverContentStatusFilter = 'all';
   let zuLoeschenderContent = null;
@@ -302,6 +303,41 @@
     `;
   }
 
+  function zugewieseneTuerchenFuerContent(contentId) {
+    return adminTageFuerContent
+      .filter(function(tag) {
+        return Array.isArray(tag.contents) && tag.contents.some(function(inhalt) {
+          return String(inhalt.id) === String(contentId);
+        });
+      })
+      .map(function(tag) {
+        return tag.day_number;
+      })
+      .sort(function(a, b) {
+        return a - b;
+      });
+  }
+
+  function textFuerContentZuweisung(contentId) {
+    const tuerchen = zugewieseneTuerchenFuerContent(contentId);
+
+    if (tuerchen.length === 0) {
+      return '';
+    }
+
+    return 'Zugewiesen in Türchen ' + tuerchen.join(', ');
+  }
+
+  function renderAdminContentZuweisung(content) {
+    const text = textFuerContentZuweisung(content.id);
+
+    return `
+      <span class="admin-content-assignment-badge ${text ? '' : 'ist-leer'}">
+        ${text || 'Nicht zugewiesen'}
+      </span>
+    `;
+  }
+
   function kopiereTextInZwischenablage(text) {
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       return navigator.clipboard.writeText(text);
@@ -429,6 +465,7 @@
         <span class="admin-content-status ${content.is_active ? 'ist-aktiv' : 'ist-inaktiv'}">
           ${content.is_active ? 'Aktiv' : 'Inaktiv'}
         </span>
+        ${renderAdminContentZuweisung(content)}
       </div>
       <p class="admin-content-body">${contentBodyVorschau(content)}</p>
       ${renderAdminContentBildVorschau(content)}
@@ -436,6 +473,10 @@
         <div>
           <dt>ID</dt>
           <dd>#${content.id}</dd>
+        </div>
+        <div>
+          <dt>Zuweisung</dt>
+          <dd>${textFuerContentZuweisung(content.id) || 'Nicht zugewiesen'}</dd>
         </div>
         <div>
           <dt>Media-URL</dt>
@@ -1306,8 +1347,18 @@
     setzeContentFilterSichtbar(false);
     setzeContentLeerFehler(false);
 
-    return window.AdventskalenderApi.ladeAdminContent()
-      .then(function(contentEintraege) {
+    return Promise.all([
+      window.AdventskalenderApi.ladeAdminContent(),
+      window.AdventskalenderApi.ladeAdminTage()
+        .catch(function() {
+          return [];
+        })
+    ])
+      .then(function(ergebnisse) {
+        const contentEintraege = ergebnisse[0];
+        const tage = ergebnisse[1];
+
+        adminTageFuerContent = Array.isArray(tage) ? tage : [];
         setzeAdminContentListe(contentEintraege);
         return contentEintraege;
       })

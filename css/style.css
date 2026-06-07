@@ -1202,6 +1202,25 @@ small span:hover {
   background: rgba(155, 48, 72, 0.16);
 }
 
+.admin-content-assignment-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid rgba(255, 106, 0, 0.26);
+  border-radius: 999px;
+  padding: 0.22rem 0.58rem;
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.admin-content-assignment-badge.ist-leer {
+  color: var(--admin-text-muted);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
 .admin-content-body {
   margin: 0 0 0.82rem;
   color: #f5f8ff;
