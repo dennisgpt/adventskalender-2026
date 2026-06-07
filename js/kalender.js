@@ -51,6 +51,10 @@ function darfWiederholtGeoeffnetWerden(nummer) {
   return nummer >= 1 && nummer <= 24;
 }
 
+function istTuerchenOeffenbar(zustand, nummer) {
+  return zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer));
+}
+
 function alsGeoeffnetSpeichern(nummer) {
   geoeffneteDieSitzung.add(nummer);
 }
@@ -141,21 +145,15 @@ function ariaLabelFuerTuerchen(nummer, zustand, apiTage) {
     return 'Türchen ' + nummer + ', verfügbar. Öffnen.';
   }
 
-  if (darfWiederholtGeoeffnetWerden(nummer)) {
+  if (zustand === 'geoeffnet') {
     return 'Türchen ' + nummer + ', bereits geöffnet. Erneut öffnen.';
   }
 
-  return 'Türchen ' + nummer + ', bereits geöffnet.';
+  return 'Türchen ' + nummer + '.';
 }
 
 function aktualisiereTuerchenBarrierefreiheit(karte, nummer, zustand, apiTage) {
   karte.setAttribute('aria-label', ariaLabelFuerTuerchen(nummer, zustand, apiTage));
-
-  if (zustand === 'geoeffnet' && !darfWiederholtGeoeffnetWerden(nummer)) {
-    karte.setAttribute('aria-disabled', 'true');
-  } else {
-    karte.removeAttribute('aria-disabled');
-  }
 }
 
 function anzahlSichtbareKalenderSpalten(grid) {
@@ -397,9 +395,9 @@ function kalenderGridAufbauen(apiTage) {
       <span class="tuerchen-label">${nummer}</span>
     `;
 
-    if (zustand === 'verfuegbar' || zustand === 'heute' || (zustand === 'geoeffnet' && darfWiederholtGeoeffnetWerden(nummer))) {
+    if (istTuerchenOeffenbar(zustand, nummer)) {
       karte.addEventListener('click', function() {
-        if (geschenkAnimationLaeuft || (karte.classList.contains('geoeffnet') && !darfWiederholtGeoeffnetWerden(nummer))) return;
+        if (geschenkAnimationLaeuft) return;
 
         karte.style.transform = 'scale(0.95)';
 
