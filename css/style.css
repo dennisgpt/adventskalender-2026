@@ -7,6 +7,7 @@
 :root {
   --thws-red: #c8102e;
   --thws-orange: #ff6a00;
+  --thws-blue: #009fe3;
   --night-blue: #0f1b34;
   --ice-white: #f8fbff;
   --glass-border: rgba(255, 255, 255, 0.28);
@@ -2130,6 +2131,12 @@ small span:hover {
   color: var(--admin-text);
   background: var(--admin-bg-muted);
   border-color: var(--admin-border);
+}
+
+.admin-content-type {
+  color: #ffffff;
+  background: var(--thws-blue);
+  border-color: var(--thws-blue);
 }
 
 .admin-content-status.ist-aktiv,
