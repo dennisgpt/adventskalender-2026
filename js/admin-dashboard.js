@@ -4,6 +4,7 @@
   let ausgewaehlterTag = null;
   let ausgewaehlterContent = null;
   let adminContentPool = [];
+  let adminTage = [];
 
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
@@ -503,8 +504,34 @@
     });
   }
 
+  function zugewieseneTuerchenFuerContent(contentId) {
+    return adminTage
+      .filter(function(tag) {
+        return Array.isArray(tag.contents) && tag.contents.some(function(inhalt) {
+          return String(inhalt.id) === String(contentId);
+        });
+      })
+      .map(function(tag) {
+        return tag.day_number;
+      })
+      .sort(function(a, b) {
+        return a - b;
+      });
+  }
+
+  function textFuerContentZuweisung(contentId) {
+    const tuerchen = zugewieseneTuerchenFuerContent(contentId);
+
+    if (tuerchen.length === 0) {
+      return '';
+    }
+
+    return 'Zugewiesen in Türchen ' + tuerchen.join(', ');
+  }
+
   function renderContentPoolKarte(content) {
     const istBereitsZugewiesen = istContentBereitsZugewiesen(content.id);
+    const zuweisungsText = textFuerContentZuweisung(content.id);
     const button = document.createElement('button');
     button.className = 'admin-zuweisung-content';
     button.type = 'button';
@@ -519,7 +546,7 @@
       ${renderContentPoolBildVorschau(content)}
       <strong>${contentBodyVorschau(content)}</strong>
       <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
-      ${istBereitsZugewiesen ? '<em>Bereits zugewiesen</em>' : ''}
+      ${zuweisungsText ? `<em>${zuweisungsText}</em>` : ''}
     `;
 
     const meta = button.querySelector('small');
@@ -928,10 +955,12 @@
     return window.AdventskalenderApi.ladeAdminTage()
       .then(function(tage) {
         if (!Array.isArray(tage) || tage.length === 0) {
+          adminTage = [];
           setzeDashboardStatus('leer');
           return tage;
         }
 
+        adminTage = tage;
         renderAdminTage(tage);
         renderAdminKennzahlen(tage);
         setzeDashboardStatus('bereit');
