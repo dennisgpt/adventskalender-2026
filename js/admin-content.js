@@ -346,6 +346,76 @@
     button.dataset.feedbackTimeout = String(timeout);
   }
 
+  function initialisiereContentKarteCollapse(karte, content) {
+    const kopf = karte.querySelector('.admin-content-card-kopf');
+    const vorschau = karte.querySelector('.admin-content-body');
+    const bildVorschau = karte.querySelector('[data-admin-content-image-preview]');
+    const details = karte.querySelector('.admin-content-details');
+    const actions = karte.querySelector('.admin-content-card-actions');
+
+    if (!kopf || !vorschau || !details || !actions) {
+      return;
+    }
+
+    karte.classList.add('ist-einklappbar');
+
+    const inhaltId = `admin-content-${content.id}-details`;
+    const toggle = document.createElement('button');
+    const summary = document.createElement('span');
+    const badges = document.createElement('span');
+    const body = document.createElement('span');
+    const pfeil = document.createElement('i');
+    const inhalt = document.createElement('div');
+    const inhaltInner = document.createElement('div');
+
+    toggle.className = 'admin-content-card-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', inhaltId);
+
+    summary.className = 'admin-content-card-summary';
+    badges.className = 'admin-content-card-badges';
+    body.className = 'admin-content-body';
+    body.innerHTML = vorschau.innerHTML;
+    pfeil.className = 'bi bi-chevron-down admin-content-card-pfeil';
+    pfeil.setAttribute('aria-hidden', 'true');
+
+    while (kopf.firstChild) {
+      badges.appendChild(kopf.firstChild);
+    }
+
+    vorschau.remove();
+    summary.appendChild(badges);
+    summary.appendChild(body);
+    toggle.appendChild(summary);
+    toggle.appendChild(pfeil);
+    kopf.appendChild(toggle);
+
+    inhalt.className = 'admin-content-card-inhalt';
+    inhalt.id = inhaltId;
+    inhalt.setAttribute('aria-hidden', 'true');
+    inhalt.setAttribute('inert', '');
+    inhaltInner.className = 'admin-content-card-inhalt-inner';
+
+    if (bildVorschau) {
+      inhaltInner.appendChild(bildVorschau);
+    }
+
+    inhaltInner.appendChild(details);
+    inhaltInner.appendChild(actions);
+    inhalt.appendChild(inhaltInner);
+    karte.appendChild(inhalt);
+
+    toggle.addEventListener('click', function() {
+      const wirdGeoeffnet = !karte.classList.contains('ist-aufgeklappt');
+
+      karte.classList.toggle('ist-aufgeklappt', wirdGeoeffnet);
+      toggle.setAttribute('aria-expanded', String(wirdGeoeffnet));
+      inhalt.setAttribute('aria-hidden', String(!wirdGeoeffnet));
+      inhalt.toggleAttribute('inert', !wirdGeoeffnet);
+    });
+  }
+
   function renderAdminContentKarte(content) {
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
@@ -391,6 +461,8 @@
         </button>
       </div>
     `;
+
+    initialisiereContentKarteCollapse(karte, content);
 
     const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
     const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');

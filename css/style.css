@@ -1092,6 +1092,81 @@ small span:hover {
   margin-bottom: 0.72rem;
 }
 
+.admin-content-card.ist-einklappbar .admin-content-card-kopf {
+  margin-bottom: 0;
+}
+
+.admin-content-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.admin-content-card-toggle:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid rgba(255, 106, 0, 0.76);
+  outline-offset: 4px;
+}
+
+.admin-content-card-toggle:hover .admin-content-body,
+.admin-content-card-toggle:focus-visible .admin-content-body {
+  color: var(--thws-orange);
+}
+
+.admin-content-card-summary {
+  display: grid;
+  gap: 0.64rem;
+  min-width: 0;
+}
+
+.admin-content-card-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-content-card-pfeil {
+  flex-shrink: 0;
+  color: #777777;
+  font-size: 0.92rem;
+  transition: transform 240ms ease;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-pfeil {
+  transform: rotate(180deg);
+}
+
+.admin-content-card-inhalt {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 280ms ease,
+    opacity 200ms ease;
+}
+
+.admin-content-card-inhalt-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-inhalt {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-inhalt-inner {
+  padding-top: 0.82rem;
+}
+
 .admin-content-type,
 .admin-content-status {
   display: inline-flex;
@@ -1140,6 +1215,10 @@ small span:hover {
   word-break: break-word;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.admin-content-card-toggle .admin-content-body {
+  margin: 0;
 }
 
 .admin-content-image-preview-button {
@@ -1426,6 +1505,8 @@ small span:hover {
 @media (prefers-reduced-motion: reduce) {
   .admin-tag-karte-pfeil,
   .admin-tag-karte-inhalt,
+  .admin-content-card-pfeil,
+  .admin-content-card-inhalt,
   .admin-content-image-preview,
   .admin-tag-content-vorschau {
     transition: none;
