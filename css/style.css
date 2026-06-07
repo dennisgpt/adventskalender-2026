@@ -12,6 +12,17 @@
   --glass-border: rgba(255, 255, 255, 0.28);
   --glass-fill: rgba(11, 24, 51, 0.52);
   --focus-ring: #ff6a00;
+  --admin-bg: #ffffff;
+  --admin-bg-muted: #f3f3f3;
+  --admin-border: #dddddd;
+  --admin-border-strong: #b8b8b8;
+  --admin-text: #333333;
+  --admin-text-strong: #111111;
+  --admin-text-muted: #666666;
+  --admin-orange-soft: #fff1e8;
+  --admin-success: #0f7a43;
+  --admin-danger: #b42335;
+  --admin-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
 }
 
 body {
@@ -1830,6 +1841,324 @@ small span:hover {
   color: #ff9aa8;
 }
 
+/* ---- Admin THWS Theme ---- */
+.login-hinweis-offcanvas,
+.admin-login-modal,
+.admin-dashboard,
+.admin-tag-karte.ist-leer,
+.admin-zuweisung,
+.admin-content-form,
+.admin-year-form,
+.admin-content-card,
+.admin-year-card,
+.admin-tag-karte,
+.admin-zuweisung-content {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border);
+  box-shadow: var(--admin-shadow);
+  backdrop-filter: none;
+}
+
+.admin-dashboard {
+  border-top: 5px solid var(--thws-orange);
+}
+
+.login-hinweis-offcanvas {
+  border-left: 4px solid var(--thws-orange);
+}
+
+.login-hinweis-offcanvas .offcanvas-header,
+.admin-login-modal .modal-header,
+.admin-login-modal .modal-footer {
+  border-color: var(--admin-border);
+}
+
+.login-hinweis-offcanvas .offcanvas-title,
+.admin-login-modal .modal-title,
+.admin-dashboard-titel,
+.admin-zuweisung-titel,
+.admin-year-zahl,
+.admin-tag-nummer,
+.admin-content-card strong,
+.admin-zuweisung-content strong,
+.admin-content-quiz-frage-titel {
+  color: var(--admin-text-strong);
+}
+
+.login-hinweis-offcanvas .offcanvas-body p,
+.admin-delete-modal .modal-body,
+.admin-delete-modal-text,
+.admin-content-body,
+.admin-content-file-name,
+.admin-content-upload-preview-name,
+.admin-year-details dd,
+.admin-content-details dd,
+.admin-tag-details dd,
+.admin-tag-toggle {
+  color: var(--admin-text);
+}
+
+.admin-dashboard-kicker {
+  color: var(--thws-orange);
+}
+
+.admin-dashboard-legende,
+.admin-dashboard-state,
+.admin-dashboard-stat,
+.admin-content-filter,
+.admin-content-quiz-felder,
+.admin-content-quiz-frage,
+.admin-content-file-auswahl,
+.admin-content-upload-preview,
+.admin-tag-einstellungen,
+.admin-tag-content,
+.admin-delete-modal-hinweis {
+  color: var(--admin-text);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-dashboard-legende-icon,
+.admin-tag-warnung {
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+  border-color: rgba(255, 106, 0, 0.34);
+}
+
+.admin-dashboard-stat span,
+.admin-content-filter-feld,
+.admin-content-filter-status,
+.admin-content-feld,
+.admin-content-file-feld small,
+.admin-content-upload-status,
+.admin-content-form-status,
+.admin-content-quiz-felder legend,
+.admin-year-details dt,
+.admin-content-details dt,
+.admin-content-media-status,
+.admin-tag-karte-pfeil,
+.admin-tag-details dt,
+.admin-tag-content-label,
+.admin-tag-content-badge small,
+.admin-tag-content-leer,
+.admin-zuweisung-auswahl,
+.admin-zuweisung-content small,
+.admin-zuweisung-status,
+.admin-tag-feld,
+.admin-tag-form-status {
+  color: var(--admin-text-muted);
+}
+
+.admin-dashboard-stat strong {
+  color: var(--admin-text-strong);
+}
+
+.admin-dashboard-state-fehler,
+.admin-dashboard-state.admin-content-leer-fehler {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-dashboard-state-leer {
+  color: var(--admin-text-muted);
+}
+
+.admin-login-modal .btn-close,
+.login-hinweis-offcanvas .btn-close {
+  filter: none;
+}
+
+.admin-login-modal .form-label {
+  color: var(--admin-text-strong);
+}
+
+.admin-login-modal .form-control,
+.admin-content-filter-feld select,
+.admin-content-filter-feld input,
+.admin-content-feld input,
+.admin-content-feld select,
+.admin-content-feld textarea,
+.admin-tag-feld input {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-login-modal .form-control:focus,
+.admin-content-filter-feld select:focus,
+.admin-content-filter-feld input:focus,
+.admin-content-feld input:focus,
+.admin-content-feld select:focus,
+.admin-content-feld textarea:focus,
+.admin-tag-feld input:focus {
+  color: var(--admin-text-strong);
+  background: var(--admin-bg);
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.18rem rgba(255, 106, 0, 0.18);
+}
+
+.admin-dashboard-refresh-btn,
+.admin-login-submit-btn,
+.login-hinweis-offcanvas .login-submit-btn,
+.admin-content-file-button,
+.admin-tag-assign-btn,
+.admin-tag-save-btn {
+  color: #ffffff;
+  background: var(--thws-orange);
+  border-color: var(--thws-orange);
+  box-shadow: none;
+}
+
+.admin-dashboard-refresh-btn:hover,
+.admin-dashboard-refresh-btn:focus-visible,
+.admin-login-submit-btn:hover,
+.admin-login-submit-btn:focus-visible,
+.login-hinweis-offcanvas .login-submit-btn:hover,
+.login-hinweis-offcanvas .login-submit-btn:focus-visible,
+.admin-content-file-button:hover,
+.admin-content-file-button:focus-visible,
+.admin-tag-assign-btn:hover,
+.admin-tag-assign-btn:focus-visible,
+.admin-tag-save-btn:not(:disabled):hover,
+.admin-tag-save-btn:not(:disabled):focus-visible {
+  color: #ffffff;
+  background: #d95600;
+  border-color: #d95600;
+  box-shadow: 0 0 0 0.18rem rgba(255, 106, 0, 0.16);
+}
+
+.admin-login-secondary-btn,
+.admin-content-quiz-remove,
+.admin-content-quiz-add,
+.admin-content-action-btn,
+.admin-tag-edit-btn,
+.admin-tag-content-remove,
+.admin-content-media-copy {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-login-secondary-btn:hover,
+.admin-login-secondary-btn:focus-visible,
+.admin-content-quiz-remove:hover,
+.admin-content-quiz-remove:focus-visible,
+.admin-content-quiz-add:hover,
+.admin-content-quiz-add:focus-visible,
+.admin-content-action-btn:hover,
+.admin-content-action-btn:focus-visible,
+.admin-tag-edit-btn:hover,
+.admin-tag-edit-btn:focus-visible,
+.admin-content-media-copy:hover,
+.admin-content-media-copy:focus-visible {
+  color: var(--admin-text-strong);
+  background: var(--admin-orange-soft);
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.16rem rgba(255, 106, 0, 0.12);
+}
+
+.admin-delete-confirm-btn,
+.admin-content-action-btn.ist-warnung {
+  color: #ffffff;
+  background: var(--admin-danger);
+  border-color: var(--admin-danger);
+}
+
+.admin-delete-confirm-btn:hover,
+.admin-delete-confirm-btn:focus-visible,
+.admin-content-action-btn.ist-warnung:hover,
+.admin-content-action-btn.ist-warnung:focus-visible {
+  color: #ffffff;
+  background: #8f1c2a;
+  border-color: #8f1c2a;
+}
+
+.admin-login-alert {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-content-type,
+.admin-content-status,
+.admin-year-status,
+.admin-tag-badge,
+.admin-tag-content-badge {
+  color: var(--admin-text);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-content-status.ist-aktiv,
+.admin-year-card.ist-aktuell,
+.admin-year-status.ist-aktuell,
+.admin-content-media-copy.ist-kopiert,
+.admin-zuweisung-content em {
+  color: var(--admin-success);
+  background: #ecf8f1;
+  border-color: rgba(15, 122, 67, 0.24);
+}
+
+.admin-content-status.ist-inaktiv {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-year-card.ist-aktuell {
+  box-shadow: 0 0 0 0.16rem rgba(15, 122, 67, 0.08);
+}
+
+.admin-tag-badge.ist-randomisiert,
+.admin-tag-karte.hat-admin-warnung,
+.admin-tag-karte.ist-in-bearbeitung,
+.admin-tag-karte.ist-ausgewaehlt,
+.admin-zuweisung-content:not(:disabled):hover,
+.admin-zuweisung-content:not(:disabled):focus-visible,
+.admin-zuweisung-content.ist-ausgewaehlt,
+.admin-content-upload-preview:hover,
+.admin-content-upload-preview:focus-visible,
+.admin-content-image-preview-button:hover,
+.admin-content-image-preview-button:focus-visible,
+.admin-tag-content-vorschau-button:hover,
+.admin-tag-content-vorschau-button:focus-visible {
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.16rem rgba(255, 106, 0, 0.12);
+}
+
+.admin-tag-badge.ist-randomisiert {
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+}
+
+.admin-content-image-preview-button,
+.admin-tag-content-vorschau-button {
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-year-form.hat-erfolg .admin-content-form-status,
+.admin-content-form.hat-erfolg .admin-content-form-status,
+.admin-zuweisung-status.hat-erfolg,
+.admin-tag-einstellungen.hat-erfolg .admin-tag-form-status,
+.admin-content-upload-status.hat-erfolg {
+  color: var(--admin-success);
+}
+
+.admin-year-form.hat-fehler .admin-content-form-status,
+.admin-content-form.hat-fehler .admin-content-form-status,
+.admin-zuweisung-status.hat-fehler,
+.admin-tag-einstellungen.hat-fehler .admin-tag-form-status,
+.admin-content-upload-status.hat-fehler {
+  color: var(--admin-danger);
+}
+
+.admin-content-upload-status.ist-ladend {
+  color: var(--thws-orange);
+}
+
 /* ---- TÃ¼rchen-Karten ---- */
 /* ---- Geschenkbox-Karten ---- */
 
@@ -3007,6 +3336,33 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+.admin-status-toast {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-status-toast.erfolg {
+  color: var(--admin-success);
+  background: #ecf8f1;
+  border-color: rgba(15, 122, 67, 0.24);
+}
+
+.admin-status-toast.fehler {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-status-toast.erfolg i {
+  color: var(--admin-success);
+}
+
+.admin-status-toast.fehler i {
+  color: var(--admin-danger);
 }
 
 /* ---- Footer ---- */
