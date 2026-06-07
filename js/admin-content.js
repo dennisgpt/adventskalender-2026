@@ -3,6 +3,7 @@
 
   let bearbeiteterContentId = null;
   let geladeneContentEintraege = [];
+  let adminTageFuerContent = [];
   let aktiverContentTypFilter = 'all';
   let aktiverContentStatusFilter = 'all';
   let zuLoeschenderContent = null;
@@ -302,6 +303,41 @@
     `;
   }
 
+  function zugewieseneTuerchenFuerContent(contentId) {
+    return adminTageFuerContent
+      .filter(function(tag) {
+        return Array.isArray(tag.contents) && tag.contents.some(function(inhalt) {
+          return String(inhalt.id) === String(contentId);
+        });
+      })
+      .map(function(tag) {
+        return tag.day_number;
+      })
+      .sort(function(a, b) {
+        return a - b;
+      });
+  }
+
+  function textFuerContentZuweisung(contentId) {
+    const tuerchen = zugewieseneTuerchenFuerContent(contentId);
+
+    if (tuerchen.length === 0) {
+      return '';
+    }
+
+    return 'Zugewiesen in Türchen ' + tuerchen.join(', ');
+  }
+
+  function renderAdminContentZuweisung(content) {
+    const text = textFuerContentZuweisung(content.id);
+
+    return `
+      <span class="admin-content-assignment-badge ${text ? '' : 'ist-leer'}">
+        ${text || 'Nicht zugewiesen'}
+      </span>
+    `;
+  }
+
   function kopiereTextInZwischenablage(text) {
     if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
       return navigator.clipboard.writeText(text);
@@ -346,6 +382,76 @@
     button.dataset.feedbackTimeout = String(timeout);
   }
 
+  function initialisiereContentKarteCollapse(karte, content) {
+    const kopf = karte.querySelector('.admin-content-card-kopf');
+    const vorschau = karte.querySelector('.admin-content-body');
+    const bildVorschau = karte.querySelector('[data-admin-content-image-preview]');
+    const details = karte.querySelector('.admin-content-details');
+    const actions = karte.querySelector('.admin-content-card-actions');
+
+    if (!kopf || !vorschau || !details || !actions) {
+      return;
+    }
+
+    karte.classList.add('ist-einklappbar');
+
+    const inhaltId = `admin-content-${content.id}-details`;
+    const toggle = document.createElement('button');
+    const summary = document.createElement('span');
+    const badges = document.createElement('span');
+    const body = document.createElement('span');
+    const pfeil = document.createElement('i');
+    const inhalt = document.createElement('div');
+    const inhaltInner = document.createElement('div');
+
+    toggle.className = 'admin-content-card-toggle';
+    toggle.type = 'button';
+    toggle.setAttribute('aria-expanded', 'false');
+    toggle.setAttribute('aria-controls', inhaltId);
+
+    summary.className = 'admin-content-card-summary';
+    badges.className = 'admin-content-card-badges';
+    body.className = 'admin-content-body';
+    body.innerHTML = vorschau.innerHTML;
+    pfeil.className = 'bi bi-chevron-down admin-content-card-pfeil';
+    pfeil.setAttribute('aria-hidden', 'true');
+
+    while (kopf.firstChild) {
+      badges.appendChild(kopf.firstChild);
+    }
+
+    vorschau.remove();
+    summary.appendChild(badges);
+    summary.appendChild(body);
+    toggle.appendChild(summary);
+    toggle.appendChild(pfeil);
+    kopf.appendChild(toggle);
+
+    inhalt.className = 'admin-content-card-inhalt';
+    inhalt.id = inhaltId;
+    inhalt.setAttribute('aria-hidden', 'true');
+    inhalt.setAttribute('inert', '');
+    inhaltInner.className = 'admin-content-card-inhalt-inner';
+
+    if (bildVorschau) {
+      inhaltInner.appendChild(bildVorschau);
+    }
+
+    inhaltInner.appendChild(details);
+    inhaltInner.appendChild(actions);
+    inhalt.appendChild(inhaltInner);
+    karte.appendChild(inhalt);
+
+    toggle.addEventListener('click', function() {
+      const wirdGeoeffnet = !karte.classList.contains('ist-aufgeklappt');
+
+      karte.classList.toggle('ist-aufgeklappt', wirdGeoeffnet);
+      toggle.setAttribute('aria-expanded', String(wirdGeoeffnet));
+      inhalt.setAttribute('aria-hidden', String(!wirdGeoeffnet));
+      inhalt.toggleAttribute('inert', !wirdGeoeffnet);
+    });
+  }
+
   function renderAdminContentKarte(content) {
     const karte = document.createElement('article');
     karte.className = 'admin-content-card';
@@ -359,6 +465,7 @@
         <span class="admin-content-status ${content.is_active ? 'ist-aktiv' : 'ist-inaktiv'}">
           ${content.is_active ? 'Aktiv' : 'Inaktiv'}
         </span>
+        ${renderAdminContentZuweisung(content)}
       </div>
       <p class="admin-content-body">${contentBodyVorschau(content)}</p>
       ${renderAdminContentBildVorschau(content)}
@@ -366,6 +473,10 @@
         <div>
           <dt>ID</dt>
           <dd>#${content.id}</dd>
+        </div>
+        <div>
+          <dt>Zuweisung</dt>
+          <dd>${textFuerContentZuweisung(content.id) || 'Nicht zugewiesen'}</dd>
         </div>
         <div>
           <dt>Media-URL</dt>
@@ -391,6 +502,8 @@
         </button>
       </div>
     `;
+
+    initialisiereContentKarteCollapse(karte, content);
 
     const bearbeitenButton = karte.querySelector('[data-admin-content-edit]');
     const aktivButton = karte.querySelector('[data-admin-content-toggle-active]');
@@ -1234,8 +1347,18 @@
     setzeContentFilterSichtbar(false);
     setzeContentLeerFehler(false);
 
-    return window.AdventskalenderApi.ladeAdminContent()
-      .then(function(contentEintraege) {
+    return Promise.all([
+      window.AdventskalenderApi.ladeAdminContent(),
+      window.AdventskalenderApi.ladeAdminTage()
+        .catch(function() {
+          return [];
+        })
+    ])
+      .then(function(ergebnisse) {
+        const contentEintraege = ergebnisse[0];
+        const tage = ergebnisse[1];
+
+        adminTageFuerContent = Array.isArray(tage) ? tage : [];
         setzeAdminContentListe(contentEintraege);
         return contentEintraege;
       })

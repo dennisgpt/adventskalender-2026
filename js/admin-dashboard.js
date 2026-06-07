@@ -4,6 +4,7 @@
   let ausgewaehlterTag = null;
   let ausgewaehlterContent = null;
   let adminContentPool = [];
+  let adminTage = [];
 
   function istAdminEingeloggt() {
     return Boolean(window.AdventskalenderApi.ladeAdminToken());
@@ -143,6 +144,17 @@
     return content.body;
   }
 
+  function contentKurzvorschau(content) {
+    const text = contentBodyVorschau(content);
+    const einzeilig = String(text).replace(/\s+/g, ' ').trim();
+
+    if (!einzeilig || einzeilig === 'Kein Body') {
+      return '';
+    }
+
+    return einzeilig.length > 34 ? einzeilig.slice(0, 31) + '...' : einzeilig;
+  }
+
   function zeigeDashboardToast(nachricht, typ) {
     if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
       window.AdminLoginUi.zeigeStatus(nachricht, typ);
@@ -191,6 +203,28 @@
     `;
   }
 
+  function renderContentPoolBildVorschau(content) {
+    if (content.type !== 'image') {
+      return '';
+    }
+
+    const mediaUrl = baueContentMediaUrl(content.media_url);
+
+    if (!mediaUrl) {
+      return '';
+    }
+
+    return `
+      <span class="admin-zuweisung-content-vorschau" aria-hidden="true">
+        <img
+          src="${mediaUrl}"
+          alt=""
+          loading="lazy"
+        >
+      </span>
+    `;
+  }
+
   function zeigeContentBildVorschauGross(mediaUrl, contentId) {
     const modal = document.getElementById('admin-content-upload-preview-modal');
     const modalTitel = document.getElementById('admin-content-upload-preview-modal-titel');
@@ -217,6 +251,8 @@
     return `
       <div class="admin-tag-content-badges">
         ${inhalte.map(function(inhalt) {
+          const vorschau = contentKurzvorschau(inhalt);
+
           return `
             <div class="admin-tag-content-eintrag">
               ${renderContentBildVorschau(inhalt)}
@@ -226,8 +262,11 @@
                 data-admin-tag-remove-content="${inhalt.id}"
                 aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
               >
-                <span>${contentTypLabel(inhalt.type)}</span>
-                <small>#${inhalt.id}</small>
+                <span class="admin-tag-content-badge-kopf">
+                  <span>${contentTypLabel(inhalt.type)}</span>
+                  <small>#${inhalt.id}</small>
+                </span>
+                ${vorschau ? `<span class="admin-tag-content-badge-text">${vorschau}</span>` : ''}
                 <i class="bi bi-x-lg" aria-hidden="true"></i>
               </button>
             </div>
@@ -481,8 +520,34 @@
     });
   }
 
+  function zugewieseneTuerchenFuerContent(contentId) {
+    return adminTage
+      .filter(function(tag) {
+        return Array.isArray(tag.contents) && tag.contents.some(function(inhalt) {
+          return String(inhalt.id) === String(contentId);
+        });
+      })
+      .map(function(tag) {
+        return tag.day_number;
+      })
+      .sort(function(a, b) {
+        return a - b;
+      });
+  }
+
+  function textFuerContentZuweisung(contentId) {
+    const tuerchen = zugewieseneTuerchenFuerContent(contentId);
+
+    if (tuerchen.length === 0) {
+      return '';
+    }
+
+    return 'Zugewiesen in Türchen ' + tuerchen.join(', ');
+  }
+
   function renderContentPoolKarte(content) {
     const istBereitsZugewiesen = istContentBereitsZugewiesen(content.id);
+    const zuweisungsText = textFuerContentZuweisung(content.id);
     const button = document.createElement('button');
     button.className = 'admin-zuweisung-content';
     button.type = 'button';
@@ -494,10 +559,16 @@
     button.disabled = istBereitsZugewiesen;
     button.innerHTML = `
       <span class="admin-content-type">${contentTypLabel(content.type)}</span>
+      ${renderContentPoolBildVorschau(content)}
       <strong>${contentBodyVorschau(content)}</strong>
       <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
-      ${istBereitsZugewiesen ? '<em>Bereits zugewiesen</em>' : ''}
+      ${zuweisungsText ? `<em>${zuweisungsText}</em>` : ''}
     `;
+
+    const meta = button.querySelector('small');
+    if (meta) {
+      meta.textContent = '#' + content.id + (content.media_url ? ' · Media vorhanden' : '');
+    }
 
     button.classList.toggle(
       'ist-ausgewaehlt',
@@ -900,10 +971,12 @@
     return window.AdventskalenderApi.ladeAdminTage()
       .then(function(tage) {
         if (!Array.isArray(tage) || tage.length === 0) {
+          adminTage = [];
           setzeDashboardStatus('leer');
           return tage;
         }
 
+        adminTage = tage;
         renderAdminTage(tage);
         renderAdminKennzahlen(tage);
         setzeDashboardStatus('bereit');

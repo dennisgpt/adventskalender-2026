@@ -7,11 +7,24 @@
 :root {
   --thws-red: #c8102e;
   --thws-orange: #ff6a00;
+  --thws-blue: #009fe3;
   --night-blue: #0f1b34;
   --ice-white: #f8fbff;
   --glass-border: rgba(255, 255, 255, 0.28);
   --glass-fill: rgba(11, 24, 51, 0.52);
   --focus-ring: #ff6a00;
+  --admin-bg: #ffffff;
+  --admin-bg-muted: #f3f3f3;
+  --admin-border: #dddddd;
+  --admin-border-strong: #b8b8b8;
+  --admin-text: #333333;
+  --admin-text-strong: #111111;
+  --admin-text-muted: #666666;
+  --admin-orange-soft: #fff1e8;
+  --admin-success: #0f7a43;
+  --admin-danger: #b42335;
+  --admin-shadow: 0 18px 42px rgba(0, 0, 0, 0.12);
+  --font-admin: 'Inter', 'Segoe UI', Arial, sans-serif;
 }
 
 body {
@@ -1079,6 +1092,81 @@ small span:hover {
   margin-bottom: 0.72rem;
 }
 
+.admin-content-card.ist-einklappbar .admin-content-card-kopf {
+  margin-bottom: 0;
+}
+
+.admin-content-card-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  text-align: left;
+}
+
+.admin-content-card-toggle:focus-visible {
+  border-radius: 8px;
+  outline: 2px solid rgba(255, 106, 0, 0.76);
+  outline-offset: 4px;
+}
+
+.admin-content-card-toggle:hover .admin-content-body,
+.admin-content-card-toggle:focus-visible .admin-content-body {
+  color: var(--thws-orange);
+}
+
+.admin-content-card-summary {
+  display: grid;
+  gap: 0.64rem;
+  min-width: 0;
+}
+
+.admin-content-card-badges {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.admin-content-card-pfeil {
+  flex-shrink: 0;
+  color: #777777;
+  font-size: 0.92rem;
+  transition: transform 240ms ease;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-pfeil {
+  transform: rotate(180deg);
+}
+
+.admin-content-card-inhalt {
+  display: grid;
+  grid-template-rows: 0fr;
+  opacity: 0;
+  transition:
+    grid-template-rows 280ms ease,
+    opacity 200ms ease;
+}
+
+.admin-content-card-inhalt-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-inhalt {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.admin-content-card.ist-aufgeklappt .admin-content-card-inhalt-inner {
+  padding-top: 0.82rem;
+}
+
 .admin-content-type,
 .admin-content-status {
   display: inline-flex;
@@ -1114,6 +1202,25 @@ small span:hover {
   background: rgba(155, 48, 72, 0.16);
 }
 
+.admin-content-assignment-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  border: 1px solid rgba(255, 106, 0, 0.26);
+  border-radius: 999px;
+  padding: 0.22rem 0.58rem;
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.admin-content-assignment-badge.ist-leer {
+  color: var(--admin-text-muted);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
 .admin-content-body {
   margin: 0 0 0.82rem;
   color: #f5f8ff;
@@ -1127,6 +1234,10 @@ small span:hover {
   word-break: break-word;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 3;
+}
+
+.admin-content-card-toggle .admin-content-body {
+  margin: 0;
 }
 
 .admin-content-image-preview-button {
@@ -1413,6 +1524,8 @@ small span:hover {
 @media (prefers-reduced-motion: reduce) {
   .admin-tag-karte-pfeil,
   .admin-tag-karte-inhalt,
+  .admin-content-card-pfeil,
+  .admin-content-card-inhalt,
   .admin-content-image-preview,
   .admin-tag-content-vorschau {
     transition: none;
@@ -1503,17 +1616,48 @@ small span:hover {
 }
 
 .admin-tag-content-badge {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.28rem;
+  column-gap: 0.42rem;
+  row-gap: 0.18rem;
   min-height: 26px;
+  max-width: 100%;
   border: 1px solid rgba(142, 201, 255, 0.24);
-  border-radius: 999px;
-  padding: 0.22rem 0.54rem;
+  border-radius: 8px;
+  padding: 0.38rem 0.52rem;
   color: #dff0ff;
   background: rgba(82, 158, 222, 0.12);
   font-size: 0.74rem;
   font-weight: 800;
+}
+
+.admin-tag-content-badge-kopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.admin-tag-content-badge-text {
+  display: block;
+  grid-column: 1;
+  max-width: 13rem;
+  overflow: hidden;
+  color: var(--admin-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-tag-content-badge .bi-x-lg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--admin-text-muted);
+  font-size: 0.82rem;
 }
 
 .admin-tag-content-remove {
@@ -1657,6 +1801,23 @@ small span:hover {
   justify-self: start;
   max-width: 100%;
   min-width: 0;
+}
+
+.admin-zuweisung-content-vorschau {
+  display: block;
+  overflow: hidden;
+  width: 100%;
+  margin: 0.1rem 0 0.2rem;
+  border: 1px solid var(--admin-border);
+  border-radius: 8px;
+  background: var(--admin-bg-muted);
+}
+
+.admin-zuweisung-content-vorschau img {
+  display: block;
+  width: 100%;
+  height: 112px;
+  object-fit: cover;
 }
 
 .admin-zuweisung-content strong {
@@ -1828,6 +1989,397 @@ small span:hover {
 
 .admin-tag-einstellungen.hat-fehler .admin-tag-form-status {
   color: #ff9aa8;
+}
+
+/* ---- Admin THWS Theme ---- */
+.login-hinweis-offcanvas,
+.admin-login-modal,
+.admin-dashboard,
+.admin-tag-karte.ist-leer,
+.admin-zuweisung,
+.admin-content-form,
+.admin-year-form,
+.admin-content-card,
+.admin-year-card,
+.admin-tag-karte,
+.admin-zuweisung-content {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border);
+  box-shadow: var(--admin-shadow);
+  backdrop-filter: none;
+  font-family: var(--font-admin);
+  letter-spacing: 0;
+}
+
+.admin-dashboard,
+.admin-login-modal,
+.login-hinweis-offcanvas {
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+.admin-dashboard {
+  border-top: 5px solid var(--thws-orange);
+}
+
+.login-hinweis-offcanvas {
+  border-left: 4px solid var(--thws-orange);
+}
+
+.login-hinweis-offcanvas .offcanvas-header,
+.admin-login-modal .modal-header,
+.admin-login-modal .modal-footer {
+  border-color: var(--admin-border);
+}
+
+.login-hinweis-offcanvas .offcanvas-title,
+.admin-login-modal .modal-title,
+.admin-dashboard-titel,
+.admin-zuweisung-titel,
+.admin-year-zahl,
+.admin-tag-nummer,
+.admin-content-card strong,
+.admin-zuweisung-content strong,
+.admin-content-quiz-frage-titel {
+  color: var(--admin-text-strong);
+}
+
+.login-hinweis-offcanvas .offcanvas-body p,
+.admin-delete-modal .modal-body,
+.admin-delete-modal-text,
+.admin-content-body,
+.admin-content-file-name,
+.admin-content-upload-preview-name,
+.admin-year-details dd,
+.admin-content-details dd,
+.admin-tag-details dd,
+.admin-tag-toggle {
+  color: var(--admin-text);
+}
+
+.admin-dashboard-kicker {
+  color: var(--thws-orange);
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.admin-dashboard-legende,
+.admin-dashboard-state,
+.admin-dashboard-stat,
+.admin-content-filter,
+.admin-content-quiz-felder,
+.admin-content-quiz-frage,
+.admin-content-file-auswahl,
+.admin-content-upload-preview,
+.admin-tag-einstellungen,
+.admin-tag-content,
+.admin-delete-modal-hinweis {
+  color: var(--admin-text);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-dashboard-legende-icon,
+.admin-tag-warnung {
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+  border-color: rgba(255, 106, 0, 0.34);
+}
+
+.admin-dashboard-stat span,
+.admin-content-filter-feld,
+.admin-content-filter-status,
+.admin-content-feld,
+.admin-content-file-feld small,
+.admin-content-upload-status,
+.admin-content-form-status,
+.admin-content-quiz-felder legend,
+.admin-year-details dt,
+.admin-content-details dt,
+.admin-content-media-status,
+.admin-tag-karte-pfeil,
+.admin-tag-details dt,
+.admin-tag-content-label,
+.admin-tag-content-badge small,
+.admin-tag-content-leer,
+.admin-zuweisung-auswahl,
+.admin-zuweisung-content small,
+.admin-zuweisung-status,
+.admin-tag-feld,
+.admin-tag-form-status {
+  color: var(--admin-text-muted);
+}
+
+.admin-dashboard-stat strong {
+  color: var(--admin-text-strong);
+  font-weight: 800;
+}
+
+.admin-dashboard-titel,
+.admin-zuweisung-titel,
+.admin-year-zahl,
+.admin-tag-nummer {
+  font-weight: 800;
+}
+
+.admin-dashboard-stat span,
+.admin-content-filter-feld,
+.admin-content-feld,
+.admin-tag-feld,
+.admin-tag-toggle,
+.admin-year-details dt,
+.admin-content-details dt,
+.admin-tag-details dt {
+  font-weight: 600;
+}
+
+.admin-dashboard-refresh-btn,
+.admin-login-submit-btn,
+.admin-login-secondary-btn,
+.admin-content-file-button,
+.admin-content-action-btn,
+.admin-tag-edit-btn,
+.admin-tag-assign-btn,
+.admin-tag-save-btn {
+  font-weight: 700;
+}
+
+.admin-dashboard-state-fehler,
+.admin-dashboard-state.admin-content-leer-fehler {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-dashboard-state-leer {
+  color: var(--admin-text-muted);
+}
+
+.admin-login-modal .btn-close,
+.login-hinweis-offcanvas .btn-close {
+  filter: none;
+}
+
+.admin-login-modal .form-label {
+  color: var(--admin-text-strong);
+}
+
+.admin-login-modal .form-control,
+.admin-content-filter-feld select,
+.admin-content-filter-feld input,
+.admin-content-feld input,
+.admin-content-feld select,
+.admin-content-feld textarea,
+.admin-tag-feld input {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-login-modal .form-control:focus,
+.admin-content-filter-feld select:focus,
+.admin-content-filter-feld input:focus,
+.admin-content-feld input:focus,
+.admin-content-feld select:focus,
+.admin-content-feld textarea:focus,
+.admin-tag-feld input:focus {
+  color: var(--admin-text-strong);
+  background: var(--admin-bg);
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.18rem rgba(255, 106, 0, 0.18);
+}
+
+.admin-dashboard-refresh-btn,
+.admin-login-submit-btn,
+.login-hinweis-offcanvas .login-submit-btn,
+.admin-content-file-button,
+.admin-tag-assign-btn,
+.admin-tag-save-btn {
+  color: #ffffff;
+  background: var(--thws-orange);
+  border-color: var(--thws-orange);
+  box-shadow: none;
+}
+
+.admin-dashboard-refresh-btn:hover,
+.admin-dashboard-refresh-btn:focus-visible,
+.admin-login-submit-btn:hover,
+.admin-login-submit-btn:focus-visible,
+.login-hinweis-offcanvas .login-submit-btn:hover,
+.login-hinweis-offcanvas .login-submit-btn:focus-visible,
+.admin-content-file-button:hover,
+.admin-content-file-button:focus-visible,
+.admin-tag-assign-btn:hover,
+.admin-tag-assign-btn:focus-visible,
+.admin-tag-save-btn:not(:disabled):hover,
+.admin-tag-save-btn:not(:disabled):focus-visible {
+  color: #ffffff;
+  background: #d95600;
+  border-color: #d95600;
+  box-shadow: 0 0 0 0.18rem rgba(255, 106, 0, 0.16);
+}
+
+.admin-login-secondary-btn,
+.admin-content-quiz-remove,
+.admin-content-quiz-add,
+.admin-content-action-btn,
+.admin-tag-edit-btn,
+.admin-tag-content-remove,
+.admin-content-media-copy {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border-color: var(--admin-border-strong);
+}
+
+.admin-login-secondary-btn:hover,
+.admin-login-secondary-btn:focus-visible,
+.admin-content-quiz-remove:hover,
+.admin-content-quiz-remove:focus-visible,
+.admin-content-quiz-add:hover,
+.admin-content-quiz-add:focus-visible,
+.admin-content-action-btn:hover,
+.admin-content-action-btn:focus-visible,
+.admin-tag-edit-btn:hover,
+.admin-tag-edit-btn:focus-visible,
+.admin-content-media-copy:hover,
+.admin-content-media-copy:focus-visible {
+  color: var(--admin-text-strong);
+  background: var(--admin-orange-soft);
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.16rem rgba(255, 106, 0, 0.12);
+}
+
+.admin-delete-confirm-btn,
+.admin-content-action-btn.ist-warnung {
+  color: #ffffff;
+  background: var(--admin-danger);
+  border-color: var(--admin-danger);
+}
+
+.admin-delete-confirm-btn:hover,
+.admin-delete-confirm-btn:focus-visible,
+.admin-content-action-btn.ist-warnung:hover,
+.admin-content-action-btn.ist-warnung:focus-visible {
+  color: #ffffff;
+  background: #8f1c2a;
+  border-color: #8f1c2a;
+}
+
+.admin-login-alert {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-content-type,
+.admin-content-status,
+.admin-year-status,
+.admin-tag-badge,
+.admin-tag-content-badge {
+  color: var(--admin-text);
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-content-type {
+  color: #ffffff;
+  background: var(--thws-blue);
+  border-color: var(--thws-blue);
+}
+
+.admin-content-status.ist-aktiv,
+.admin-year-card.ist-aktuell,
+.admin-year-status.ist-aktuell,
+.admin-content-media-copy.ist-kopiert,
+.admin-zuweisung-content em {
+  color: var(--admin-success);
+  background: #ecf8f1;
+  border-color: rgba(15, 122, 67, 0.24);
+}
+
+.admin-content-status.ist-inaktiv {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-year-card.ist-aktuell {
+  box-shadow: 0 0 0 0.16rem rgba(15, 122, 67, 0.08);
+}
+
+.admin-tag-badge.ist-randomisiert,
+.admin-tag-karte.hat-admin-warnung,
+.admin-tag-karte.ist-in-bearbeitung,
+.admin-tag-karte.ist-ausgewaehlt,
+.admin-zuweisung-content:not(:disabled):hover,
+.admin-zuweisung-content:not(:disabled):focus-visible,
+.admin-zuweisung-content.ist-ausgewaehlt,
+.admin-content-upload-preview:hover,
+.admin-content-upload-preview:focus-visible,
+.admin-content-image-preview-button:hover,
+.admin-content-image-preview-button:focus-visible,
+.admin-tag-content-vorschau-button:hover,
+.admin-tag-content-vorschau-button:focus-visible {
+  border-color: var(--thws-orange);
+  box-shadow: 0 0 0 0.16rem rgba(255, 106, 0, 0.12);
+}
+
+.admin-tag-badge.ist-randomisiert {
+  color: var(--thws-orange);
+  background: var(--admin-orange-soft);
+}
+
+.admin-tag-content {
+  background: transparent;
+  border-color: var(--admin-border);
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.admin-tag-content-leer {
+  color: var(--admin-text-muted);
+}
+
+.admin-tag-karte-toggle:hover .admin-tag-nummer,
+.admin-tag-karte-toggle:focus-visible .admin-tag-nummer,
+.admin-tag-karte.ist-in-bearbeitung .admin-tag-nummer,
+.admin-tag-karte.ist-ausgewaehlt .admin-tag-nummer,
+.admin-zuweisung-content.ist-ausgewaehlt strong {
+  color: var(--thws-orange);
+}
+
+.admin-tag-karte-toggle:focus-visible {
+  outline-color: var(--thws-orange);
+}
+
+.admin-tag-toggle input {
+  accent-color: var(--thws-orange);
+}
+
+.admin-content-image-preview-button,
+.admin-tag-content-vorschau-button {
+  background: var(--admin-bg-muted);
+  border-color: var(--admin-border);
+}
+
+.admin-year-form.hat-erfolg .admin-content-form-status,
+.admin-content-form.hat-erfolg .admin-content-form-status,
+.admin-zuweisung-status.hat-erfolg,
+.admin-tag-einstellungen.hat-erfolg .admin-tag-form-status,
+.admin-content-upload-status.hat-erfolg {
+  color: var(--admin-success);
+}
+
+.admin-year-form.hat-fehler .admin-content-form-status,
+.admin-content-form.hat-fehler .admin-content-form-status,
+.admin-zuweisung-status.hat-fehler,
+.admin-tag-einstellungen.hat-fehler .admin-tag-form-status,
+.admin-content-upload-status.hat-fehler {
+  color: var(--admin-danger);
+}
+
+.admin-content-upload-status.ist-ladend {
+  color: var(--thws-orange);
 }
 
 /* ---- TÃ¼rchen-Karten ---- */
@@ -3007,6 +3559,33 @@ body.geschenk-reveal-aktiv > *:not(.geschenk-reveal-overlay) {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
+}
+
+.admin-status-toast {
+  color: var(--admin-text);
+  background: var(--admin-bg);
+  border: 1px solid var(--admin-border);
+  box-shadow: var(--admin-shadow);
+}
+
+.admin-status-toast.erfolg {
+  color: var(--admin-success);
+  background: #ecf8f1;
+  border-color: rgba(15, 122, 67, 0.24);
+}
+
+.admin-status-toast.fehler {
+  color: var(--admin-danger);
+  background: #fff0f1;
+  border-color: rgba(180, 35, 53, 0.24);
+}
+
+.admin-status-toast.erfolg i {
+  color: var(--admin-success);
+}
+
+.admin-status-toast.fehler i {
+  color: var(--admin-danger);
 }
 
 /* ---- Footer ---- */
