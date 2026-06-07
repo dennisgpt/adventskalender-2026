@@ -969,12 +969,17 @@
   function baueContentPayload() {
     const elemente = contentElemente();
     const typ = elemente.typeFeld ? elemente.typeFeld.value : 'text';
+    const body = feldWert(elemente.bodyFeld);
     const mediaUrl = feldWert(elemente.mediaUrlFeld);
+    const payloadMediaUrl = typ === 'video' ? (body || mediaUrl) : mediaUrl;
+    const payloadBody = typ === 'quiz'
+      ? baueQuizBody(elemente)
+      : (typ === 'video' ? null : body || null);
 
     return {
       type: typ,
-      body: typ === 'quiz' ? baueQuizBody(elemente) : feldWert(elemente.bodyFeld) || null,
-      media_url: mediaUrl || null
+      body: payloadBody,
+      media_url: payloadMediaUrl || null
     };
   }
 
@@ -1188,6 +1193,8 @@
     if (content.type === 'quiz') {
       elemente.bodyFeld.value = '';
       fuelleQuizFelder(elemente, content);
+    } else if (content.type === 'video') {
+      elemente.bodyFeld.value = content.body || content.media_url || '';
     } else {
       elemente.bodyFeld.value = content.body || '';
     }
@@ -1208,7 +1215,11 @@
       return contentUploadLaeuft ? 'Bitte warte, bis der Upload abgeschlossen ist.' : 'Das Content-Formular ist noch nicht bereit.';
     }
 
-    if (elemente.typeFeld.value === 'quiz') {
+    const typ = elemente.typeFeld.value;
+    const body = feldWert(elemente.bodyFeld);
+    const mediaUrl = feldWert(elemente.mediaUrlFeld);
+
+    if (typ === 'quiz') {
       const quizFragen = leseQuizFragenAusForm(elemente);
 
       if (quizFragen.length === 0) {
@@ -1234,15 +1245,23 @@
       return '';
     }
 
-    if (elemente.typeFeld.value === 'text') {
-      return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage einen Body ein.';
+    if (typ === 'text') {
+      return body ? '' : 'Bitte trage einen Body ein.';
     }
 
-    if (elemente.typeFeld.value === 'video') {
-      return feldWert(elemente.bodyFeld) ? '' : 'Bitte trage eine YouTube-Embed-URL in das Body-Feld ein.';
+    if (typ === 'game') {
+      return '';
     }
 
-    return feldWert(elemente.mediaUrlFeld) ? '' : 'Bitte lade zuerst eine Datei hoch, damit die media_url gespeichert werden kann.';
+    if (typ === 'image') {
+      return mediaUrl ? '' : 'Bitte lade zuerst eine Bilddatei hoch.';
+    }
+
+    if (typ === 'video') {
+      return mediaUrl || body ? '' : 'Bitte hinterlege eine Video-URL oder lade eine Mediendatei hoch.';
+    }
+
+    return '';
   }
 
   function aktualisiereContentFormValiditaet() {
@@ -1290,6 +1309,14 @@
       elemente.form.reset();
     }
 
+    if (elemente.mediaUrlFeld) {
+      elemente.mediaUrlFeld.value = '';
+    }
+
+    if (elemente.fileFeld) {
+      elemente.fileFeld.value = '';
+    }
+
     setzeContentUploadStatus('', '');
     setzeContentDateiName('');
     setzeContentUploadVorschau('');
@@ -1305,13 +1332,21 @@
       return;
     }
 
-    const istQuiz = elemente.typeFeld.value === 'quiz';
+    const typ = elemente.typeFeld.value;
+    const istQuiz = typ === 'quiz';
 
     elemente.quizFelder.classList.toggle('d-none', !istQuiz);
     elemente.bodyFeld.disabled = istQuiz;
-    elemente.bodyFeld.placeholder = istQuiz
-      ? 'Quiz-Daten werden aus den Quiz-Feldern vorbereitet'
-      : 'Text, Link oder kurze Beschreibung';
+
+    if (istQuiz) {
+      elemente.bodyFeld.placeholder = 'Quiz-Daten werden aus den Quiz-Feldern vorbereitet';
+    } else if (typ === 'video') {
+      elemente.bodyFeld.placeholder = 'Video-URL oder Embed-URL eintragen';
+    } else if (typ === 'game') {
+      elemente.bodyFeld.placeholder = 'Optionale Spiel-ID oder kurze Beschreibung';
+    } else {
+      elemente.bodyFeld.placeholder = 'Text, Link oder kurze Beschreibung';
+    }
 
     if (istQuiz) {
       stelleQuizMindestfrageSicher(elemente);
@@ -1443,6 +1478,11 @@
 
         if (datei) {
           ladeContentDateiHoch(datei);
+        } else if (!bearbeiteterContentId && elemente.mediaUrlFeld) {
+          elemente.mediaUrlFeld.value = '';
+          setzeContentDateiName('');
+          setzeContentUploadVorschau('');
+          aktualisiereContentFormValiditaet();
         }
       });
     }
