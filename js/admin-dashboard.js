@@ -191,6 +191,28 @@
     `;
   }
 
+  function renderContentPoolBildVorschau(content) {
+    if (content.type !== 'image') {
+      return '';
+    }
+
+    const mediaUrl = baueContentMediaUrl(content.media_url);
+
+    if (!mediaUrl) {
+      return '';
+    }
+
+    return `
+      <span class="admin-zuweisung-content-vorschau" aria-hidden="true">
+        <img
+          src="${mediaUrl}"
+          alt=""
+          loading="lazy"
+        >
+      </span>
+    `;
+  }
+
   function zeigeContentBildVorschauGross(mediaUrl, contentId) {
     const modal = document.getElementById('admin-content-upload-preview-modal');
     const modalTitel = document.getElementById('admin-content-upload-preview-modal-titel');
@@ -494,10 +516,16 @@
     button.disabled = istBereitsZugewiesen;
     button.innerHTML = `
       <span class="admin-content-type">${contentTypLabel(content.type)}</span>
+      ${renderContentPoolBildVorschau(content)}
       <strong>${contentBodyVorschau(content)}</strong>
       <small>#${content.id}${content.media_url ? ' · ' + content.media_url : ''}</small>
       ${istBereitsZugewiesen ? '<em>Bereits zugewiesen</em>' : ''}
     `;
+
+    const meta = button.querySelector('small');
+    if (meta) {
+      meta.textContent = '#' + content.id + (content.media_url ? ' · Media vorhanden' : '');
+    }
 
     button.classList.toggle(
       'ist-ausgewaehlt',
