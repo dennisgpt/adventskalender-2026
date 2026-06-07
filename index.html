@@ -24,9 +24,20 @@
   <!-- ===== HEADER / NAVIGATION ===== -->
   <header class="thws-header py-3">
     <div class="container-fluid px-2 thws-header-inner">
-      <a href="https://www.thws.de" target="_blank" rel="noreferrer">
-        <img class="thws-logo" src="img/thws-logo.png" alt="THWS Logo" style="height: 80px;">
-      </a>
+      <div class="d-flex flex-column align-items-start gap-1">
+        <a href="https://www.thws.de" target="_blank" rel="noreferrer">
+          <img class="thws-logo" src="img/thws-logo.png" alt="THWS Logo" style="height: 80px;">
+        </a>
+        <div class="header-socials d-flex align-items-center gap-2">
+          <small class="text-muted">Unsere Socials</small>
+          <a href="https://www.instagram.com/fiw.thws/" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="Instagram">
+            <i class="bi bi-instagram"></i>
+          </a>
+          <a href="https://de.linkedin.com/school/thws/" target="_blank" rel="noopener noreferrer" class="social-icon-link" aria-label="LinkedIn">
+            <i class="bi bi-linkedin"></i>
+          </a>
+        </div>
+      </div>
 
       <div>
         <small class="text-muted header-breadcrumb">
@@ -35,19 +46,7 @@
       </div>
 
       <button
-        class="content-btn ms-auto"
-        type="button"
-        aria-label="Mein Inhalt (Login erforderlich)"
-        data-bs-toggle="offcanvas"
-        data-bs-target="#meinInhaltHinweis"
-        aria-controls="meinInhaltHinweis"
-      >
-        <i class="bi bi-gift" aria-hidden="true"></i>
-        Mein Inhalt
-      </button>
-
-      <button
-        class="login-btn ms-3"
+        class="login-btn ms-auto"
         id="admin-login-button"
         type="button"
         data-bs-toggle="modal"
@@ -222,20 +221,124 @@
   <!-- ===== HERO-BEREICH ===== -->
   <section class="hero-bereich text-center py-5">
     <div class="container">
-      <p class="hero-kicker mb-2">Campus Edition 2026</p>
-      <h1 class="display-4 fw-bold">🎄 FIW Adventskalender</h1>
-      <p class="lead text-muted">Jeden Tag ein neues Türchen – viel Spaß!</p>
-      <div class="hero-info-row">
-        <span class="hero-info-pill"><i class="bi bi-calendar-check" aria-hidden="true"></i> 24 Tage</span>
-        <span class="hero-info-pill"><i class="bi bi-stars" aria-hidden="true"></i> Täglich neue Inhalte</span>
-        <span class="hero-info-pill"><i class="bi bi-gift-fill" aria-hidden="true"></i> Campus-Highlights</span>
-      </div>
+      <h1 class="display-4 fw-bold">Adventskalender 2026</h1>
+      <p class="lead text-muted">Täglich ein neues Türchen vom 1. bis 24. Dezember</p>
     </div>
   </section>
 
   <!-- ===== KALENDER GRID (24 Türchen) ===== -->
   <!-- Zuständig: Dennis (Logik in js/kalender.js) -->
-  <main class="container my-5" id="kalender" tabindex="-1">
+  <main class="container my-5 kalender-container" id="kalender" tabindex="-1">
+    <svg viewBox="0 0 280 340" xmlns="http://www.w3.org/2000/svg" class="santa-svg santa-on-kalender" aria-label="Weihnachtsmann mit THWS Geschenkesack">
+      <defs>
+        <radialGradient id="faceGrad" cx="45%" cy="40%" r="55%">
+          <stop offset="0%" stop-color="#fde3c8"/>
+          <stop offset="100%" stop-color="#e8a87c"/>
+        </radialGradient>
+        <linearGradient id="coatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ff6a00"/>
+          <stop offset="100%" stop-color="#cc4400"/>
+        </linearGradient>
+        <linearGradient id="hatGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#ff6a00"/>
+          <stop offset="100%" stop-color="#bb3800"/>
+        </linearGradient>
+        <radialGradient id="sackGrad" cx="35%" cy="30%" r="65%">
+          <stop offset="0%" stop-color="#a0703a"/>
+          <stop offset="100%" stop-color="#5a3010"/>
+        </radialGradient>
+        <radialGradient id="noseGrad" cx="40%" cy="35%" r="60%">
+          <stop offset="0%" stop-color="#f09070"/>
+          <stop offset="100%" stop-color="#c05030"/>
+        </radialGradient>
+        <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.25)"/>
+        </filter>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g class="santa-sack">
+        <path d="M185 148 Q210 138 220 155" stroke="#6B4226" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <ellipse cx="218" cy="210" rx="42" ry="52" fill="url(#sackGrad)" filter="url(#softShadow)"/>
+        <path d="M195 175 Q210 195 195 220" stroke="rgba(0,0,0,0.12)" stroke-width="2.5" fill="none"/>
+        <path d="M240 178 Q228 200 238 225" stroke="rgba(0,0,0,0.10)" stroke-width="2" fill="none"/>
+        <ellipse cx="218" cy="162" rx="24" ry="12" fill="#6B4226"/>
+        <path d="M197 158 Q218 150 239 158" stroke="#ff6a00" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <rect x="197" y="190" width="42" height="30" rx="5" fill="rgba(255,255,255,0.12)" stroke="rgba(255,255,255,0.3)" stroke-width="1"/>
+        <text x="218" y="205" text-anchor="middle" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="11" fill="white" letter-spacing="1">THWS</text>
+        <text x="218" y="216" text-anchor="middle" font-family="Arial, sans-serif" font-size="7" fill="rgba(255,255,255,0.85)" letter-spacing="0.5">FIW · 2026</text>
+        <polygon points="218,230 221,239 231,239 223,245 226,254 218,248 210,254 213,245 205,239 215,239" fill="#e8c84a" opacity="0.9" filter="url(#glow)"/>
+      </g>
+      <g filter="url(#softShadow)">
+        <rect x="72" y="172" width="96" height="90" rx="18" fill="url(#coatGrad)"/>
+        <rect x="140" y="172" width="28" height="90" rx="18" fill="rgba(0,0,0,0.12)"/>
+        <rect x="72" y="172" width="96" height="18" rx="9" fill="white"/>
+        <circle cx="120" cy="215" r="3" fill="rgba(0,0,0,0.3)"/>
+        <circle cx="120" cy="230" r="3" fill="rgba(0,0,0,0.3)"/>
+        <circle cx="120" cy="245" r="3" fill="rgba(0,0,0,0.3)"/>
+        <rect x="72" y="230" width="96" height="14" rx="4" fill="#1a1a1a"/>
+        <rect x="107" y="232" width="26" height="10" rx="2" fill="#e8c84a"/>
+        <rect x="112" y="235" width="16" height="4" rx="1" fill="#1a1a1a"/>
+        <rect x="119" y="233" width="2" height="8" rx="1" fill="#1a1a1a"/>
+      </g>
+      <g filter="url(#softShadow)">
+        <path d="M72 185 Q42 195 35 215" stroke="url(#coatGrad)" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <circle cx="35" cy="215" r="13" fill="white"/>
+        <ellipse cx="35" cy="217" rx="11" ry="9" fill="url(#faceGrad)"/>
+      </g>
+      <g filter="url(#softShadow)">
+        <path d="M168 185 Q192 195 198 172" stroke="url(#coatGrad)" stroke-width="26" fill="none" stroke-linecap="round"/>
+        <circle cx="198" cy="172" r="13" fill="white"/>
+        <ellipse cx="198" cy="170" rx="11" ry="9" fill="url(#faceGrad)"/>
+      </g>
+      <!-- Linker Oberschenkel schräg nach links -->
+      <path d="M85 258 Q68 265 52 268" stroke="url(#coatGrad)" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <!-- Linker Unterschenkel hängt runter -->
+      <rect x="40" y="264" width="20" height="50" rx="10" fill="url(#coatGrad)"/>
+      <!-- Linker Stiefel -->
+      <ellipse cx="50" cy="314" rx="18" ry="9" fill="#1a1a1a"/>
+      <rect x="33" y="305" width="22" height="9" rx="4" fill="#1a1a1a"/>
+      <ellipse cx="41" cy="309" rx="5" ry="2.5" fill="rgba(255,255,255,0.15)"/>
+      <!-- Rechter Oberschenkel schräg nach rechts -->
+      <path d="M155 258 Q172 265 188 268" stroke="url(#coatGrad)" stroke-width="22" fill="none" stroke-linecap="round"/>
+      <!-- Rechter Unterschenkel hängt runter -->
+      <rect x="180" y="264" width="20" height="50" rx="10" fill="url(#coatGrad)"/>
+      <!-- Rechter Stiefel -->
+      <ellipse cx="190" cy="314" rx="18" ry="9" fill="#1a1a1a"/>
+      <rect x="185" y="305" width="22" height="9" rx="4" fill="#1a1a1a"/>
+      <ellipse cx="193" cy="309" rx="5" ry="2.5" fill="rgba(255,255,255,0.15)"/>
+      <g filter="url(#softShadow)">
+        <ellipse cx="120" cy="128" rx="40" ry="38" fill="url(#faceGrad)"/>
+        <ellipse cx="93" cy="135" rx="12" ry="8" fill="#f08080" opacity="0.38"/>
+        <ellipse cx="147" cy="135" rx="12" ry="8" fill="#f08080" opacity="0.38"/>
+        <circle cx="105" cy="120" r="5" fill="#2a1a0a"/>
+        <circle cx="135" cy="120" r="5" fill="#2a1a0a"/>
+        <circle cx="106.8" cy="118.2" r="1.8" fill="white"/>
+        <circle cx="136.8" cy="118.2" r="1.8" fill="white"/>
+        <ellipse cx="120" cy="131" rx="7" ry="6" fill="url(#noseGrad)"/>
+        <ellipse cx="118" cy="129" rx="2.5" ry="2" fill="rgba(255,255,255,0.3)"/>
+        <path d="M105 142 Q120 155 135 142" stroke="#c07040" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path d="M109 143 Q120 152 131 143" fill="white" opacity="0.7"/>
+      </g>
+      <ellipse cx="120" cy="155" rx="44" ry="18" fill="white"/>
+      <ellipse cx="90" cy="148" rx="18" ry="13" fill="white"/>
+      <ellipse cx="150" cy="148" rx="18" ry="13" fill="white"/>
+      <ellipse cx="120" cy="162" rx="38" ry="24" fill="white"/>
+      <path d="M85 158 Q95 165 88 175" stroke="rgba(200,200,200,0.5)" stroke-width="1.5" fill="none"/>
+      <path d="M120 160 Q128 168 122 178" stroke="rgba(200,200,200,0.5)" stroke-width="1.5" fill="none"/>
+      <path d="M148 156 Q140 164 146 174" stroke="rgba(200,200,200,0.5)" stroke-width="1.5" fill="none"/>
+      <path d="M102 140 Q111 146 120 140 Q129 146 138 140" stroke="white" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <g filter="url(#softShadow)">
+        <path d="M80 92 L120 20 L160 92 Z" fill="url(#hatGrad)"/>
+        <path d="M82 92 L120 25 L158 92" fill="rgba(0,0,0,0.08)"/>
+        <rect x="72" y="88" width="96" height="18" rx="9" fill="white"/>
+        <path d="M110 30 Q118 22 126 35" stroke="rgba(255,255,255,0.2)" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <circle cx="120" cy="20" r="13" fill="white" filter="url(#softShadow)"/>
+        <ellipse cx="116" cy="16" rx="5" ry="4" fill="rgba(255,255,255,0.6)"/>
+      </g>
+    </svg>
     <div class="row g-3" id="kalender-grid">
       <!-- Die 24 Türchen werden per JavaScript eingefügt (siehe js/kalender.js) -->
     </div>
