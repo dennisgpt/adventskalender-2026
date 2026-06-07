@@ -3763,3 +3763,93 @@ footer .text-muted {
   }
 }
 
+.social-icon-link {
+  color: var(--thws-red);
+  font-size: 1.1rem;
+  text-decoration: none;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.social-icon-link:hover {
+  color: var(--thws-orange);
+  opacity: 0.85;
+}
+
+.header-socials small {
+  color: var(--thws-red);
+  font-weight: 500;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+
+.santa-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.santa-svg {
+  width: 180px;
+  height: auto;
+  filter: drop-shadow(0 4px 12px rgba(200, 16, 46, 0.2));
+}
+
+/* ===== SANTA ===== */
+.santa-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.santa-svg {
+  width: 220px;
+  height: auto;
+  animation: santaFloat 4s ease-in-out infinite;
+}
+
+.santa-sack {
+  animation: sackSwing 3s ease-in-out infinite;
+  transform-origin: 200px 155px;
+}
+
+.snow-1 { animation: snowFall 3s ease-in-out infinite; }
+.snow-2 { animation: snowFall 4s ease-in-out infinite 0.8s; }
+.snow-3 { animation: snowFall 3.5s ease-in-out infinite 1.4s; }
+.snow-4 { animation: snowFall 4.5s ease-in-out infinite 0.4s; }
+
+@keyframes santaFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-10px); }
+}
+
+@keyframes sackSwing {
+  0%, 100% { transform: rotate(0deg); }
+  30%       { transform: rotate(4deg); }
+  70%       { transform: rotate(-3deg); }
+}
+
+@keyframes snowFall {
+  0%        { transform: translateY(0) rotate(0deg); opacity: 0.7; }
+  50%       { transform: translateY(12px) rotate(180deg); opacity: 0.4; }
+  100%      { transform: translateY(0) rotate(360deg); opacity: 0.7; }
+}
+
+.kalender-container {
+  position: relative;
+}
+
+.santa-on-kalender {
+  position: absolute;
+  top: -148px;
+  left: -45px;
+  width: 160px;
+  height: auto;
+  z-index: 10;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .santa-on-kalender {
+    display: none;
+  }
+}
