@@ -144,6 +144,17 @@
     return content.body;
   }
 
+  function contentKurzvorschau(content) {
+    const text = contentBodyVorschau(content);
+    const einzeilig = String(text).replace(/\s+/g, ' ').trim();
+
+    if (!einzeilig || einzeilig === 'Kein Body') {
+      return '';
+    }
+
+    return einzeilig.length > 34 ? einzeilig.slice(0, 31) + '...' : einzeilig;
+  }
+
   function zeigeDashboardToast(nachricht, typ) {
     if (window.AdminLoginUi && typeof window.AdminLoginUi.zeigeStatus === 'function') {
       window.AdminLoginUi.zeigeStatus(nachricht, typ);
@@ -240,6 +251,8 @@
     return `
       <div class="admin-tag-content-badges">
         ${inhalte.map(function(inhalt) {
+          const vorschau = contentKurzvorschau(inhalt);
+
           return `
             <div class="admin-tag-content-eintrag">
               ${renderContentBildVorschau(inhalt)}
@@ -249,8 +262,11 @@
                 data-admin-tag-remove-content="${inhalt.id}"
                 aria-label="${contentTypLabel(inhalt.type)} #${inhalt.id} entfernen"
               >
-                <span>${contentTypLabel(inhalt.type)}</span>
-                <small>#${inhalt.id}</small>
+                <span class="admin-tag-content-badge-kopf">
+                  <span>${contentTypLabel(inhalt.type)}</span>
+                  <small>#${inhalt.id}</small>
+                </span>
+                ${vorschau ? `<span class="admin-tag-content-badge-text">${vorschau}</span>` : ''}
                 <i class="bi bi-x-lg" aria-hidden="true"></i>
               </button>
             </div>

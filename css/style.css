@@ -1616,17 +1616,48 @@ small span:hover {
 }
 
 .admin-tag-content-badge {
-  display: inline-flex;
+  display: inline-grid;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 0.28rem;
+  column-gap: 0.42rem;
+  row-gap: 0.18rem;
   min-height: 26px;
+  max-width: 100%;
   border: 1px solid rgba(142, 201, 255, 0.24);
-  border-radius: 999px;
-  padding: 0.22rem 0.54rem;
+  border-radius: 8px;
+  padding: 0.38rem 0.52rem;
   color: #dff0ff;
   background: rgba(82, 158, 222, 0.12);
   font-size: 0.74rem;
   font-weight: 800;
+}
+
+.admin-tag-content-badge-kopf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  min-width: 0;
+}
+
+.admin-tag-content-badge-text {
+  display: block;
+  grid-column: 1;
+  max-width: 13rem;
+  overflow: hidden;
+  color: var(--admin-text);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-tag-content-badge .bi-x-lg {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--admin-text-muted);
+  font-size: 0.82rem;
 }
 
 .admin-tag-content-remove {
