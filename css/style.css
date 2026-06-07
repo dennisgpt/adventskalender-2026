@@ -2262,6 +2262,17 @@ small span:hover {
   background: var(--admin-orange-soft);
 }
 
+.admin-tag-content {
+  background: transparent;
+  border-color: var(--admin-border);
+  padding-right: 0;
+  padding-left: 0;
+}
+
+.admin-tag-content-leer {
+  color: var(--admin-text-muted);
+}
+
 .admin-tag-karte-toggle:hover .admin-tag-nummer,
 .admin-tag-karte-toggle:focus-visible .admin-tag-nummer,
 .admin-tag-karte.ist-in-bearbeitung .admin-tag-nummer,
