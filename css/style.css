@@ -95,21 +95,19 @@ body::before {
   min-height: 88px;
 }
 
-.header-breadcrumb {
-  color: #666 !important;
-  font-size: 0.86rem;
-  letter-spacing: 0.15px;
-  font-weight: 400;
+.header-xmas-deko {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  overflow: hidden;
 }
 
-.header-breadcrumb span:hover {
-  color: var(--thws-orange);
-  cursor: pointer;
-}
-
-small span:hover {
-  color: var(--thws-orange);
-  cursor: pointer;
+.header-xmas-svg {
+  width: 100%;
+  height: 66px;
+  display: block;
 }
 
 .thws-header strong {
